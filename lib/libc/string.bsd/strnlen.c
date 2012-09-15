@@ -29,6 +29,67 @@ __FBSDID("$FreeBSD$");
 
 #include <string.h>
 
+#ifdef __ORCAC__
+
+size_t
+strnlen(const char *s, size_t maxlen)
+{
+	size_t len;
+
+	asm {
+		stz <len
+		stz <len+2
+
+		ldy #0
+		ldx <maxlen+2 // # of banks
+		beq partial
+
+		ldy #0
+		// handle a full bank
+bloop:
+		lda [s],y
+		bit #0x00ff
+		beq done
+
+		iny
+		bit #0xff00
+		beq done
+
+		iny
+		bne bloop
+		inc <s+2
+		inc <len+2
+		dex
+		bne bloop
+
+
+partial:	// handle a partial bank
+		ldy #0
+		ldx <maxlen
+		beq done
+
+		short m
+ploop:
+		lda [s],y
+		beq done
+		iny
+		dex
+		bne ploop
+		long m
+
+
+done:
+		sty <len
+
+	}
+
+
+	return (len);
+}
+
+
+#else
+
 size_t
 strnlen(const char *s, size_t maxlen)
 {
@@ -40,3 +101,5 @@ strnlen(const char *s, size_t maxlen)
 	}
 	return (len);
 }
+
+#endif

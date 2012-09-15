@@ -32,6 +32,36 @@ __FBSDID("$FreeBSD$");
 
 #include <strings.h>
 
+#ifdef __ORCAC__
+
+int
+flsl(long mask)
+{
+	int bit;
+
+	asm {
+		ldy #16
+		lda <mask+2
+		bne loop
+low:
+		ldy #0
+		lda <mask
+		beq done
+loop:
+		iny
+		lsr a
+		bne loop
+done:
+		sty <bit
+
+	}
+
+	return bit;
+}
+
+
+#else
+
 /*
  * Find Last Set bit
  */
@@ -46,3 +76,5 @@ flsl(long mask)
 		mask = (unsigned long)mask >> 1;
 	return (bit);
 }
+
+#endif

@@ -37,6 +37,61 @@ __FBSDID("$FreeBSD$");
 
 #include <string.h>
 
+#ifdef __ORCAC__
+
+char *
+stpcpy(char * __restrict to, const char * __restrict from)
+{
+	#define LONG_M rep #0x20
+	#define SHORT_M sep #0x20
+	asm
+	{
+		ldy #0
+		SHORT_M
+loop:
+		// partially unrolled - 4 bytes/loop
+		lda [from],y
+		sta [to],y
+		beq done
+		iny
+
+		lda [from],y
+		sta [to],y
+		beq done
+		iny
+
+		lda [from],y
+		sta [to],y
+		beq done
+		iny
+
+		lda [from],y
+		sta [to],y
+		beq done
+		iny
+
+		bne loop
+		// y overflow, jump to next bank.
+		// these are performed with short-M,
+		// but it's 24 bit address so it's ok.
+		inc <to+2
+		inc <from+2
+		bra loop
+done:
+		LONG_M
+		tya
+		clc
+		adc <to
+		sta <to
+		lda #0
+		adc <to+2
+		sta <to+2
+	}
+	return to;
+}
+
+#else
+
 char *
 stpcpy(char * __restrict to, const char * __restrict from)
 {
@@ -44,3 +99,4 @@ stpcpy(char * __restrict to, const char * __restrict from)
 	for (; (*to = *from); ++from, ++to);
 	return(to);
 }
+#endif

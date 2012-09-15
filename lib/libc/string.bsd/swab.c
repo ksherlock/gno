@@ -38,6 +38,81 @@ __FBSDID("$FreeBSD$");
 
 #include <unistd.h>
 
+#ifdef __ORCAC__
+
+void
+swab(const void * __restrict from, void * __restrict to, ssize_t len)
+{
+
+	asm {
+
+		ldy #0
+
+		// if (len < 0) return;
+
+		ldx <len+2	// number of banks
+		bmi done
+		beq partial
+
+bloop:
+		// partially unrolled - 8 bytes at a time.
+		lda [from],y
+		xba
+		sta [to],y
+		iny
+		iny
+
+		lda [from],y
+		xba
+		sta [to],y
+		iny
+		iny
+
+		lda [from],y
+		xba
+		sta [to],y
+		iny
+		iny
+
+		lda [from],y
+		xba
+		sta [to],y
+		iny
+		iny
+
+		bne bloop
+
+		dex	// # of banks
+		beq partial
+		inc <from+2
+		inc <to+2
+		bra bloop
+
+partial:
+		lda <len
+		lsr a
+		beq done
+
+		tax
+
+		ldy #0
+ploop:
+		lda [from],y
+		xba
+		sta [to],y
+		iny
+		iny
+		dex
+		bne ploop
+
+done:
+	}
+
+}
+
+
+#else
+
 void
 swab(const void * __restrict from, void * __restrict to, ssize_t len)
 {
@@ -59,3 +134,4 @@ swab(const void * __restrict from, void * __restrict to, ssize_t len)
 		STEP; STEP; STEP; STEP;
 	}
 }
+#endif
