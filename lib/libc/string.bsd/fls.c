@@ -37,7 +37,7 @@ __FBSDID("$FreeBSD$");
 int
 fls(int mask)
 {
-	int bit
+	int bit;
 
 	asm {
 		ldy #0
