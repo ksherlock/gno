@@ -121,7 +121,7 @@
 
 /* Source compatibility only, ID string not emitted in object file */
 #ifndef __FBSDID
-#define __FBSDID(s)
+#define __FBSDID(s) struct __fbsdid_hack
 #endif
 
 #endif /* !_SYS_CDEFS_H_ */
