@@ -41,9 +41,14 @@ __FBSDID("$FreeBSD$");
 #include <string.h>
 #include <signal.h>
 
+#ifdef __ORCAC__
+//     extern const int sys_nsig; missing.
+#define sys_nsig NSIG
+#endif
+
+// hmm... does this need to be large memory model?
 char *
-strsignal(num)
-	int num;
+strsignal(int num)
 {
 #define	UPREFIX	"Unknown signal: "
 	static char ebuf[40] = UPREFIX;		/* 64-bit number + slop */
