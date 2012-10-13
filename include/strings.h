@@ -29,12 +29,25 @@
 #ifndef _STRINGS_H_
 #define	_STRINGS_H_
 
-#include <sys/cdefs.h>
-#include <sys/_types.h>
+//#include <sys/cdefs.h>
+//#include <sys/_types.h>
 
-#ifndef _SIZE_T_DECLARED
-typedef	__size_t	size_t;
-#define	_SIZE_T_DECLARED
+#ifndef _MACHINE_ANSI_H_
+#include <machine/ansi.h>
+#endif
+
+#if defined(_BSD_SIZE_T_) && !defined(__size_t__)
+#define __size_t__ 1
+typedef	_BSD_SIZE_T_	size_t;
+#undef	_BSD_SIZE_T_
+#endif
+
+#ifndef	NULL
+#define NULL  (void *) 0L
+#endif
+
+#ifndef _SYS_CDEFS_H_
+#include <sys/cdefs.h>
 #endif
 
 __BEGIN_DECLS
