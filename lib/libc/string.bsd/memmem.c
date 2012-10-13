@@ -58,7 +58,7 @@ memmem(const void *l, size_t l_len, const void *s, size_t s_len)
 	last = (char *)cl + l_len - s_len;
 
 	for (cur = (char *)cl; cur <= last; cur++)
-		if (cur[0] == cs[0] && memcmp(cur, cs, s_len) == 0)
+		if (cur[0] == cs[0] && memcmp((const void *)cur, (const void *)cs, s_len) == 0)
 			return cur;
 
 	return NULL;

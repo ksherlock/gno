@@ -70,7 +70,7 @@ bcopy(const void *src0, void *dst0, size_t length)
 #endif
 {
 	char *dst = dst0;
-	const char *src = src0;
+	const char *src = (const char *)src0;
 	size_t t;
 
 	if (length == 0 || dst == src)		/* nothing to do */

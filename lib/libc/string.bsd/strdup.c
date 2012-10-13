@@ -46,6 +46,6 @@ strdup(const char *str)
 	len = strlen(str) + 1;
 	if ((copy = malloc(len)) == NULL)
 		return (NULL);
-	memcpy(copy, str, len);
+	memcpy(copy, (const void *)str, len);
 	return (copy);
 }
