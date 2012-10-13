@@ -29,7 +29,7 @@ __FBSDID("$FreeBSD$");
 
 #include <string.h>
 
-#ifdef __ORCAC__
+#ifdef __XXORCAC__
 
 size_t
 strnlen(const char *s, size_t maxlen)
