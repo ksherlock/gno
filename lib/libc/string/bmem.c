@@ -8,7 +8,7 @@
 segment "libc_str__";
 #endif
 
-#include <strings.h>
+#include <string.h>
 
 void
 bzero(void *buf, size_t len) {
