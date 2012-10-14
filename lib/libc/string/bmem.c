@@ -5,7 +5,7 @@
  */
 
 #ifdef __ORCAC__
-segment "libc_gen__";
+segment "libc_str__";
 #endif
 
 #include <string.h>

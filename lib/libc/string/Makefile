@@ -7,6 +7,6 @@
 LIB	= c
 LIBPFX	= $(OBJ_DIR)../
 NO_REZ	= true
-SRCS	= case.c str.c strerror.c swab.c
+SRCS	= bmem.c case.c str.c strerror.c swab.c
 
 .INCLUDE: /src/gno/lib/lib.mk
