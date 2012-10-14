@@ -91,8 +91,6 @@ char	*strndup __P((const char *, size_t));
 size_t	 strnlen __P((const char *, size_t));
 char	*strpbrk __P((const char *, const char *));
 char	*strrchr __P((const char *, int));
-char	*strpbrk __P((const char *, const char *));
-char	*strrchr __P((const char *, int));
 char	*strsignal __P((int));
 size_t	 strspn __P((const char *, const char *));
 char	*strstr __P((const char *, const char *));
