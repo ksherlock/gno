@@ -47,7 +47,7 @@ ffsl(long mask)
 high:
 		lda <mask+2
 		beq done
-		ldy #15
+		ldy #16
 loop:
 		iny
 		lsr a

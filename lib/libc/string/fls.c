@@ -41,7 +41,7 @@ fls(int mask)
 
 	asm {
 		ldy #0
-		lda <bit
+		lda <mask
 		beq done
 loop:
 		dey
