@@ -110,6 +110,8 @@ off_t	 lseek __P((int, off_t, int));
 long	 pathconf __P((const char *, int));
 int	 pause __P((void));
 int	 pipe __P((int *));
+ssize_t	 pread __P((int, void *, size_t, off_t));
+ssize_t	 pwrite __P((int, const void *, size_t, off_t));
 ssize_t	 read __P((int, void *, size_t));		/* non-POSIX? */
 int	 rmdir __P((const char *));
 int	 setgid __P((gid_t));
