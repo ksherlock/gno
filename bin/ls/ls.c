@@ -12,15 +12,23 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <getopt.h>
 #include <fcntl.h>
 #include <gsos.h>
 #include <unistd.h>
 #include <misctool.h>
 
+#include <gno/gno.h>
+
 #pragma stacksize 1024
 #pragma optimize -1
 /*#pragma optimize 8*/
+
+// BSD stdio macro version causes problems.
+#undef putchar
+
+
+extern pascal void SystemQuitFlags (unsigned int);
+extern pascal void SystemQuitPath (GSStringPtr);
 
 #define CALCULATE -1
 #define ONLYONE -2
@@ -45,10 +53,10 @@ struct directory {
 DirEntryRecGS dirinfo;
 ResultBuf32 nameb;
 
-lsexit(int x_code)
+void lsexit(int x_code)
 {
-    SYSTEMQUITFLAGS(0x4000);
-    SYSTEMQUITPATH(NULL);
+    SystemQuitFlags(0x4000);
+    SystemQuitPath(NULL);
     exit(x_code);
 }
 /*#define lsexit(x) exit(x)*/
@@ -59,7 +67,7 @@ void nqsort(void *,unsigned, unsigned,int (*cmp)(void *,void *));
 
 void printGS(GSString255Ptr g)
 {
-    fwrite(g->text,g->length,1,stdout);
+    fwrite(g->text, g->length, 1, stdout);
 }
 
 typedef struct listStruct *list;
@@ -114,7 +122,7 @@ int i;
         }
         else i++;
     }
-    sprintf(conv,"$%2X ",type);
+    sprintf(conv,"$%02X ",type);
     return conv;
 }
 
