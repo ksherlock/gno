@@ -56,7 +56,7 @@ pascal int	Kscreate(int count, int *errno)		__INLINE(0x0F03);
 pascal int	Ksdelete(int sem, int *errno)		__INLINE(0x1003);
 
 #ifdef _GNO_KVM_H_
-pascal int	Kkvm_open(int *errno)			__INLINE(0x1103);
+pascal kvmt *	Kkvm_open(int *errno)			__INLINE(0x1103);
 pascal int	Kkvm_close(kvmt *k, int *errno)		__INLINE(0x1203);
 pascal struct pentry *Kkvm_getproc(kvmt *kd, int pid, int *errno)
 							__INLINE(0x1303);
