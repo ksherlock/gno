@@ -133,11 +133,11 @@ int		InstallNetDriver __P((void *pr_usrreq, int domain));
 
 /* Kernel Virtual Memory */
 #ifdef KERNEL
-kvm_t *		kvm_open __P((void));			/* non-BSD */
-int		kvm_close __P((kvm_t *));
-struct pentry *	kvm_getproc __P((kvm_t *, pid_t));
-struct pentry *	kvm_nextproc __P((kvm_t *));
-int		kvm_setproc __P((kvm_t *));
+kvmt *		kvm_open __P((void));			/* non-BSD */
+int		kvm_close __P((kvmt *));
+struct pentry *	kvm_getproc __P((kvmt *, pid_t));
+struct pentry *	kvm_nextproc __P((kvmt *));
+int		kvm_setproc __P((kvmt *));
 #endif
 
 #endif /* _GNO_GNO_H_ */
