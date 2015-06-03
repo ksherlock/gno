@@ -10,10 +10,11 @@
 #include <texttool.h>
 #include <locator.h>
 #include <orca.h>
-#include <gno/gno.h>
+
 #include <gno/conf.h>
 #include <gno/proc.h>
 #include <gno/kvm.h>
+#include <gno/gno.h>
 
 struct snoop1 {
     word blockLen;
@@ -176,6 +177,7 @@ int i,x,y;
           case rtGSOS: printf("GSOS,"); break;
           case rtPIPE: printf("PIPE(%d),",y); break;
           case rtTTY: printf("tty%02d,",y-1); break;
+          case rtSOCKET: printf("socket,"); break;
           default: printf("UNK,");
         }
         printf("%d] ",rtp[i].count);
@@ -212,7 +214,7 @@ char *nm = "~PROCYON~GNO~SNOOPER";
 	goto lp;
     }
     snoopermsg.blockLen = sizeof(snoopermsg);
-    msg = MessageByName(0,&snoopermsg);
+    msg = MessageByName(0,(Pointer)&snoopermsg);
     MessageCenter(2,(word)msg,h);
     HLock(h);
     sn = (struct snoop2 *) (((byte *)*h)+0x1D);
