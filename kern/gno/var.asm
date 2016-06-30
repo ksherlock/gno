@@ -57,6 +57,12 @@ VTABSIZE	gequ  39                 ;Size of variable table
 
 VEXPORT	gequ  %0001              ;This is variable is exported.
 
+o_next	gequ 0
+o_vt	gequ 4
+o_name	gequ 4
+o_value	gequ 8
+o_flag	gequ 12
+
 ;=========================================================================
 ;
 ; Deallocates the specified process' variable tables.  After this is done
@@ -229,31 +235,31 @@ loop1	ldy   #2
 	ora   p
 	beq   nexttbl
 
-loop2	ldy   #12
+loop2	ldy   #o_flag
 	lda   [p],y
 	and   #VEXPORT
 	beq   nextvar
 
-	ldy   #4+2
+	ldy   #o_name+2
 	lda   [p],y
 	pha
 	dey2
 	lda   [p],y
 	pha
-	ldy   #8+2
+	ldy   #o_value+2
 	lda   [p],y
 	pha
 	dey2
 	lda   [p],y
 	pha
 	jsl   setvar             ;Copy over the new variable
-	ldy   #4+2
+	ldy   #o_name+2
 	lda   [p],y
 	pha
 	dey2
 	lda   [p],y
 	pha
-	ldy   #12
+	ldy   #o_flag
 	lda   [p],y
 	pha
 	jsl   exportvar          ;Copy over the var flags
@@ -395,14 +401,14 @@ loop2	anop
 *              pha
 *              jsl   exportvar          ;Copy over the var flags
 
-dispvar	ldy   #4+2               ;dispose the variable
+dispvar	ldy   #o_name+2               ;dispose the variable
 	lda   [p],y
 	pha
 	dey2
 	lda   [p],y
 	pha
 	jsl   ~NDISPOSE
-	ldy   #8+2
+	ldy   #o_value+2
 	lda   [p],y
 	pha
 	dey2
@@ -534,7 +540,7 @@ pointit	txa
 changevar	anop
 	sta   var                ;point to variable
 	stx   var+2
-	ldy   #8+2               ;dispose old value
+	ldy   #o_value+2               ;dispose old value
 	lda   [var],y
 	pha
 	dey2
@@ -561,7 +567,7 @@ newvar	anop
 	sta   [p]
 	lda   var+2
 	sta   [p],y
-	ldy   #12                ;initialize flag to 0
+	ldy   #o_flag                ;initialize flag to 0
 	lda   #0
 	sta   [var],y
 	pei   (name+2)           ;get memory for the string
@@ -569,7 +575,7 @@ newvar	anop
 	jsl   alloccstr
 	sta   q
 	stx   q+2
-	ldy   #4                 ;point to name
+	ldy   #o_name                 ;point to name
 	sta   [var],y
 	txa
 	iny2
@@ -584,7 +590,7 @@ setvalue	pei   (value+2)          ;get memory for the string
 	jsl   alloccstr
 	sta   q
 	stx   q+2
-	ldy   #8                 ;point to value
+	ldy   #o_value                 ;point to value
 	sta   [var],y
 	txa
 	iny2
@@ -824,7 +830,7 @@ loop	clc
 
 found	sta   var
 	stx   var+2
-	ldy   #8
+	ldy   #o_value
 	lda   [var],y
 	sta   p
 	iny2
@@ -1030,7 +1036,7 @@ loop	lda   p
 ;
 ; Point to this variable name
 ;
-	ldy   #4
+	ldy   #o_name
 	lda   [p],y
 	sta   thisname
 	iny2
@@ -1060,14 +1066,14 @@ next	mv4   p,q
 ;
 ; We found it, now unset it
 ;
-found	ldy   #4+2               ;dispose the name
+found	ldy   #o_name+2               ;dispose the name
 	lda   [p],y
 	pha
 	dey2
 	lda   [p],y
 	pha
 	jsl   ~NDISPOSE
-	ldy   #8+2               ;dispose the value
+	ldy   #o_value+2               ;dispose the value
 	lda   [p],y
 	pha
 	dey2
@@ -1179,7 +1185,7 @@ pointit	txa
 
 found	sta   var
 	stx   var+2
-	ldy   #12
+	ldy   #o_flag
 	lda   [var],y
 	ora   flag
 	sta   [var],y
@@ -1210,7 +1216,7 @@ loop	lda   p
 ;
 ; Point to this variable name
 ;
-	ldy   #4
+	ldy   #o_name
 	lda   [p],y
 	sta   thisname
 	iny2
