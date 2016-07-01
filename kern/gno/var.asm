@@ -1133,25 +1133,31 @@ space	equ   p+4
 	lda   varDepth,x
 	bne   pointit
 
+	anop  ; set up variables for this pid.
+	jsl   initvar
 	lda   truepid
-folpid	anop
-	asl2  a
-	asl2  a
-	asl2  a
-	asl   a
-	sta   pidx128
-	tax
-	lda   ParentProc,x       ;parent id
-	jmi   done               ;can't do it
 	asl   a
 	tax
-	lda   varDepth,x
-	bne   tryit
-	ldx   pidx128
-	lda   ParentProc,x
-	bra   folpid
 
-tryit	anop
+;	lda   truepid
+;folpid	anop
+;	asl2  a
+;	asl2  a
+;	asl2  a
+;	asl   a
+;	sta   pidx128
+;	tax
+;	lda   ParentProc,x       ;parent id
+;	jmi   done               ;can't do it
+;	asl   a
+;	tax
+;	lda   varDepth,x
+;	bne   tryit
+;	ldx   pidx128
+;	lda   ParentProc,x
+;	bra   folpid
+
+;tryit	anop
 
 ;
 ; Point to table
