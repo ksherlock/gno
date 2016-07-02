@@ -1,0 +1,9 @@
+Name:    printenv
+Version: 1.0 (July 2016)
+Shell:   GNO
+Author:  Kelvin Sherlock (from FreeBSD)
+Contact: ksherlock@gmail.com
+Where:   /usr/bin
+FTP:
+
+ Set environment and execute command.
