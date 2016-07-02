@@ -208,14 +208,18 @@ orca_2	anop
 	pha
 	sta   valC
 	stx   valC+2
-	jsl   setvar
 
-	pei   (varC+2)           ; set the export flag according
-	pei   (varC)
-	ldy   #PBexport          ; to the new parm in Orca 2.0
+	ldy   #PBexport
 	lda   [pBlock],y
 	pha
-	jsl   exportvar
+	jsl   setvar
+
+;	pei   (varC+2)           ; set the export flag according
+;	pei   (varC)
+;	ldy   #PBexport          ; to the new parm in Orca 2.0
+;	lda   [pBlock],y
+;	pha
+;	jsl   exportvar
 	bra   orca_com
 
 orca_1	ldy   #2                 ;$
@@ -241,7 +245,7 @@ orca_1	ldy   #2                 ;$
 	pha
 	sta   valC
 	stx   valC+2
-
+	pea   0                  ; export flags.
 	jsl   setvar
 
 orca_com	pei   (varC+2)

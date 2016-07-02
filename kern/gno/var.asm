@@ -48,6 +48,14 @@
 * Nov 6, 1991 (jb) : I removed all references to kvm_xxxx routines.
 *   The variable code will probably run about twice as fast now.
 *
+* June 30, 2016 (Sherlock) : Calls that modify variables (set, unset, export)
+* will automatically create a new scope if necessary. Otherwise, the parent's
+* variables are clobbered. (Kill calls disposevar so they will be cleaned up
+* automatically)
+*
+* Calls that read variables (read, indexed) hide a parent's variables unless
+* they are exported.
+*
 **************************************************************************
 
 	case	on
@@ -252,17 +260,22 @@ loop2	ldy   #o_flag
 	dey2
 	lda   [p],y
 	pha
-	jsl   setvar             ;Copy over the new variable
-	ldy   #o_name+2
-	lda   [p],y
-	pha
-	dey2
-	lda   [p],y
-	pha
+
 	ldy   #o_flag
 	lda   [p],y
 	pha
-	jsl   exportvar          ;Copy over the var flags
+
+	jsl   setvar             ;Copy over the new variable
+;	ldy   #o_name+2
+;	lda   [p],y
+;	pha
+;	dey2
+;	lda   [p],y
+;	pha
+;	ldy   #o_flag
+;	lda   [p],y
+;	pha
+;	jsl   exportvar          ;Copy over the var flags
 
 nextvar	ldy   #2
 	lda   [p]
@@ -458,7 +471,7 @@ p	equ   tbl+4
 q	equ   p+4
 space	equ   q+4
 
-	subroutine (4:name,4:value),space
+	subroutine (4:name,4:value,2:flag),space
 
 	pei   (name+2)
 	pei   (name)
@@ -607,6 +620,12 @@ setvalue	pei   (value+2)          ;get memory for the string
 	pei   (q)
 	jsl   copycstr
 
+setflag	anop
+	ldy   #o_flag
+	lda   [var],y
+	ora   flag
+	sta   [var],y
+
 done	return
 
 	END
@@ -628,7 +647,8 @@ hashval	equ   pidx128+2
 var	equ   hashval+2
 tbl	equ   var+4
 p	equ   tbl+4
-space	equ   p+4
+fmask	equ   p+4
+space	equ   fmask+2
 
 	subroutine (4:name),space
 
@@ -640,6 +660,8 @@ space	equ   p+4
 	jsl   hashvar
 	sta   hashval
 
+	lda   #-1
+	sta   fmask
 	lda   truepid
 	asl   a
 	tax
@@ -669,7 +691,7 @@ cont	asl   a
 	bra   folpid
 
 tryit	anop
-
+        inc   fmask
 ;
 ; Point to table
 ;
@@ -721,6 +743,17 @@ loop	clc
 found	sta   var
 	stx   var+2
 
+; check if variable is visible for this pid.
+	ora   var+2
+	beq   done
+
+	ldy   #o_flag
+	lda   [var],y
+	ora   fmask
+	bne   done
+	sta   var
+	sta   var+2
+
 done	return 4:var
 
 	END
@@ -742,7 +775,8 @@ hashval	equ   pidx128+2
 var	equ   hashval+2
 tbl	equ   var+4
 p	equ   tbl+4
-space	equ   p+4
+fmask	equ   p+4
+space	equ   fmask+2
 
 	subroutine (4:name),space
 
@@ -753,6 +787,9 @@ space	equ   p+4
 	pei   (name)
 	jsl   hashvar
 	sta   hashval
+
+	lda   #-1
+	sta   fmask
 
 	lda   truepid
 	asl   a
@@ -783,7 +820,7 @@ cont	asl   a
 	bra   folpid
 
 tryit	anop
-
+	inc   fmask
 ;
 ; Point to table
 ;
@@ -830,12 +867,22 @@ loop	clc
 ;               stx   p
 ;               ora   p
 ;               bne   loop
+
+notfound	anop
+
 	stz	p
 	stz	p+2
 	bra   done
 
 found	sta   var
 	stx   var+2
+
+; check if visible in current scope
+	ldy   #o_flag
+	lda   [var],y
+	ora   fmask
+	beq   notfound
+
 	ldy   #o_value
 	lda   [var],y
 	sta   p
@@ -862,13 +909,17 @@ pidx128	equ   0
 count	equ   pidx128+2
 p	equ   count+2
 tbl	equ   p+4
-space	equ   tbl+4
+fmask	equ   tbl+4
+space	equ   fmask+2
 
 	subroutine (2:index),space
 
 	lda   index
 	jeq   nope
 	jmi   nope
+
+	lda   #-1
+	sta   fmask
 
 	lda   truepid
 	asl   a
@@ -895,7 +946,7 @@ folpid	anop
 	bra   folpid
 
 tryit	anop
-
+	inc   fmask          ; only include exported variables.
 ;
 ; Point to table
 ;
@@ -924,8 +975,19 @@ loop1	ldy   #2
 	ora   p
 	beq   nexttbl
 
-loop2	dec   index
+loop2	anop
+;
+;  only visible if varDepth,X || exported.
+;
+
+	ldy   #o_flag
+	lda   [p],y
+	ora   fmask
+	beq   skip
+	dec   index
 	beq   found
+
+skip	anop
 	ldy   #2
 	lda   [p]
 	tax
