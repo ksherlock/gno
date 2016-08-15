@@ -754,6 +754,7 @@ pread (int fd, void *buf, size_t bytecount, off_t offset) {
 	}
 
 	SetMarkGS(&setPosDCB);
+	if (_toolErr)
 	{
 		errno = _mapErr(_toolErr)
 		return -1L;
@@ -797,6 +798,7 @@ pwrite (int fd, const void *buf, size_t bytecount, off_t offset)
 	if (offset > eofDCB.eof)
 	{
 		SetEOFGS(&setPosDCB);
+		if (_toolErr)
 		{
 			errno = _mapErr(_toolErr)
 			return -1L;
@@ -804,6 +806,7 @@ pwrite (int fd, const void *buf, size_t bytecount, off_t offset)
 	}
 
 	SetMarkGS(&setPosDCB);
+	if (_toolErr)
 	{
 		errno = _mapErr(_toolErr)
 		return -1L;
