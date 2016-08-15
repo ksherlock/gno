@@ -1,0 +1,3 @@
+cmpl gnosnooper.c keep=GNOSnooper
+chtyp -t \$b9 GNOSnooper
+mv GNOSnooper /procyon/system/desk.accs
