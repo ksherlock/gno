@@ -735,6 +735,93 @@ mkdir(char *dirname)
   return 0;
 }
 
+
+ssize_t
+pread (int fd, void *buf, size_t bytecount, off_t offset) {
+	/* perform a read at location offset.
+	 * the file's offset is not modified
+	 */
+	SetPositionRecGS setPosDCB = { 3, fd, startPlus, offset };
+	PositionRecGS  posDCB = { 2, fd, 0 };
+
+	ssize_t transferCount;
+
+	GetMarkGS(&posDCB);
+	if (_toolErr)
+	{
+		errno = _mapErr(_toolErr)
+		return -1L;
+	}
+
+	SetMarkGS(&setPosDCB);
+	if (_toolErr)
+	{
+		errno = _mapErr(_toolErr)
+		return -1L;
+	}
+
+	transferCount = read(fd, buf, bytecount);
+
+	setPosDCB.displacement = posDCB.position;
+	SetMarkGS(&setPosDCB);
+	/* retain any read errno */
+
+	return transferCount;
+}
+
+ssize_t
+pwrite (int fd, const void *buf, size_t bytecount, off_t offset)
+{
+	/* perform a write at location offset.
+	 * the file's offset is not modified
+	 */
+	SetPositionRecGS setPosDCB = { 3, fd, startPlus, offset };
+	PositionRecGS  posDCB = { 2, fd, 0 };
+	EOFRecGS eofDCB = { 2, fd, 0 };
+
+	ssize_t transferCount;
+
+	GetMarkGS(&posDCB);
+	if (_toolErr)
+	{
+		errno = _mapErr(_toolErr)
+		return -1L;
+	}
+
+	GetEOFGS(&eofDCB);
+	if (_toolErr)
+	{
+		errno = _mapErr(_toolErr)
+		return -1L;
+	}
+
+	if (offset > eofDCB.eof)
+	{
+		SetEOFGS(&setPosDCB);
+		if (_toolErr)
+		{
+			errno = _mapErr(_toolErr)
+			return -1L;
+		}
+	}
+
+	SetMarkGS(&setPosDCB);
+	if (_toolErr)
+	{
+		errno = _mapErr(_toolErr)
+		return -1L;
+	}
+
+	transferCount = write(fd, buf, bytecount);
+
+	setPosDCB.displacement = posDCB.position;
+	SetMarkGS(&setPosDCB);
+	/* retain any read errno */
+
+	return transferCount;
+}
+
+
 /*
  * raise -- This routine has been moved into ORCALib so that we can avoid
  *          backward references through abort(3), which the current linker
