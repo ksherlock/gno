@@ -6,6 +6,7 @@
 #define DESC "Find printable strings in a file."
 
 #include "Types.rez"
+#include "builddate.rez"
 
 /*
  * Comment

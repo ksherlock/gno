@@ -29,7 +29,7 @@ printStack (void) {
 }
 #endif
 
-main(int argc,char **argv)
+int main(int argc,char **argv)
 {
 FILE *duh;
 int concur,c,errflg = 0,size,pos;
