@@ -216,7 +216,6 @@ char *find_path(const char *arg, char *path) {
 	exit(127);
 }
 
-#define __STACK_CHECK__
 #if defined(__STACK_CHECK__)
 #include <gno/gno.h>
 static void
