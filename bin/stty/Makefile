@@ -1,6 +1,1 @@
-#	@(#)Makefile	5.4 (Berkeley) 6/5/91
-
-PROG=	stty
-SRCS=	cchar.c gfmt.c key.c modes.c print.c stty.c util.c
-
-.include <bsd.prog.mk>
+## $Id: Makefile,v 1.3 1999/02/15 19:08:46 gdr-ftp Exp $#PROG	= sttyBINDIR	= /bin# CFLAGS	+= -D__STACK_CHECK__STACK	= 1280OPTIMIZE= 9.INCLUDE : /src/gno/prog.mk
