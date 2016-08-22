@@ -1,1 +1,9 @@
-## $Id: Makefile,v 1.3 1999/02/15 19:08:46 gdr-ftp Exp $#PROG	= sttyBINDIR	= /bin# CFLAGS	+= -D__STACK_CHECK__STACK	= 1280OPTIMIZE= 9.INCLUDE : /src/gno/prog.mk
+PROG	= stty
+BINDIR	= /bin
+
+# CFLAGS	+= -D__STACK_CHECK__
+STACK	= 1280
+OPTIMIZE= 9
+
+.INCLUDE : /src/gno/prog.mk
+

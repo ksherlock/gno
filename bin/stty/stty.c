@@ -4,9 +4,6 @@
  * Set terminal parameters
  */
 
-#pragma stacksize 1280
-#pragma optimize 9
-
 #include <stdio.h>
 #include <ctype.h>
 #include <string.h>
@@ -217,9 +214,22 @@ void printCurSettings(void)
     printf("%-7s\n",doctrl(tc.t_eofc));
 }
 
+#if defined(__STACK_CHECK__)
+static void
+stackResults(void) {
+    fprintf(stderr, "stack usage:\t ===> %d bytes <===\n",
+        _endStackCheck());
+}
+#endif
+
 int main(int argc, char *argv[])
 {
 int i,item;
+
+#ifdef __STACK_CHECK__
+    _beginStackCheck();
+    atexit(stackResults);
+#endif
 
     ioctl(STDIN_FILENO,TIOCGETP,&sg);
     ioctl(STDIN_FILENO,TIOCGETC,&tc);
