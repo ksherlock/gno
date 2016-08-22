@@ -1,0 +1,32 @@
+/*
+ * Resources for version and comment
+ * $Id: split.rez,v 1.1 1997/12/02 05:15:19 gdr Exp $
+ */
+#define NAME "strings"
+#define DESC "Find printable strings in a file."
+
+#include "Types.rez"
+
+/*
+ * Comment
+ */
+resource rComment (1, purgeable3) {
+	NAME " v1.1\n", 
+	DESC "\n"
+	BUILD_DATE
+};
+
+/*
+ * Version
+ */
+resource rVersion (1, purgeable3) {
+	{ 1, 1, 0,	/* Version 1.1.0 */
+	  release,	/* development|alpha|beta|final|release */
+	  0 },		/* non-final release number */
+	verUS,	/* Country */
+	NAME,	/* Program name */
+	DESC "\n"
+	BUILD_DATE
+};
+
+

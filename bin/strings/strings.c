@@ -1,9 +1,12 @@
-#pragma stacksize 1024
 
 #include <types.h>
 #include <stdio.h>
 #include <ctype.h>
 #include <stdlib.h>
+#include <unistd.h>
+#ifdef __STACK_CHECK__
+#include <gno/gno.h>
+#endif
 
 const long bufSize = 512l;
 int all;
@@ -19,6 +22,13 @@ int myprint(char c)
     return 0;
 }
 
+#ifdef __STACK_CHECK__
+static void
+printStack (void) {
+    fprintf(stderr, "stack usage: %d bytes\n", _endStackCheck());
+}
+#endif
+
 main(int argc,char **argv)
 {
 FILE *duh;
@@ -26,9 +36,11 @@ int concur,c,errflg = 0,size,pos;
 int inRow = 4,keepOff = FALSE;
 unsigned char *buffer,*string;
 unsigned long stringSize = 256l,offSet;
-extern char *optarg;
-extern int optind;
-extern int getopt(int,char **,char*);
+
+#ifdef __STACK_CHECK__
+   _beginStackCheck();
+   atexit(printStack);
+#endif
 
 /*  optarg = NULL; optind = 0; */ /* this makes getopt restartable */
     all = FALSE;

@@ -1,5 +1,6 @@
-strings.a: strings.c
-   compile strings.c keep=strings
+PROG=	strings
+SRCS=	strings.c
+STACK	= 1024
+OPTIMIZE= 79
 
-strings: strings.a
-   link strings 2/direct256 keep=strings
+.INCLUDE : /src/gno/prog.mk
