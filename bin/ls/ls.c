@@ -19,16 +19,9 @@
 
 #include <gno/gno.h>
 
-#pragma stacksize 1024
-#pragma optimize -1
-/*#pragma optimize 8*/
-
 // BSD stdio macro version causes problems.
 #undef putchar
 
-
-extern pascal void SystemQuitFlags (unsigned int);
-extern pascal void SystemQuitPath (GSStringPtr);
 
 #define CALCULATE -1
 #define ONLYONE -2
@@ -53,13 +46,6 @@ struct directory {
 DirEntryRecGS dirinfo;
 ResultBuf32 nameb;
 
-void lsexit(int x_code)
-{
-    SystemQuitFlags(0x4000);
-    SystemQuitPath(NULL);
-    exit(x_code);
-}
-/*#define lsexit(x) exit(x)*/
 
 #define qsort(a,b,c,d) nqsort(a,b,c,d)
 extern void SortList(void *a, int c, int b, void *d);
@@ -213,7 +199,7 @@ extern GSString255Ptr __C2GSMALLOC(char *);
         GetFileInfoGS(&fi);
         if (err=_toolErr) {
 	    fprintf(stderr,"ls: %s: %s\n",strerror(_mapErr(err)),argv[i]);
-	    lsexit(1);
+	    rexit(1);
         }
         nptr->name = malloc(fi.pathname->length+5);
         nptr->name->bufSize = fi.pathname->length+5;
@@ -487,13 +473,26 @@ DirEntryRecGS *entry;
     }
 }
 
+#if defined(__STACK_CHECK__)
+static void
+stackResults(void) {
+    fprintf(stderr, "stack usage:\t ===> %d bytes <===\n",
+        _endStackCheck());
+}
+#endif
+
 int main(int argc, char **argv)
 {
 int fd;
 struct directory *dd;
 TimeRec curtime;
 int ch;
-extern int getopt_restart(void);
+
+#ifdef __STACK_CHECK__
+    _beginStackCheck();
+    atexit(stackResults);
+#endif
+
 
     getopt_restart();
     curtime = ReadTimeHex();
@@ -570,7 +569,7 @@ extern int getopt_restart(void);
             default:
                 (void)fprintf(stderr,
                   "usage: ls [-acdfilnqrstu1ACLFR] [name ...]\n");
-                 lsexit(1);
+                 rexit(1);
         }
     }
     argv += optind;
@@ -590,5 +589,5 @@ extern int getopt_restart(void);
         dd = fakeDirect(argc, argv, NULL);
         if (dd->num_entries) listDir(dd);
     }
-    lsexit(0);
+    rexit(0);
 }

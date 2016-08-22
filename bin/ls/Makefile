@@ -1,8 +1,10 @@
-ls.root: ls.c
-   compile -i ls.c keep=ls
 
-itqsort.a: itqsort.c
-  compile +O itqsort.c keep=itqsort
+PROG	= ls
+SRCS	= ls.c itqsort.c
 
-ls: ls.root itqsort.a
-   link ls itqsort keep=ls
+# CFLAGS	+= -D__STACK_CHECK__
+STACK	= 1024
+OPTIMIZE= -1
+
+.INCLUDE : /src/gno/prog.mk
+

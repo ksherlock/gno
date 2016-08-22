@@ -4,16 +4,11 @@
  *	qsort.c - iterative Quicksort
  */
 
-#pragma noroot
-
 #define DEPTH	20	/*  should be adequate for most sorts  */
 
 
 	static
-swb(a, b, len)
-	register char *a;
-	register char *b;
-	register unsigned len;
+swb(char *a, char *b, unsigned len)
 {
 	register char temp;
 
@@ -49,11 +44,7 @@ loop:	    cpy	#0
 
 
 	int
-nqsort(bas, n, wid, cmp)
-	char *bas;	/*  base of data		*/
-	unsigned n;	/*  number of items to sort	*/
-	unsigned wid;	/*  width of an element		*/
-	int (*cmp)();	/*  key comparison function	*/
+nqsort(char *bas, unsigned n, unsigned wid, int (*cmp)(void *, void *))
 {
 	unsigned mumble;
 	unsigned j;
