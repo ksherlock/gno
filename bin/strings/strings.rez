@@ -12,7 +12,7 @@
  * Comment
  */
 resource rComment (1, purgeable3) {
-	NAME " v1.1\n", 
+	NAME " v1.1\n"
 	DESC "\n"
 	BUILD_DATE
 };
