@@ -158,7 +158,7 @@ char *doctrl(char c)
 {
 static char ss[3] = "  ";
 
-    if (c == -1) c = ' ';
+    if (c == (char)-1) c = ' ';
     if (c == 0x7F) {
     	ss[0] = '^';
 	ss[1] = '?';
