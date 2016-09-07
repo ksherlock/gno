@@ -58,7 +58,7 @@ struct lc_time_T {
 
 #define	LCTIME_SIZE (sizeof(struct lc_time_T) / sizeof(char *))
 
-static const struct lc_time_T	_C_time_locale = {
+static struct lc_time_T	_C_time_locale = {
 	{
 		"Jan", "Feb", "Mar", "Apr", "May", "Jun",
 		"Jul", "Aug", "Sep", "Oct", "Nov", "Dec"

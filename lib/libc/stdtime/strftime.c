@@ -96,6 +96,10 @@ static const char fmt_padding[][4][5] = {
 	{ "%04d",	"%d",	"%4d",	"%04d" }
 };
 
+#ifdef __ORCAC__
+static void tzset(void) {}
+static char *tzname[] = { NULL, NULL };
+#endif
 
 size_t
 strftime(char *s, const size_t maxsize, const char *format,
@@ -119,7 +123,7 @@ _fmt(const char *format, const struct tm *t, char *pt,
 #ifdef __ORCAC__
 	#define tptr (&_C_time_locale)
 #else
-	struct lc_time_T *tptr = __get_current_time_locale(loc);
+	struct lc_time_T *tptr = __get_current_time_locale(__get_locale());
 #endif
 
 	for ( ; *format; ++format) {
