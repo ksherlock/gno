@@ -7,6 +7,7 @@
 LIB	= c
 LIBPFX	= $(OBJ_DIR)../
 NO_REZ	= true
+SEGMENT	= libc_stdtm
 # SRCS	= asctime.c difftime.c localtime.c strftime.c
 SRCS	= localtime.c strftime.c
 

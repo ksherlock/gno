@@ -20,7 +20,6 @@
  */
 
 #ifdef __ORCAC__
-segment "libc_stdtm";
 #define NOID
 #define CONST
 #else
