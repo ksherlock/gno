@@ -1,13 +1,19 @@
+
 /*
  * Copyright (c) 1989 The Regents of the University of California.
  * All rights reserved.
+ *
+ * Copyright (c) 2011 The FreeBSD Foundation
+ * All rights reserved.
+ * Portions of this software were developed by David Chisnall
+ * under sponsorship from the FreeBSD Foundation.
  *
  * Redistribution and use in source and binary forms are permitted
  * provided that the above copyright notice and this paragraph are
  * duplicated in all such forms and that any documentation,
  * advertising materials, and other materials related to such
  * distribution and use acknowledge that the software was developed
- * by the University of California, Berkeley.  The name of the
+ * by the University of California, Berkeley. The name of the
  * University may not be used to endorse or promote products derived
  * from this software without specific prior written permission.
  * THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
@@ -20,11 +26,7 @@
  */
 
 #ifdef __ORCAC__
-segment "libc_stdtm";
 #define NOID
-#define CONST
-#else
-#define CONST const
 #endif
 
 #ifdef LIBC_RCS
@@ -34,120 +36,74 @@ static const char rcsid[] =
 
 #ifndef lint
 #ifndef NOID
-static const char	elsieid[] = "@(#)strftime.c	7.38";
+static const char	elsieid[] = "@(#)strftime.3	8.3";
 /*
-** Based on the UCB version with the ID appearing below.
-** This is ANSIish only when "multibyte character == plain character".
-*/
+ * Based on the UCB version with the ID appearing below.
+ * This is ANSIish only when "multibyte character == plain character".
+ */
 #endif /* !defined NOID */
 #endif /* !defined lint */
 
 #include "private.h"
 
-#ifndef LIBC_SCCS
-#ifndef lint
+#if defined(LIBC_SCCS) && !defined(lint)
 static const char	sccsid[] = "@(#)strftime.c	5.4 (Berkeley) 3/14/89";
-#endif /* !defined lint */
-#endif /* !defined LIBC_SCCS */
+#endif /* LIBC_SCCS and not lint */
 
 #include "tzfile.h"
-#include <fcntl.h>
-#include <locale.h>
-#include <rune.h>		/* for _PATH_LOCALE */
-#include <sys/stat.h>
+#include "timelocal.h"
 #ifdef __ORCAC__
 #include <string.h>		/* for memcpy() */
 #endif
-#define LOCALE_HOME _PATH_LOCALE
 
-struct lc_time_T {
-	const char *	mon[12];
-	const char *	month[12];
-	const char *	wday[7];
-	const char *	weekday[7];
-	const char *	X_fmt;
-	const char *	x_fmt;
-	const char *	c_fmt;
-	const char *	am;
-	const char *	pm;
-	const char *	date_fmt;
-};
 
-static struct lc_time_T		localebuf;
-#ifdef __ORCAC__
-#define Locale	(&C_time_locale)
-#else
-static struct lc_time_T *	_loc P((void));
-static int using_locale;
+static char *	_add (const char *, char *, const char *);
+static char *	_conv (int, const char *, char *, const char *);
+static char *	_fmt (const char *, const struct tm *, char *, const char *);
+static char *   _secs (const struct tm *, char *, const char *);
+static char *	_yconv(int, int, int, int, char *, const char *);
 
-#define Locale	(using_locale ? &localebuf : &C_time_locale)
-#endif
-
-static CONST struct lc_time_T	C_time_locale = {
-	{
-		"Jan", "Feb", "Mar", "Apr", "May", "Jun",
-		"Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
-	}, {
-		"January", "February", "March", "April", "May", "June",
-		"July", "August", "September", "October", "November", "December"
-	}, {
-		"Sun", "Mon", "Tue", "Wed",
-		"Thu", "Fri", "Sat"
-	}, {
-		"Sunday", "Monday", "Tuesday", "Wednesday",
-		"Thursday", "Friday", "Saturday"
-	},
-
-	/* X_fmt */
-	"%H:%M:%S",
-
-	/*
-	** x_fmt
-	** Since the C language standard calls for
-	** "date, using locale's date format," anything goes.
-	** Using just numbers (as here) makes Quakers happier;
-	** it's also compatible with SVR4.
-	*/
-	"%m/%d/%y",
-
-	/*
-	** c_fmt (ctime-compatible)
-	** Note that
-	**	"%a %b %d %H:%M:%S %Y"
-	** is used by Solaris 2.3.
-	*/
-	"%a %b %e %X %Y",
-
-	/* am */
-	"AM",
-
-	/* pm */
-	"PM",
-
-	/* date_fmt */
-	"%a %b %e %X %Z %Y"
-};
-
-static char *	_add P((const char *, char *, const char *));
-static char *	_conv P((int, const char *, char *, const char *));
-static char *	_fmt P((const char *, CONST struct tm *, char *, CONST char *));
-static char *   _secs P((const struct tm *, char *, const char *));
-
-size_t strftime P((char *, size_t, const char *, const struct tm *));
+size_t strftime (char *, size_t, const char *, const struct tm *);
 
 extern char *	tzname[];
 
-size_t
-#ifdef USE_PROTOS
-strftime(char *const s, const size_t maxsize, const char *const format,
-	const struct tm *const t)
-#else
-strftime(s, maxsize, format, t)
-	char *const s;
-	const size_t maxsize;
-	const char *const format;
-	const struct tm *const t;
+#define	IN_NONE	0
+#define	IN_SOME	1
+#define	IN_THIS	2
+#define	IN_ALL	3
+
+#define	PAD_DEFAULT	0
+#define	PAD_LESS	1
+#define	PAD_SPACE	2
+#define	PAD_ZERO	3
+
+static const char fmt_padding[][4][5] = {
+	/* DEFAULT,	LESS,	SPACE,	ZERO */
+#define	PAD_FMT_MONTHDAY	0
+#define	PAD_FMT_HMS		0
+#define	PAD_FMT_CENTURY		0
+#define	PAD_FMT_SHORTYEAR	0
+#define	PAD_FMT_MONTH		0
+#define	PAD_FMT_WEEKOFYEAR	0
+#define	PAD_FMT_DAYOFMONTH	0
+	{ "%02d",	"%d",	"%2d",	"%02d" },
+#define	PAD_FMT_SDAYOFMONTH	1
+#define	PAD_FMT_SHMS		1
+	{ "%2d",	"%d",	"%2d",	"%02d" },
+#define	PAD_FMT_DAYOFYEAR	2
+	{ "%03d",	"%d",	"%3d",	"%03d" },
+#define	PAD_FMT_YEAR		3
+	{ "%04d",	"%d",	"%4d",	"%04d" }
+};
+
+#ifdef __ORCAC__
+static void tzset(void) {}
+static char *tzname[] = { NULL, NULL };
 #endif
+
+size_t
+strftime(char *s, const size_t maxsize, const char *format,
+	const struct tm *t)
 {
 	char *p;
 
@@ -160,105 +116,131 @@ strftime(s, maxsize, format, t)
 }
 
 static char *
-#ifdef USE_PROTOS
-_fmt(const char *format, CONST struct tm *CONST t, char *pt,
-	CONST char *CONST ptlim)
-#else
-_fmt(format, t, pt, ptlim)
-	const char *format;
-	const struct tm *const t;
-	char *pt;
-	const char *const ptlim;
-#endif
+_fmt(const char *format, const struct tm *t, char *pt,
+	const char *ptlim)
 {
+	int Ealternative, Oalternative, PadIndex;
+#ifdef __ORCAC__
+	#define tptr (&_C_time_locale)
+#else
+	struct lc_time_T *tptr = __get_current_time_locale(__get_locale());
+#endif
+
 	for ( ; *format; ++format) {
 		if (*format == '%') {
+			Ealternative = 0;
+			Oalternative = 0;
+			PadIndex	 = PAD_DEFAULT;
 label:
 			switch (*++format) {
 			case '\0':
 				--format;
 				break;
 			case 'A':
-				pt = _add((t->tm_wday < 0 || t->tm_wday > 6) ?
-					"?" : Locale->weekday[t->tm_wday],
+				pt = _add((t->tm_wday < 0 || t->tm_wday >= DAYSPERWEEK) ?
+					"?" : tptr->weekday[t->tm_wday],
 					pt, ptlim);
 				continue;
 			case 'a':
-				pt = _add((t->tm_wday < 0 || t->tm_wday > 6) ?
-					"?" : Locale->wday[t->tm_wday],
+				pt = _add((t->tm_wday < 0 || t->tm_wday >= DAYSPERWEEK) ?
+					"?" : tptr->wday[t->tm_wday],
 					pt, ptlim);
 				continue;
 			case 'B':
-				pt = _add((t->tm_mon < 0 || t->tm_mon > 11) ?
-					"?" : Locale->month[t->tm_mon],
+				pt = _add((t->tm_mon < 0 ||
+					t->tm_mon >= MONSPERYEAR) ?
+					"?" : (Oalternative ? tptr->alt_month :
+					tptr->month)[t->tm_mon],
 					pt, ptlim);
+				continue;
+
 				continue;
 			case 'b':
 			case 'h':
-				pt = _add((t->tm_mon < 0 || t->tm_mon > 11) ?
-					"?" : Locale->mon[t->tm_mon],
+				pt = _add((t->tm_mon < 0 || t->tm_mon >= MONSPERYEAR) ?
+					"?" : tptr->mon[t->tm_mon],
 					pt, ptlim);
 				continue;
 			case 'C':
 				/*
-				** %C used to do a...
-				**	_fmt("%a %b %e %X %Y", t);
-				** ...whereas now POSIX 1003.2 calls for
-				** something completely different.
-				** (ado, 5/24/93)
-				*/
-				pt = _conv((t->tm_year + TM_YEAR_BASE) / 100,
-					"%02d", pt, ptlim);
+				 * %C used to do a...
+				 *	_fmt("%a %b %e %X %Y", t);
+				 * ...whereas now POSIX 1003.2 calls for
+				 * something completely different.
+				 * (ado, 1993-05-24)
+				 */
+				pt = _yconv(t->tm_year, TM_YEAR_BASE, 1, 0,
+					pt, ptlim);
 				continue;
 			case 'c':
-				pt = _fmt(Locale->c_fmt, t, pt, ptlim);
+				pt = _fmt(tptr->c_fmt, t, pt, ptlim);
 				continue;
 			case 'D':
 				pt = _fmt("%m/%d/%y", t, pt, ptlim);
 				continue;
 			case 'd':
-				pt = _conv(t->tm_mday, "%02d", pt, ptlim);
+				pt = _conv(t->tm_mday,
+					fmt_padding[PAD_FMT_DAYOFMONTH][PadIndex],
+					pt, ptlim);
 				continue;
 			case 'E':
+				if (Ealternative || Oalternative)
+					break;
+				Ealternative++;
+				goto label;
 			case 'O':
 				/*
-				** POSIX locale extensions, a la
-				** Arnold Robbins' strftime version 3.0.
-				** The sequences
-				**	%Ec %EC %Ex %Ey %EY
-				**	%Od %oe %OH %OI %Om %OM
-				**	%OS %Ou %OU %OV %Ow %OW %Oy
-				** are supposed to provide alternate
-				** representations.
-				** (ado, 5/24/93)
-				*/
+				 * C99 locale modifiers.
+				 * The sequences
+				 *	%Ec %EC %Ex %EX %Ey %EY
+				 *	%Od %oe %OH %OI %Om %OM
+				 *	%OS %Ou %OU %OV %Ow %OW %Oy
+				 * are supposed to provide alternate
+				 * representations.
+				 *
+				 * FreeBSD extension
+				 *      %OB
+				 */
+				if (Ealternative || Oalternative)
+					break;
+				Oalternative++;
 				goto label;
 			case 'e':
-				pt = _conv(t->tm_mday, "%2d", pt, ptlim);
+				pt = _conv(t->tm_mday,
+					fmt_padding[PAD_FMT_SDAYOFMONTH][PadIndex],
+					pt, ptlim);
+				continue;
+			case 'F':
+				pt = _fmt("%Y-%m-%d", t, pt, ptlim);
 				continue;
 			case 'H':
-				pt = _conv(t->tm_hour, "%02d", pt, ptlim);
+				pt = _conv(t->tm_hour, fmt_padding[PAD_FMT_HMS][PadIndex],
+					pt, ptlim);
 				continue;
 			case 'I':
 				pt = _conv((t->tm_hour % 12) ?
 					(t->tm_hour % 12) : 12,
-					"%02d", pt, ptlim);
+					fmt_padding[PAD_FMT_HMS][PadIndex],
+					pt, ptlim);
 				continue;
 			case 'j':
-				pt = _conv(t->tm_yday + 1, "%03d", pt, ptlim);
+				pt = _conv(t->tm_yday + 1,
+					fmt_padding[PAD_FMT_DAYOFYEAR][PadIndex],
+					pt, ptlim);
 				continue;
 			case 'k':
 				/*
-				** This used to be...
-				**	_conv(t->tm_hour % 12 ?
-				**		t->tm_hour % 12 : 12, 2, ' ');
-				** ...and has been changed to the below to
-				** match SunOS 4.1.1 and Arnold Robbins'
-				** strftime version 3.0.  That is, "%k" and
-				** "%l" have been swapped.
-				** (ado, 5/24/93)
-				*/
-				pt = _conv(t->tm_hour, "%2d", pt, ptlim);
+				 * This used to be...
+				 *	_conv(t->tm_hour % 12 ?
+				 *		t->tm_hour % 12 : 12, 2, ' ');
+				 * ...and has been changed to the below to
+				 * match SunOS 4.1.1 and Arnold Robbins'
+				 * strftime version 3.0. That is, "%k" and
+				 * "%l" have been swapped.
+				 * (ado, 1993-05-24)
+				 */
+				 pt = _conv(t->tm_hour, fmt_padding[PAD_FMT_SHMS][PadIndex],
+				 	pt, ptlim);
 				continue;
 #ifdef KITCHEN_SINK
 			case 'K':
@@ -270,41 +252,45 @@ label:
 #endif /* defined KITCHEN_SINK */
 			case 'l':
 				/*
-				** This used to be...
-				**	_conv(t->tm_hour, 2, ' ');
-				** ...and has been changed to the below to
-				** match SunOS 4.1.1 and Arnold Robbin's
-				** strftime version 3.0.  That is, "%k" and
-				** "%l" have been swapped.
-				** (ado, 5/24/93)
-				*/
+				 * This used to be...
+				 *	_conv(t->tm_hour, 2, ' ');
+				 * ...and has been changed to the below to
+				 * match SunOS 4.1.1 and Arnold Robbin's
+				 * strftime version 3.0. That is, "%k" and
+				 * "%l" have been swapped.
+				 * (ado, 1993-05-24)
+				 */
 				pt = _conv((t->tm_hour % 12) ?
 					(t->tm_hour % 12) : 12,
-					"%2d", pt, ptlim);
+					fmt_padding[PAD_FMT_SHMS][PadIndex],
+					pt, ptlim);
 				continue;
 			case 'M':
-				pt = _conv(t->tm_min, "%02d", pt, ptlim);
+				pt = _conv(t->tm_min, fmt_padding[PAD_FMT_HMS][PadIndex],
+					pt, ptlim);
 				continue;
 			case 'm':
-				pt = _conv(t->tm_mon + 1, "%02d", pt, ptlim);
+				pt = _conv(t->tm_mon + 1,
+					fmt_padding[PAD_FMT_MONTH][PadIndex],
+					pt, ptlim);
 				continue;
 			case 'n':
 				pt = _add("\n", pt, ptlim);
 				continue;
 			case 'p':
-				pt = _add((t->tm_hour >= 12) ?
-					Locale->pm :
-					Locale->am,
+				pt = _add((t->tm_hour >= (HOURSPERDAY / 2)) ?
+					tptr->pm : tptr->am,
 					pt, ptlim);
 				continue;
 			case 'R':
 				pt = _fmt("%H:%M", t, pt, ptlim);
 				continue;
 			case 'r':
-				pt = _fmt("%I:%M:%S %p", t, pt, ptlim);
+				pt = _fmt(tptr->ampm_fmt, t, pt, ptlim);
 				continue;
 			case 'S':
-				pt = _conv(t->tm_sec, "%02d", pt, ptlim);
+				pt = _conv(t->tm_sec, fmt_padding[PAD_FMT_HMS][PadIndex],
+					pt, ptlim);
 				continue;
 			case 's':
 				pt = _secs(t, pt, ptlim);
@@ -316,132 +302,235 @@ label:
 				pt = _add("\t", pt, ptlim);
 				continue;
 			case 'U':
-				pt = _conv((t->tm_yday + 7 - t->tm_wday) / 7,
-					"%02d", pt, ptlim);
+				pt = _conv((t->tm_yday + DAYSPERWEEK -
+					t->tm_wday) / DAYSPERWEEK,
+					fmt_padding[PAD_FMT_WEEKOFYEAR][PadIndex],
+					pt, ptlim);
 				continue;
 			case 'u':
 				/*
-				** From Arnold Robbins' strftime version 3.0:
-				** "ISO 8601: Weekday as a decimal number
-				** [1 (Monday) - 7]"
-				** (ado, 5/24/93)
-				*/
-				pt = _conv((t->tm_wday == 0) ? 7 : t->tm_wday,
+				 * From Arnold Robbins' strftime version 3.0:
+				 * "ISO 8601: Weekday as a decimal number
+				 * [1 (Monday) - 7]"
+				 * (ado, 1993-05-24)
+				 */
+				pt = _conv((t->tm_wday == 0) ?
+					DAYSPERWEEK : t->tm_wday,
 					"%d", pt, ptlim);
 				continue;
-			case 'V':
-				/*
-				** From Arnold Robbins' strftime version 3.0:
-				** "the week number of the year (the first
-				** Monday as the first day of week 1) as a
-				** decimal number (01-53).  The method for
-				** determining the week number is as specified
-				** by ISO 8601 (to wit: if the week containing
-				** January 1 has four or more days in the new
-				** year, then it is week 1, otherwise it is
-				** week 53 of the previous year and the next
-				** week is week 1)."
-				** (ado, 5/24/93)
-				*/
-				/*
-				** XXX--If January 1 falls on a Friday,
-				** January 1-3 are part of week 53 of the
-				** previous year.  By analogy, if January
-				** 1 falls on a Thursday, are December 29-31
-				** of the PREVIOUS year part of week 1???
-				** (ado 5/24/93)
-				*/
-				/*
-				** You are understood not to expect this.
-				*/
+			case 'V':	/* ISO 8601 week number */
+			case 'G':	/* ISO 8601 year (four digits) */
+			case 'g':	/* ISO 8601 year (two digits) */
+/*
+ * From Arnold Robbins' strftime version 3.0: "the week number of the
+ * year (the first Monday as the first day of week 1) as a decimal number
+ * (01-53)."
+ * (ado, 1993-05-24)
+ *
+ * From "http://www.ft.uni-erlangen.de/~mskuhn/iso-time.html" by Markus Kuhn:
+ * "Week 01 of a year is per definition the first week which has the
+ * Thursday in this year, which is equivalent to the week which contains
+ * the fourth day of January. In other words, the first week of a new year
+ * is the week which has the majority of its days in the new year. Week 01
+ * might also contain days from the previous year and the week before week
+ * 01 of a year is the last week (52 or 53) of the previous year even if
+ * it contains days from the new year. A week starts with Monday (day 1)
+ * and ends with Sunday (day 7). For example, the first week of the year
+ * 1997 lasts from 1996-12-30 to 1997-01-05..."
+ * (ado, 1996-01-02)
+ */
 				{
-					int	i;
+					int	year;
+					int	base;
+					int	yday;
+					int	wday;
+					int	w;
 
-					i = (t->tm_yday + 10 - (t->tm_wday ?
-						(t->tm_wday - 1) : 6)) / 7;
-					if (i == 0) {
+					year = t->tm_year;
+					base = TM_YEAR_BASE;
+					yday = t->tm_yday;
+					wday = t->tm_wday;
+					for ( ; ; ) {
+						int	len;
+						int	bot;
+						int	top;
+
+						len = isleap_sum(year, base) ?
+							DAYSPERLYEAR :
+							DAYSPERNYEAR;
 						/*
-						** What day of the week does
-						** January 1 fall on?
-						*/
-						i = t->tm_wday -
-							(t->tm_yday - 1);
+						 * What yday (-3 ... 3) does
+						 * the ISO year begin on?
+						 */
+						bot = ((yday + 11 - wday) %
+							DAYSPERWEEK) - 3;
 						/*
-						** Fri Jan 1: 53
-						** Sun Jan 1: 52
-						** Sat Jan 1: 53 if previous
-						**		 year a leap
-						**		 year, else 52
-						*/
-						if (i == TM_FRIDAY)
-							i = 53;
-						else if (i == TM_SUNDAY)
-							i = 52;
-						else	i = isleap(t->tm_year +
-								TM_YEAR_BASE) ?
-								53 : 52;
-#ifdef XPG4_1994_04_09
-						/*
-						** As of 4/9/94, though,
-						** XPG4 calls for 53
-						** unconditionally.
-						*/
-						i = 53;
-#endif /* defined XPG4_1994_04_09 */
+						 * What yday does the NEXT
+						 * ISO year begin on?
+						 */
+						top = bot -
+							(len % DAYSPERWEEK);
+						if (top < -3)
+							top += DAYSPERWEEK;
+						top += len;
+						if (yday >= top) {
+							++base;
+							w = 1;
+							break;
+						}
+						if (yday >= bot) {
+							w = 1 + ((yday - bot) /
+								DAYSPERWEEK);
+							break;
+						}
+						--base;
+						yday += isleap_sum(year, base) ?
+							DAYSPERLYEAR :
+							DAYSPERNYEAR;
 					}
-					pt = _conv(i, "%02d", pt, ptlim);
+#ifdef XPG4_1994_04_09
+					if ((w == 52 &&
+						t->tm_mon == TM_JANUARY) ||
+						(w == 1 &&
+						t->tm_mon == TM_DECEMBER))
+							w = 53;
+#endif /* defined XPG4_1994_04_09 */
+					if (*format == 'V')
+						pt = _conv(w, fmt_padding[PAD_FMT_WEEKOFYEAR][PadIndex],
+							pt, ptlim);
+					else if (*format == 'g') {
+						pt = _yconv(year, base, 0, 1,
+							pt, ptlim);
+					} else	pt = _yconv(year, base, 1, 1,
+							pt, ptlim);
 				}
 				continue;
 			case 'v':
 				/*
-				** From Arnold Robbins' strftime version 3.0:
-				** "date as dd-bbb-YYYY"
-				** (ado, 5/24/93)
-				*/
+				 * From Arnold Robbins' strftime version 3.0:
+				 * "date as dd-bbb-YYYY"
+				 * (ado, 1993-05-24)
+				 */
 				pt = _fmt("%e-%b-%Y", t, pt, ptlim);
 				continue;
 			case 'W':
-				pt = _conv((t->tm_yday + 7 -
+				pt = _conv((t->tm_yday + DAYSPERWEEK -
 					(t->tm_wday ?
-					(t->tm_wday - 1) : 6)) / 7,
-					"%02d", pt, ptlim);
+					(t->tm_wday - 1) :
+					(DAYSPERWEEK - 1))) / DAYSPERWEEK,
+					fmt_padding[PAD_FMT_WEEKOFYEAR][PadIndex],
+					pt, ptlim);
 				continue;
 			case 'w':
 				pt = _conv(t->tm_wday, "%d", pt, ptlim);
 				continue;
 			case 'X':
-				pt = _fmt(Locale->X_fmt, t, pt, ptlim);
+				pt = _fmt(tptr->X_fmt, t, pt, ptlim);
 				continue;
 			case 'x':
-				pt = _fmt(Locale->x_fmt, t, pt, ptlim);
+				pt = _fmt(tptr->x_fmt, t, pt, ptlim);
 				continue;
 			case 'y':
-				pt = _conv((t->tm_year + TM_YEAR_BASE) % 100,
-					"%02d", pt, ptlim);
+				pt = _yconv(t->tm_year, TM_YEAR_BASE, 0, 1,
+					pt, ptlim);
 				continue;
 			case 'Y':
-				pt = _conv(t->tm_year + TM_YEAR_BASE, "%04d",
+				pt = _yconv(t->tm_year, TM_YEAR_BASE, 1, 1,
 					pt, ptlim);
 				continue;
 			case 'Z':
-#ifndef __ORCAC__
-			/* we don't currently have the tm_zone field */
-				if (t->tm_zone != NULL)
-					pt = _add(t->tm_zone, pt, ptlim);
+#ifdef TM_ZONE
+				if (t->TM_ZONE != NULL)
+					pt = _add(t->TM_ZONE, pt, ptlim);
 				else
-#endif
-				if (t->tm_isdst == 0 || t->tm_isdst == 1) {
-					pt = _add(tzname[t->tm_isdst],
+#endif /* defined TM_ZONE */
+				if (t->tm_isdst >= 0)
+					pt = _add(tzname[t->tm_isdst != 0],
 						pt, ptlim);
-				} else  pt = _add("?", pt, ptlim);
+				/*
+				 * C99 says that %Z must be replaced by the
+				 * empty string if the time zone is not
+				 * determinable.
+				 */
+				continue;
+			case 'z':
+				{
+				int		diff;
+				char const *	sign;
+
+				if (t->tm_isdst < 0)
+					continue;
+#ifdef TM_GMTOFF
+				diff = t->TM_GMTOFF;
+#else /* !defined TM_GMTOFF */
+				/*
+				 * C99 says that the UTC offset must
+				 * be computed by looking only at
+				 * tm_isdst. This requirement is
+				 * incorrect, since it means the code
+				 * must rely on magic (in this case
+				 * altzone and timezone), and the
+				 * magic might not have the correct
+				 * offset. Doing things correctly is
+				 * tricky and requires disobeying C99;
+				 * see GNU C strftime for details.
+				 * For now, punt and conform to the
+				 * standard, even though it's incorrect.
+				 *
+				 * C99 says that %z must be replaced by the
+				 * empty string if the time zone is not
+				 * determinable, so output nothing if the
+				 * appropriate variables are not available.
+				 */
+				if (t->tm_isdst == 0)
+#ifdef USG_COMPAT
+					diff = -timezone;
+#else /* !defined USG_COMPAT */
+					continue;
+#endif /* !defined USG_COMPAT */
+				else
+#ifdef ALTZONE
+					diff = -altzone;
+#else /* !defined ALTZONE */
+					continue;
+#endif /* !defined ALTZONE */
+#endif /* !defined TM_GMTOFF */
+				if (diff < 0) {
+					sign = "-";
+					diff = -diff;
+				} else
+					sign = "+";
+				pt = _add(sign, pt, ptlim);
+				diff /= SECSPERMIN;
+				diff = (diff / MINSPERHOUR) * 100 +
+					(diff % MINSPERHOUR);
+				pt = _conv(diff,
+					fmt_padding[PAD_FMT_YEAR][PadIndex],
+					pt, ptlim);
+				}
 				continue;
 			case '+':
-				pt = _fmt(Locale->date_fmt, t, pt, ptlim);
+				pt = _fmt(tptr->date_fmt, t, pt, ptlim);
 				continue;
+			case '-':
+				if (PadIndex != PAD_DEFAULT)
+					break;
+				PadIndex = PAD_LESS;
+				goto label;
+			case '_':
+				if (PadIndex != PAD_DEFAULT)
+					break;
+				PadIndex = PAD_SPACE;
+				goto label;
+			case '0':
+				if (PadIndex != PAD_DEFAULT)
+					break;
+				PadIndex = PAD_ZERO;
+				goto label;
 			case '%':
 			/*
 			 * X311J/88-090 (4.12.3.5): if conversion char is
-			 * undefined, behavior is undefined.  Print out the
+			 * undefined, behavior is undefined. Print out the
 			 * character itself as printf(3) also does.
 			 */
 			default:
@@ -456,16 +545,8 @@ label:
 }
 
 static char *
-#ifdef USE_PROTOS
-_conv(const int n, const char *const format, char *const pt,
-	const char *const ptlim)
-#else
-_conv(n, format, pt, ptlim)
-	const int n;
-	const char *const format;
-	char *const pt;
-	const char *const ptlim;
-#endif
+_conv(int n, const char *format, char *pt,
+	const char *ptlim)
 {
 	char	buf[INT_STRLEN_MAXIMUM(int) + 1];
 
@@ -474,18 +555,11 @@ _conv(n, format, pt, ptlim)
 }
 
 static char *
-#ifdef USE_PROTOS
 _secs(const struct tm *t, char *pt, const char *ptlim)
-#else
-_secs(t, pt, ptlim)
-	const struct tm *t;
-	char *pt;
-	const char *ptlim;
-#endif
 {
-	char    buf[INT_STRLEN_MAXIMUM(int) + 1];
-	register time_t s;
-	struct tm tmp;
+	struct tm	tm;
+	char		buf[INT_STRLEN_MAXIMUM(time_t) + 1];
+	time_t		mkt;
 
 	/* Make a copy, mktime(3) modifies the tm struct. */
 #ifdef __ORCAC__
@@ -493,148 +567,56 @@ _secs(t, pt, ptlim)
 	 * ORCA/C pukes with an "illegal operand for the indirection
 	 * operator" message
 	 */
-	memcpy(&tmp, t, sizeof(struct tm));
+	memcpy(&tm, t, sizeof(struct tm));
 #else
-	tmp = *t;
+	tm = *t;
 #endif
-	s = mktime(&tmp);
-	(void) sprintf(buf, "%ld", s);
+	mkt = mktime(&tm);
+	(void) sprintf(buf, "%ld", (long)mkt);
 	return _add(buf, pt, ptlim);
 }
   
 static char *
-#ifdef USE_PROTOS
-_add(const char *str, char *pt, const char *const ptlim)
-#else
-_add(str, pt, ptlim)
-	const char *str;
-	char *pt;
-	const char *const ptlim;
-#endif
+_add(const char *str, char *pt, const char *ptlim)
 {
 	while (pt < ptlim && (*pt = *str++) != '\0')
 		++pt;
 	return pt;
 }
 
-#if 0	/* we don't seem to need this yet, so don't build it; it's untested */
+/*
+ * POSIX and the C Standard are unclear or inconsistent about
+ * what %C and %y do if the year is negative or exceeds 9999.
+ * Use the convention that %C concatenated with %y yields the
+ * same output as %Y, and that %Y contains at least 4 bytes,
+ * with more only if necessary.
+ */
 
-extern char *_PathLocale;
-
-int
-#ifdef USE_PROTOS
-__time_load_locale(const char *name)
-#else
-__time_load_locale(name)
-	const char *name;
-#endif
+static char *
+_yconv(int a, int b, int convert_top, int convert_yy,
+    char *pt, const char *ptlim)
 {
-	static const char	lc_time[] = "LC_TIME";
-	static char *		locale_buf;
-	static char		locale_buf_C[] = "C";
+	register int	lead;
+	register int	trail;
 
-	int			fd;
-	char *			lbuf;
-	char *			p;
-	const char **		ap;
-	const char *		plim;
-#ifdef __ORCAC__
-	static
-#endif
-	char			filename[FILENAME_MAX];
-	struct stat		st;
-	size_t			namesize;
-	size_t			bufsize;
-
-	using_locale = 0;
-
-	if (!strcmp(name, "C") || !strcmp(name, "POSIX"))
-		return 0;
-
-	if (name == NULL || *name == '\0') {
-		goto no_locale;
+#define	DIVISOR	100
+	trail = a % DIVISOR + b % DIVISOR;
+	lead = a / DIVISOR + b / DIVISOR + trail / DIVISOR;
+	trail %= DIVISOR;
+	if (trail < 0 && lead > 0) {
+		trail += DIVISOR;
+		--lead;
+	} else if (lead < 0 && trail > 0) {
+		trail -= DIVISOR;
+		++lead;
 	}
-	/*
-	** If the locale name is the same as our cache, use the cache.
-	*/
-	lbuf = locale_buf;
-	if (lbuf != NULL && strcmp(name, lbuf) == 0) {
-		p = lbuf;
-		for (ap = (const char **) &localebuf;
-			ap < (const char **) (&localebuf + 1);
-				++ap)
-					*ap = p += strlen(p) + 1;
-		using_locale = 1;
-		return 0;
+	if (convert_top) {
+		if (lead == 0 && trail < 0)
+			pt = _add("-0", pt, ptlim);
+		else	pt = _conv(lead, "%02d", pt, ptlim);
 	}
-	/*
-	** Slurp the locale file into the cache.
-	*/
-	namesize = strlen(name) + 1;
-
-	snprintf(filename, sizeof filename, 
-		 "%s/%s/%s",
-		 _PathLocale, name, lc_time);
-	fd = open(filename, O_RDONLY);
-	if (fd < 0) {
-		goto no_locale;
-	}
-	if (fstat(fd, &st) != 0)
-		goto bad_locale;
-	if (st.st_size <= 0)
-		goto bad_locale;
-	bufsize = namesize + st.st_size;
-	locale_buf = NULL;
-	lbuf = (lbuf == NULL || lbuf == locale_buf_C) ?
-		malloc(bufsize) : realloc(lbuf, bufsize);
-	if (lbuf == NULL)
-		goto bad_locale;
-	(void) strcpy(lbuf, name);
-	p = lbuf + namesize;
-	plim = p + st.st_size;
-	if (read(fd, p, (size_t) st.st_size) != st.st_size)
-		goto bad_lbuf;
-	if (close(fd) != 0)
-		goto bad_lbuf;
-	/*
-	** Parse the locale file into localebuf.
-	*/
-	if (plim[-1] != '\n')
-		goto bad_lbuf;
-	for (ap = (const char **) &localebuf;
-		ap < (const char **) (&localebuf + 1);
-			++ap) {
-				if (p == plim)
-					goto bad_lbuf;
-				*ap = p;
-				while (*p != '\n')
-					++p;
-				*p++ = '\0';
-	}
-	/*
-	** Record the successful parse in the cache.
-	*/
-	locale_buf = lbuf;
-
-	using_locale = 1;
-	return 0;
-
-bad_lbuf:
-	free(lbuf);
-bad_locale:
-	(void) close(fd);
-no_locale:
-	/*
-	 * XXX - This may not be the correct thing to do in this case.
-	 * setlocale() assumes that we left the old locale alone.
-	 */
-	locale_buf = locale_buf_C;
-#ifdef __ORCAC__
-	memcpy(&localebuf, &C_time_locale, sizeof(struct lc_time_T));
-#else
-	localebuf = C_time_locale;
-#endif
-	return -1;
+	if (convert_yy)
+		pt = _conv(((trail < 0) ? -trail : trail), "%02d", pt,
+		     ptlim);
+	return (pt);
 }
-
-#endif	/* 0 */

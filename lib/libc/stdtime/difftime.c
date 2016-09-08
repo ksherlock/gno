@@ -6,7 +6,6 @@
  */
 
 #ifdef __ORCAC__
-segment "libc_stdtm";
 #define NOID
 #define CONST		/* ORCA/C v2.1.1b2 chokes on the const as used here */
 #else

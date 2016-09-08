@@ -29,6 +29,7 @@
 #include <errno.h>
 #include <unistd.h>	/* GNO 2.0.6: read() and close() moved to here */
 #include <err.h>	/* GNO 2.0.6: use standard error reporting */
+#include <libgen.h>
 
 /* [v1.1] Use library routine rather than macro, so that program  */
 /*        code is less complicated and can be optimized by ORCA/C */
@@ -238,9 +239,7 @@ int i;
             name[0] = header.LABLEN;
             read(fd, name+1, header.LABLEN);
         }
-        printf("%s",fname);
-        i = strlen(fname);
-        while (i++ < 20) putchar(' ');
+        printf("%-20s",basename(fname));
 
         kind = header.KIND & 0x1F;
         switch (kind)   {
