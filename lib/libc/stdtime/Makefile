@@ -9,10 +9,11 @@ LIBPFX	= $(OBJ_DIR)../
 NO_REZ	= true
 SEGMENT	= libc_stdtm
 # SRCS	= asctime.c difftime.c localtime.c strftime.c
-SRCS	= localtime.c strftime.c
+# SRCS	= localtime.c strftime.c
+SRCS	= strftime.c
 
-DEBUG	= 25
-OPTIMIZE= 0
+#DEBUG	= 25
+#OPTIMIZE= 0
 CFLAGS	+= -v
 
 #default:
