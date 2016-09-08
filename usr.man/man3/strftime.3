@@ -13,10 +13,6 @@
 .\" 2. Redistributions in binary form must reproduce the above copyright
 .\"    notice, this list of conditions and the following disclaimer in the
 .\"    documentation and/or other materials provided with the distribution.
-.\" 3. All advertising materials mentioning features or use of this software
-.\"    must display the following acknowledgement:
-.\"	This product includes software developed by the University of
-.\"	California, Berkeley and its contributors.
 .\" 4. Neither the name of the University nor the names of its contributors
 .\"    may be used to endorse or promote products derived from this software
 .\"    without specific prior written permission.
@@ -34,181 +30,256 @@
 .\" SUCH DAMAGE.
 .\"
 .\"     @(#)strftime.3	8.1 (Berkeley) 6/4/93
+.\" $FreeBSD$
 .\"
-.TH STRFTIME 3 "4 July 1999" GNO "Library Routines"
-.SH NAME
-.BR strftime
+.TH "STRFTIME" "3" "June 25, 2012" "GNO" "Library Functions Manual"
+.SH "NAME"
+\fBstrftime\fR
 \- format date and time
-.SH SYNOPSIS
-.br
-#include <time.h>
-.sp 1
-size_t
-\fBstrftime\fR (char *\fIbuf\fR, size_t \fImaxsize\fR, const char *\fIformat\fR, const struct tm *\fItimeptr\fR);
-.SH DESCRIPTION
+.SH "LIBRARY"
+Standard C Library (libc, \-lc)
+.SH "SYNOPSIS"
+\fB#include <time.h>\fR
+.sp
+\fIsize_t\fR
+\fBstrftime\fR(\fIchar\ *\ restrict\ buf\fR,
+\fIsize_t\ maxsize\fR,
+\fIconst\ char\ *\ restrict\ format\fR,
+\fIconst\ struct\ tm\ *\ restrict\ timeptr\fR);
+.PP
+\fIsize_t\fR
+\fBstrftime_l\fR(\fIchar\ *restrict\ buf\fR, \fIsize_t\ maxsize\fR, \fIconst\ char\ *\ restrict\ format\fR, \fIconst\ struct\ tm\ *restrict\ timeptr\fR, \fIlocale_t\ loc\fR);
+.SH "DESCRIPTION"
 The
-.BR strftime 
+\fBstrftime\fR()
 function formats the information from
-.I timeptr
+\fItimeptr\fR
 into the buffer
-.I buf
+\fIbuf\fR
 according to the string pointed to by
-.IR format .
-.LP
+\fIformat\fR.
+The function
+\fBstrftime_l\fR()
+does the same as
+\fBstrftime\fR()
+but takes an explicit locale rather than using the current locale.
+.PP
 The
-.I format
+\fIformat\fR
 string consists of zero or more conversion specifications and
 ordinary characters.
 All ordinary characters are copied directly into the buffer.
-A conversion specification consists of a percent sign 
-.RB ( % )
+A conversion specification consists of a percent sign
+```%'''
 and one other character.
-.LP
+.PP
 No more than
-.I maxsize
+\fImaxsize\fR
 characters will be placed into the array.
 If the total number of resulting characters, including the terminating
-null character, is not more than
-.IR maxsize .
-.BR strftime 
+NUL character, is not more than
+\fImaxsize\fR,
+\fBstrftime\fR()
 returns the number of characters in the array, not counting the
-terminating null.
-Otherwise, zero is returned.
-.LP
-Each conversion specification is replaced by the characters as
-follows which are then copied into the buffer.
-.RS
-.IP "\fB\&%A\fR"
+terminating NUL.
+Otherwise, zero is returned and the buffer contents are indeterminate.
+.PP
+The conversion specifications are copied to the buffer after expansion
+as follows:-
+.TP \fB\&%A\fR
 is replaced by national representation of the full weekday name.
-.IP "\fB%a\fR"
+.TP \fB%a\fR
 is replaced by national representation of
-the abbreviated weekday name, where the abbreviation
-is the first three characters.
-.IP "\fB\&%B\fR"
+the abbreviated weekday name.
+.TP \fB\&%B\fR
 is replaced by national representation of the full month name.
-.IP "\fB%b\fR"
+.TP \fB%b\fR
 is replaced by national representation of
-the abbreviated month name, where the abbreviation is
-the first three characters.
-.IP "\fB\&%C\fR"
+the abbreviated month name.
+.TP \fB\&%C\fR
 is replaced by (year / 100) as decimal number; single
 digits are preceded by a zero.
-.IP "\fB%c\fR"
-is replaced by national representation of time and date
-(the format is similar with produced by
-.BR asctime (3)).
-.IP "\fB\&%D\fR"
+.TP \fB%c\fR
+is replaced by national representation of time and date.
+.TP \fB\&%D\fR
 is equivalent to
-.BR %m/%d/%y .
-.IP "\fB%d\fR"
+``\fR%m/%d/%y\fR''.
+.TP \fB%d\fR
 is replaced by the day of the month as a decimal number (01-31).
-.IP "\fB\&%E*\fR"
+.TP \fB%E* %O*\fR
 POSIX locale extensions.
 The sequences
-%Ec %EC %Ex %Ey %EY
+%Ec %EC %Ex %EX %Ey %EY
 %Od %Oe %OH %OI %Om %OM
 %OS %Ou %OU %OV %Ow %OW %Oy
 are supposed to provide alternate
 representations.
-.IP "\fB%e\fR"
-is replaced by the day of month as a decimal number (1-31); single
+.sp
+Additionally %OB implemented
+to represent alternative months names
+(used standalone, without day mentioned).
+.TP \fB%e\fR
+is replaced by the day of the month as a decimal number (1-31); single
 digits are preceded by a blank.
-.IP "\fB\&%H\fR"
+.TP \fB\&%F\fR
+is equivalent to
+``\fR%Y-%m-%d\fR''.
+.TP \fB\&%G\fR
+is replaced by a year as a decimal number with century.
+This year is the one that contains the greater part of
+the week (Monday as the first day of the week).
+.TP \fB%g\fR
+is replaced by the same year as in
+``\fR%G\fR'',
+but as a decimal number without century (00-99).
+.TP \fB\&%H\fR
 is replaced by the hour (24-hour clock) as a decimal number (00-23).
-.IP "\fB%h\fR"
-the same as %b.
-.IP "\fB\&%I\fR"
+.TP \fB%h\fR
+the same as
+\fB%b\fR.
+.TP \fB\&%I\fR
 is replaced by the hour (12-hour clock) as a decimal number (01-12).
-.IP "\fB%j\fR"
+.TP \fB%j\fR
 is replaced by the day of the year as a decimal number (001-366).
-.IP "\fB%k\fR"
+.TP \fB%k\fR
 is replaced by the hour (24-hour clock) as a decimal number (0-23);
 single digits are preceded by a blank.
-.IP "\fB%l\fR"
+.TP \fB%l\fR
 is replaced by the hour (12-hour clock) as a decimal number (1-12);
 single digits are preceded by a blank.
-.IP "\fB\&%M\fR"
+.TP \fB\&%M\fR
 is replaced by the minute as a decimal number (00-59).
-.IP "\fB%m\fR"
+.TP \fB%m\fR
 is replaced by the month as a decimal number (01-12).
-.IP "\fB%n\fR"
+.TP \fB%n\fR
 is replaced by a newline.
-.IP "\fB\&%O*\fR"
-the same as %E*.
-.IP "\fB%p
+.TP \fB%O*\fR
+the same as
+\fB%E*\fR.
+.TP \fB%p\fR
 is replaced by national representation of either
-"ante meridiem"
+"ante meridiem" (a.m.)
 or
-"post meridiem"
+"post meridiem" (p.m.)
 as appropriate.
-.IP "\fB\&%R
+.TP \fB\&%R\fR
 is equivalent to
-.Dq Li %H:%M .
-.IP "\fB%r
+``\fR%H:%M\fR''.
+.TP \fB%r\fR
 is equivalent to
-.BR "%I:%M:%S %p" .
-.IP "\fB\&%S
+``\fR%I:%M:%S %p\fR''.
+.TP \fB\&%S\fR
 is replaced by the second as a decimal number (00-60).
-.IP "\fB%s
+.TP \fB%s\fR
 is replaced by the number of seconds since the Epoch, UTC (see
-.BR mktime (3)).
-.IP "\fB\&%T
+mktime(3)).
+.TP \fB\&%T\fR
 is equivalent to
-.Dq Li %H:%M:%S .
-.IP "\fB%t
+``\fR%H:%M:%S\fR''.
+.TP \fB%t\fR
 is replaced by a tab.
-.IP "\fB\&%U
+.TP \fB\&%U\fR
 is replaced by the week number of the year (Sunday as the first day of
 the week) as a decimal number (00-53).
-.IP "\fB%u
+.TP \fB%u\fR
 is replaced by the weekday (Monday as the first day of the week)
 as a decimal number (1-7).
-.IP "\fB\&%V
-is replaced by the week number of the year (the first
-Monday as the first day of week 1) as a
-decimal number (01-53).
-.IP "\fB%v
+.TP \fB\&%V\fR
+is replaced by the week number of the year (Monday as the first day of
+the week) as a decimal number (01-53).
+If the week containing January
+1 has four or more days in the new year, then it is week 1; otherwise
+it is the last week of the previous year, and the next week is week 1.
+.TP \fB%v\fR
 is equivalent to
-.BR "%e-%b-%Y" .
-.IP "\fB\&%W
+``\fR%e-%b-%Y\fR''.
+.TP \fB\&%W\fR
 is replaced by the week number of the year (Monday as the first day of
 the week) as a decimal number (00-53).
-.IP "\fB%w
+.TP \fB%w\fR
 is replaced by the weekday (Sunday as the first day of the week)
 as a decimal number (0-6).
-.IP "\fB\&%X
+.TP \fB\&%X\fR
 is replaced by national representation of the time.
-.IP "\fB%x
+.TP \fB%x\fR
 is replaced by national representation of the date.
-.IP "\fB\&%Y
+.TP \fB\&%Y\fR
 is replaced by the year with century as a decimal number.
-.IP "\fB%y
+.TP \fB%y\fR
 is replaced by the year without century as a decimal number (00-99).
-.IP "\fB\&%Z
+.TP \fB\&%Z\fR
 is replaced by the time zone name.
-.IP "\fB%+
+.TP \fB%z\fR
+is replaced by the time zone offset from UTC; a leading plus sign stands for
+east of UTC, a minus sign for west of UTC, hours and minutes follow
+with two digits each and no delimiter between them (common form for
+RFC 822 date headers).
+.TP \fB%+\fR
 is replaced by national representation of the date and time
-(the format is similar with produced by
-.BR date (1)).
-.IP "\fB%%
+(the format is similar to that produced by
+date(1)).
+.TP \fB%-*\fR
+GNU libc extension.
+Do not do any padding when performing numerical outputs.
+.TP \fB%_*\fR
+GNU libc extension.
+Explicitly specify space for padding.
+.TP \fB%0*\fR
+GNU libc extension.
+Explicitly specify zero for padding.
+.TP \fB%%\fR
 is replaced by
-.BR % .
-.RE
-.SH SEE ALSO
-.BR date (1),
-.BR ctime (3),
-.BR printf (1),
-.BR printf (3)
-.SH STANDARDS
+`%'.
+.SH "SEE ALSO"
+date(1),
+printf(1),
+ctime(3),
+printf(3),
+strptime(3),
+wcsftime(3)
+.SH "STANDARDS"
 The
-.BR strftime 
+\fBstrftime\fR()
 function
-conforms to ANSI/C.
+conforms to
+ISO/IEC 9899:1990 (``ISO C90'')
+with a lot of extensions including
+`\&%C',
+`\&%D',
+`%E*',
+`%e',
+`%G',
+`%g',
+`%h',
+`%k',
+`%l',
+`%n',
+`%O*',
+`\&%R',
+`%r',
+`%s',
+`\&%T',
+`%t',
+`%u',
+`\&%V',
+`%z',
+`%+'.
+.PP
+The peculiar week number and year in the replacements of
+`%G',
+`%g'
+and
+`\&%V'
+are defined in ISO 8601: 1988.
 The
-.B %s
-conversion specification is an extension.
-.SH BUGS
+\fBstrftime_l\fR()
+function conforms to
+IEEE Std 1003.1-2008 (``POSIX.1'').
+.SH "BUGS"
 There is no conversion specification for the phase of the moon.
-.LP
-The GNO version does not currently handle national locales.  The C locale
-is assumed.
+.PP
+The
+\fBstrftime\fR()
+function does not correctly handle multibyte characters in the
+\fIformat\fR
+argument.
