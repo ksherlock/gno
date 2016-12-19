@@ -41,7 +41,7 @@ segment "libc_gen__";
 #endif
 
 /* need bit 3 and 6 (minimum) for variadic function definitions */
-#pragma optimize 78
+#pragma optimize -1
 
 #include <err.h>
 #include <errno.h>
@@ -60,9 +60,11 @@ segment "libc_gen__";
 static FILE *err_file        = NULL; /* file to use for error output */
 static void (*err_exit)(int) = NULL;
 
-void err_set_file(void *fp);
-void err_set_exit(void (*ef)(int));
-
+/*
+ * This is declared to take a `void *' so that the caller is not required
+ * to include <stdio.h> first.  However, it is really a `FILE *', and the
+ * manual page documents it as such.
+ */
 void
 err_set_file(void *fp)
 {
@@ -79,21 +81,33 @@ err_set_exit(void (*ef)(int))
         err_exit = ef;
 }
 
-volatile void
+void
 err(int eval, const char *fmt, ...)
 {
         va_list ap;
         va_start(ap, fmt);
-        verr(eval, fmt, ap);
+        verrc(eval, errno, fmt, ap);
         va_end(ap);
 }
 
-volatile void
+void
 verr(int eval, const char *fmt, va_list ap)
 {
-        int sverrno;
+        verrc(eval, errno, fmt, ap);
+}
 
-        sverrno = errno;
+void
+errc(int eval, int code, const char *fmt, ...)
+{
+        va_list ap;
+        va_start(ap, fmt);
+        verrc(eval, code, fmt, ap);
+        va_end(ap);
+}
+
+void
+verrc(int eval, int code, const char *fmt, va_list ap)
+{
         if (! err_file) {
                 err_set_file((FILE *)0);
         }
@@ -102,14 +116,14 @@ verr(int eval, const char *fmt, va_list ap)
                 vfprintf(err_file, fmt, ap);
                 fprintf(err_file, ": ");
         }
-        fprintf(err_file, "%s\n", strerror(sverrno));
-        if(err_exit) {
+        fprintf(err_file, "%s\n", strerror(code));
+        if (err_exit) {
                 err_exit(eval);
         }
         exit(eval);
 }
 
-volatile void
+void
 errx(int eval, const char *fmt, ...)
 {
         va_list ap;
@@ -118,7 +132,7 @@ errx(int eval, const char *fmt, ...)
         va_end(ap);
 }
 
-volatile void
+void
 verrx(int eval, const char *fmt, va_list ap)
 {
         if (! err_file) {
@@ -140,16 +154,19 @@ warn(const char *fmt, ...)
 {
         va_list ap;
         va_start(ap, fmt);
-        vwarn(fmt, ap);
+        vwarnc(errno, fmt, ap);
         va_end(ap);
 }
 
 void
 vwarn(const char *fmt, va_list ap)
 {
-        int sverrno;
+        vwarnc(errno, fmt, ap);
+}
 
-        sverrno = errno;
+void
+vwarnc(int code, const char *fmt, va_list ap)
+{
         if (! err_file) {
                 err_set_file((FILE *)0);
         }
@@ -158,7 +175,7 @@ vwarn(const char *fmt, va_list ap)
                 vfprintf(err_file, fmt, ap);
                 fprintf(err_file, ": ");
         }
-        fprintf(err_file, "%s\n", strerror(sverrno));
+        fprintf(err_file, "%s\n", strerror(code));
 }
 
 void
