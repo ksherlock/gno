@@ -45,6 +45,7 @@
 #define	FNM_CASEFOLD	0x08	/* Case insensitive search. */
 #define	FNM_LEADING_DIR	0x10	/* Ignore /<tail> after Imatch. */
 #define	FNM_IGNORECASE	FNM_CASEFOLD
+#define	FNM_FILE_NAME	FNM_PATHNAME
 #endif
 
 #ifndef _SYS_CDEFS_H_
