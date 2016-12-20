@@ -2,10 +2,6 @@
  * $Id: hostname.c,v 1.2 1997/09/21 06:05:00 gdr Exp $
  */
 
-#ifdef __ORCAC__
-segment "libc_gen__";
-#endif
-
 #include <sys/param.h>
 #include <unistd.h>
 #include <errno.h>

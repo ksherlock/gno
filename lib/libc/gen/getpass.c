@@ -38,10 +38,6 @@
  *
  * This file is formatted for tab stops every 8 characters.
  */
- 
-#ifdef __ORCAC__
-segment "libc_gen__";
-#endif
 
 #if defined(LIBC_SCCS) && !defined(lint)
 static char sccsid[] = "@(#)getpass.c	5.9 (Berkeley) 5/6/91";

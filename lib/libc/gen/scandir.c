@@ -36,10 +36,6 @@
  *
  * $Id: scandir.c,v 1.2 1997/09/21 06:05:01 gdr Exp $
  */
- 
-#ifdef __ORCAC__
-segment "libc_gen__";
-#endif
 
 #if defined(LIBC_SCCS) && !defined(lint)
 static char sccsid[] = "@(#)scandir.c	8.3 (Berkeley) 1/2/94";

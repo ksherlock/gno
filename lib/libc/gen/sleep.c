@@ -7,10 +7,6 @@
  * This file has been formatted for tabs every 8 columns
  */
 
-#ifdef __ORCAC__
-segment "libc_gen__";
-#endif
-
 #include <signal.h>
 #include <unistd.h>
 

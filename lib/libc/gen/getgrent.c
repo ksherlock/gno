@@ -36,10 +36,6 @@
  *
  * $Id: getgrent.c,v 1.2 1997/09/21 06:05:00 gdr Exp $
  */
- 
-#ifdef __ORCAC__
-segment "libc_gen__";
-#endif
 
 #if defined(LIBC_SCCS) && !defined(lint)
 static char sccsid[] = "@(#)getgrent.c	8.2 (Berkeley) 3/21/94";

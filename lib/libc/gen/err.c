@@ -36,10 +36,6 @@
  * SUCH DAMAGE.
  */
 
-#ifdef __ORCAC__
-segment "libc_gen__";
-#endif
-
 /* need bit 3 and 6 (minimum) for variadic function definitions */
 #pragma optimize -1
 

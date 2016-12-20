@@ -7,6 +7,7 @@
 LIB	= c
 LIBPFX	= $(OBJ_DIR)../
 NO_REZ	= true
+SEGMENT	= libc_gen__
 SRC_ASM	= setjmp.asm
 SRC_C	= basename.c compat.c dirent.c err.c errlist.c fnmatch.c fts.c \
 	  getcwd.c getgrent.c getlogin.c getpass.c getpwent.c \

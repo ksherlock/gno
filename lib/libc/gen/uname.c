@@ -6,10 +6,6 @@
  * $Id: uname.c,v 1.1 1998/02/16 22:44:03 gdr-ftp Exp $
  */
 
-#ifdef __ORCAC__
-segment "libc_gen__";
-#endif
-
 #include <sys/utsname.h>
 #include <errno.h>
 #include <stdio.h>

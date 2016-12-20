@@ -6,10 +6,6 @@
  * This file is formatted for tabs every 8 columns.
  */
 
-#ifdef __ORCAC__
-segment "libc_gen__";
-#endif
-
 #include <sys/syslimits.h>
 #include <string.h>
 #include <stdio.h>

@@ -7,10 +7,6 @@
  *
  * This file is formatted with tab stops every 8 characters.
  */
- 
-#ifdef __ORCAC__
-segment "libc_gen__";
-#endif
 
 #define __LIBC_DIRENT	/* needed for decls in <dirent.h> */
 

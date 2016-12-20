@@ -6,10 +6,6 @@
  * This file is formatted with tab stops every 8 columns.
  */
 
-#ifdef __ORCAC__
-segment "libc_gen__";
-#endif
-
 #include <sys/types.h>
 #include <sys/time.h>
 #include <utime.h>

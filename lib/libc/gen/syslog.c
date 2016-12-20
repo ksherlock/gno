@@ -31,10 +31,6 @@
  * SUCH DAMAGE.
  */
 
-#ifdef __ORCAC__
-segment "libc_gen__";
-#endif
-
 #if defined(LIBC_SCCS) && !defined(lint)
 static char sccsid[] = "@(#)syslog.c	8.4 (Berkeley) 3/18/94";
 #endif /* LIBC_SCCS and not lint */

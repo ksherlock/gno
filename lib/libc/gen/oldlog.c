@@ -15,10 +15,6 @@
  * This file is formatted with tab stops every 8 columns.
  */
 
-#ifdef __ORCAC__
-segment "libc_gen__";
-#endif
-
 #include <stdio.h>
 #include <fcntl.h>
 #include <memory.h>

@@ -36,10 +36,6 @@
  *
  * $Id: tty.c,v 1.2 1997/09/21 06:05:01 gdr Exp $
  */
- 
-#ifdef __ORCAC__
-segment "libc_gen__";
-#endif
 
 #if defined(LIBC_SCCS) && !defined(lint)
 static char sccsid[] = "@(#)ttyslot.c	5.6 (Berkeley) 2/23/91";

@@ -6,10 +6,6 @@
  * This file is formatted with tab stops every 8 columns.
  */
 
-#ifdef __ORCAC__
-segment "libc_gen__";
-#endif
-
 #include <sys/errno.h>		/* for ELAST */
 
 const char * const sys_errlist[] = {

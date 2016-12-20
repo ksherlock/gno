@@ -35,10 +35,6 @@
  * This file is formatted for tab stops every 8 columns.
  */
 
-#ifdef __ORCAC__
-segment "libc_gen__";
-#endif
-
 #if defined(LIBC_SCCS) && !defined(lint)
 static char sccsid[] = "@(#)siglist.c	8.1 (Berkeley) 6/4/93";
 #endif /* LIBC_SCCS and not lint */
