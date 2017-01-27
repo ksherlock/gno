@@ -11,6 +11,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <gsos.h>
+#include <shell.h>
+#include <sysexits.h>
 
 #include "ftypes.h"
 
@@ -37,7 +39,10 @@ int main(int argc, char **argv)
     int filet = -1;
     long auxt = -1;
     int ch;
+    int rv = 0;
     FileInfoRecGS finfo = {4, &path};
+    ErrorGSPB error = { 1, 0 };
+
 
 #ifdef __STACK_CHECK__
     atexit(cleanup);
@@ -48,16 +53,14 @@ int main(int argc, char **argv)
 	switch(ch) {
 	    case 't':
 		if(lang) {
-		    (void) fprintf(stderr,
-				 	"chtyp: -t cannot be used with -l\n");
+		    (void) fputs("chtyp: -t cannot be used with -l\n", stderr);
 		    usage();
 		}
 		ftype = optarg;
 		break;
 	    case 'a':
 		if(lang) {
-		    (void) fprintf(stderr, 
-					"chtyp: -a cannot be used with -l\n");
+		    (void) fputs("chtyp: -a cannot be used with -l\n", stderr);
 		    usage();
 		}
 		atype = optarg;
@@ -85,24 +88,24 @@ int main(int argc, char **argv)
     argv = argv + optind;
 
     if(argc == 0) {
-	(void) fprintf(stderr, "chtyp: no files specified\n");
+	(void) fputs("chtyp: no files specified\n", stderr);
 	usage();
     }
 
     if(lang) {
 	if(find_lang(lang, &filet, &auxt) == -1) {
-	    (void) fprintf(stderr, "chtyp: unknown language argument \"%s\".\n",
+	(void) fprintf(stderr, "chtyp: unknown language argument \"%s\".\n",
 				lang);
-	    usage();
+		usage();
 	}
     }
 
     if(ftype) {
+	errno = 0;		/* be sure to reset errno! */
 	filet = (int) strtol(ftype, &left, 0);
 	if(errno == ERANGE || *left) 
 	    if(find_type(ftype, &filet, &auxt) == -1) {
-		(void) fprintf(stderr,
-				"chtyp: invalid argument to -t option.\n");
+		(void) fputs("chtyp: invalid argument to -t option.\n", stderr);
 		usage();
 	    }
     }
@@ -111,35 +114,60 @@ int main(int argc, char **argv)
 	errno = 0;		/* be sure to reset errno! */
 	auxt = strtol(atype, (char **) NULL, 0);
 	if(errno == ERANGE) {
-	    (void) fprintf(stderr, "chtyp: invalid argument to -a option.\n");
+	    (void) fputs("chtyp: invalid argument to -a option.\n", stderr);
 	    usage();
 	}
     }
 
+    if (filet == -1 && auxt == -1) {
+	(void)fputs("chtyp: no filetype/auxtype specified.\n", stderr);
+	usage();
+    }
+
     ch = 0;
     while(argc) {
-	strcpy(path.text, argv[ch]);
-	path.length = strlen(argv[ch++]);
+	argc--;
+	strcpy(path.text, argv[ch++]);
+	path.length = strlen(path.text);
 	GetFileInfoGS(&finfo);
+	if (_toolErr) {
+		error.error = _toolErr;
+		fprintf(stderr, "%s: ", path.text);
+		fflush(stderr);
+		ErrorGS(&error);
+		rv = 1;
+		continue;
+	}
 	if(filet != -1)
 	    finfo.fileType = filet;
 	if(auxt != -1)
 	    finfo.auxType = auxt;
 	SetFileInfoGS(&finfo);
-	argc--;
+	if (_toolErr) {
+		fprintf(stderr, "%s: ", path.text);
+		fflush(stderr);
+		error.error = _toolErr;
+		ErrorGS(&error);
+		rv = 1;
+		continue;
+	}
     }
+    return rv;
 }
 
 static void usage(void)
 {
     (void) fprintf(stderr,
      "Usage: chtyp { [-t type] [-a auxtype] } | { [-l lang] } file ...\n");
-    exit(-1);
+    exit(EX_USAGE);
 }
 
 static void version(void)
 {
     (void) fprintf(stderr,
 		"V 2.0.1 Copyright 1997 by Evan Day, day@engr.orst.edu\n");
-    usage();
+
+    (void) fprintf(stderr,
+     "Usage: chtyp { [-t type] [-a auxtype] } | { [-l lang] } file ...\n");
+    exit(0);
 }
