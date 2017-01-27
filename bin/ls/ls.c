@@ -308,6 +308,14 @@ unsigned ea,eb;
     }
 }
 
+int sortBySize(DirEntryRecGS **a,DirEntryRecGS **b)
+{
+
+    if ((*a)->eof < (*b)->eof) return more;
+    if ((*a)->eof > (*b)->eof) return less;
+    return 0;
+}
+
 int sortByName(DirEntryRecGS **a,DirEntryRecGS **b)
 {
     return strcmp((*a)->name->bufString.text,(*b)->name->bufString.text) * more;
@@ -517,44 +525,71 @@ int ch;
     whichTime = 0;
     firstflag = 0;
 
-    while ((ch = getopt(argc, argv, "acdflnqrst1CFR")) != EOF) {
+    while ((ch = getopt(argc, argv, "acdflqrst1CFRS")) != EOF) {
         switch(ch) {
-            case 'n' :
-                fl_nosort = TRUE;
+
+            case 'a' :
+                fl_all = TRUE;;
                 break;
-            case 'r' :
-                more = -1; less = 1;
-                break;
-            case 't' :
-                sortRoutine = sortByMod;
-                whichTime = 0;
-                break;
+
             case 'c' :
                 sortRoutine = sortByCreate;
                 whichTime = 1;
                 break;
-            case '1' :
-                columns = ONLYONE;
+
+            case 'd' :
+                openDirectory = FALSE;
+                fl_recursive = FALSE;
                 break;
-            case 'C' :
-                columns = CALCULATE;
-                break;
-            case 'a' :
-                fl_all = TRUE;;
-                break;
-            case 'l' :
-                fl_longOutput = TRUE;
-                break;
-            case 's' :
-                inK = TRUE;
-                break;
+
             case 'f' :
+                /*
+                 *
+                 * legacy behavior:
+                 * Force each argument to be interpreted as a directory...
+                 */
+                #if 0
                 dirOnly = TRUE;
                 fl_longOutput = FALSE;
                 inK = FALSE;
                 fl_all = TRUE;
+                #endif
+                fl_all = TRUE;
+                fl_nosort = TRUE;
                 break;
+
+            case 'l' :
+                fl_longOutput = TRUE;
+                break;
+
+                #if 0
+                /* not posix */
+            case 'n' :
+                fl_nosort = TRUE;
+                break;
+                #endif 
+            case 'r' :
+                more = -1; less = 1;
+                break;
+
             case 'q' :
+                break;
+
+            case 's' :
+                inK = TRUE;
+                break;
+
+            case 't' :
+                sortRoutine = sortByMod;
+                whichTime = 0;
+                break;
+
+            case '1' :
+                columns = ONLYONE;
+
+                break;
+            case 'C' :
+                columns = CALCULATE;
                 break;
             case 'F' :
                 idType = TRUE;
@@ -562,10 +597,10 @@ int ch;
             case 'R' :
                 fl_recursive = TRUE;
                 break;
-            case 'd' :
-                openDirectory = FALSE;
-                fl_recursive = FALSE;
+            case 'S':
+                sortRoutine = sortBySize;
                 break;
+
             default:
                 (void)fprintf(stderr,
                   "usage: ls [-acdfilnqrstu1ACLFR] [name ...]\n");
