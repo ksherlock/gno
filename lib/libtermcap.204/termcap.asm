@@ -2,6 +2,9 @@
                     longa     on
                     longi     on
 
+rootdummy           start
+                    end
+
 tgetent             start
 
                     using     ~TERMGLOBALS
@@ -1513,14 +1516,10 @@ _00ca               anop
 ~TERMGLOBALS        privdata
                     kind      $4001
 
-pathbuf             anop
-                    ds        512                                               ; 0000:
-pathvec             anop
-                    ds        128                                               ; 0200:
-pvec                anop
-                    ds        4                                                 ; 0280:
-tbuf                anop
-                    ds        4                                                 ; 0284:
+pathbuf             ds        512                                               ; 0000:
+pathvec             ds        128                                               ; 0200:
+pvec                ds        4                                                 ; 0280:
+tbuf                ds        4                                                 ; 0284:
                     end
 
                     case      on
