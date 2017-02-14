@@ -30,8 +30,8 @@ tgetent             start
                     sta       tbuf                                              ; 002a: 8d 00 00     ...
                     lda       <$1a                                              ; 002d: a5 1a        ..
                     sta       tbuf+$0002                                        ; 002f: 8d 00 00     ...
-                    pea       |_01a0|-$0010                                     ; 0032: f4 00 00     ...
-                    pea       |_01a0                                            ; 0035: f4 00 00     ...
+                    pea       |TERMCAP|-$0010                                   ; 0032: f4 00 00     ...
+                    pea       |TERMCAP                                          ; 0035: f4 00 00     ...
                     jsl       >getenv                                           ; 0038: 22 00 00 00  "...
                     sta       <$11                                              ; 003c: 85 11        ..
                     stx       <$13                                              ; 003e: 86 13        ..
@@ -54,8 +54,8 @@ tgetent             start
                     pei       <$11                                              ; 0059: d4 11        ..
                     jsl       >~DISPOSE                                         ; 005b: 22 00 00 00  "...
                     jmp       |_0102                                            ; 005f: 4c 00 00     L..
-                    pea       |_01a8|-$0010                                     ; 0062: f4 00 00     ...
-                    pea       |_01a8                                            ; 0065: f4 00 00     ...
+                    pea       |TERMPATH|-$0010                                  ; 0062: f4 00 00     ...
+                    pea       |TERMPATH                                         ; 0065: f4 00 00     ...
                     jsl       >getenv                                           ; 0068: 22 00 00 00  "...
                     sta       <$0d                                              ; 006c: 85 0d        ..
                     stx       <$0f                                              ; 006e: 86 0f        ..
@@ -78,8 +78,8 @@ tgetent             start
                     pei       <$0d                                              ; 0089: d4 0d        ..
                     jsl       >~DISPOSE                                         ; 008b: 22 00 00 00  "...
                     jmp       |_0102                                            ; 008f: 4c 00 00     L..
-                    pea       |_01b1|-$0010                                     ; 0092: f4 00 00     ...
-                    pea       |_01b1                                            ; 0095: f4 00 00     ...
+                    pea       |HOME|-$0010                                      ; 0092: f4 00 00     ...
+                    pea       |HOME                                             ; 0095: f4 00 00     ...
                     jsl       >getenv                                           ; 0098: 22 00 00 00  "...
                     sta       <$09                                              ; 009c: 85 09        ..
                     stx       <$0b                                              ; 009e: 86 0b        ..
@@ -134,7 +134,7 @@ tgetent             start
                     longa     off
                     longi     off
                     ldy       #$00                                              ; 00f2: a0 00        ..
-                    lda       |_01b6,y                                          ; 00f4: b9 00 00     ...
+                    lda       |termpath,y                                       ; 00f4: b9 00 00     ...
                     beq       $00fe                                             ; 00f7: f0 05        ..
                     sta       [<$05],y                                          ; 00f9: 97 05        ..
                     iny                                                         ; 00fb: c8           .
@@ -220,23 +220,19 @@ _0102               anop
                     tcs                                                         ; 019d: 1b           .
                     tya                                                         ; 019e: 98           .
                     rtl                                                         ; 019f: 6b           k
-_01a0               anop
-                    dc        i1'$54, $45, $52, $4d'                            ; 01a0: 54 45 52 4d  TERM
-                    dc        i1'$43, $41, $50, $00'                            ; 01a4: 43 41 50 00  CAP.
-_01a8               anop
-                    dc        i1'$54, $45, $52, $4d'                            ; 01a8: 54 45 52 4d  TERM
-                    dc        i1'$50, $41, $54, $48'                            ; 01ac: 50 41 54 48  PATH
-                    dc        i1'$00'                                           ; 01b0: 00           .
-_01b1               anop
-                    dc        i1'$48, $4f, $4d, $45'                            ; 01b1: 48 4f 4d 45  HOME
-                    dc        i1'$00'                                           ; 01b5: 00           .
-_01b6               anop
-                    dc        i1'$74, $65, $72, $6d'                            ; 01b6: 74 65 72 6d  term
-                    dc        i1'$63, $61, $70, $20'                            ; 01ba: 63 61 70 20  cap 
-                    dc        i1'$2f, $65, $74, $63'                            ; 01be: 2f 65 74 63  /etc
-                    dc        i1'$2f, $74, $65, $72'                            ; 01c2: 2f 74 65 72  /ter
-                    dc        i1'$6d, $63, $61, $70'                            ; 01c6: 6d 63 61 70  mcap
-                    dc        i1'$00'                                           ; 01ca: 00           .
+
+TERMCAP             anop
+                    dc c'TERMCAP',h'00'
+
+TERMPATH            anop
+                    dc c'TERMPATH',h'00'
+
+HOME                anop
+                    dc c'HOME',h'00'
+
+termpath            anop
+                    dc c'termcap /etc/termcap',h'00'
+
                     end
 
                     case      on
@@ -452,14 +448,12 @@ _01bd               anop
                     dc        i1'$01, $00'                                      ; 01bd: 01 00        ..
 _01bf               anop
                     dc        i1'$00, $00'                                      ; 01bf: 00 00        ..
+
+
 _01c1               anop
-                    dc        i1'$54, $65, $72, $6d'                            ; 01c1: 54 65 72 6d  Term
-                    dc        i1'$63, $61, $70, $20'                            ; 01c5: 63 61 70 20  cap 
-                    dc        i1'$65, $6e, $74, $72'                            ; 01c9: 65 6e 74 72  entr
-                    dc        i1'$79, $20, $74, $6f'                            ; 01cd: 79 20 74 6f  y to
-                    dc        i1'$6f, $20, $6c, $6f'                            ; 01d1: 6f 20 6c 6f  o lo
-                    dc        i1'$6e, $67, $0d, $0a'                            ; 01d5: 6e 67 0d 0a  ng..
-                    dc        i1'$00'                                           ; 01d9: 00           .
+
+                    dc c'Termcap entry too long',h'0d 0a 00'
+
 _01da               anop
                     ds        256                                               ; 01da:
                     end
@@ -943,13 +937,11 @@ _00a4               anop
                     tya                                                         ; 00d5: 98           .
                     rtl                                                         ; 00d6: 6b           k
 _00d7               anop
-                    dc        i1'$45, $5e, $5c, $3a'                            ; 00d7: 45 5e 5c 3a  E^\:
-                    dc        i1'$6e, $72, $74, $62'                            ; 00db: 6e 72 74 62  nrtb
-                    dc        i1'$66, $00'                                      ; 00df: 66 00        f.
+                    dc c'E^\:nrtbf',h'00'
+
 _00e1               anop
-                    dc        i1'$1b, $5e, $5c, $3a'                            ; 00e1: 1b 5e 5c 3a  .^\:
-                    dc        i1'$0a, $0d, $09, $08'                            ; 00e5: 0a 0d 09 08  ....
-                    dc        i1'$0c'                                           ; 00e9: 0c           .
+                    dc h'1b',c'^\:',h'0a 0d 09 08 0c'
+
                     end
 
                     case      on
@@ -1212,13 +1204,16 @@ _01f5               anop
                     tcs                                                         ; 0207: 1b           .
                     tya                                                         ; 0208: 98           .
                     rtl                                                         ; 0209: 6b           k
+
 _020a               anop
-                    dc        i1'$4f, $4f, $50, $53'                            ; 020a: 4f 4f 50 53  OOPS
-                    dc        i1'$21, $00'                                      ; 020e: 21 00        !.
+                    dc c'OOPS!',h'00'
+
 _0210               anop
                     ds        10                                                ; 0210:
+
 _021a               anop
                     ds        64                                                ; 021a:
+
                     end
 
                     case      on
@@ -1514,7 +1509,6 @@ _00ca               anop
                     longi     on
 
 ~TERMGLOBALS        privdata
-                    kind      $4001
 
 pathbuf             ds        512                                               ; 0000:
 pathvec             ds        128                                               ; 0200:
