@@ -1,0 +1,39 @@
+ MACRO
+&lab _GET_VAR &parms
+&lab jsl $E100A8
+ dc i2'$010B'
+ dc i4'&parms'
+ MEND
+ MACRO
+&lab _CloseGS &params
+&lab jsl $E100A8
+ dc i2"$2014"
+ dc i4"&params"
+ MEND
+ MACRO
+&lab _OpenGS &params
+&lab jsl $E100A8
+ dc i2"$2010"
+ dc i4"&params"
+ MEND
+ MACRO
+&lab _ReadGS &params
+&lab jsl $E100A8
+ dc i2"$2012"
+ dc i4"&params"
+ MEND
+ MACRO
+&lab _Multiply
+&lab ldx #$090B
+ jsl $E10000
+ MEND
+ MACRO
+&lab _UDivide
+&lab ldx #$0B0B
+ jsl $E10000
+ MEND
+ MACRO
+&lab _ErrWriteCString
+&lab ldx #$210C
+ jsl $E10000
+ MEND
