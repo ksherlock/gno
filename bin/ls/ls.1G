@@ -1,0 +1,132 @@
+.TH "LS" "1" "August 1, 1996" "GNO" "General Commands Manual"
+.SH "NAME"
+\fBls\fR
+\- list directory contents
+.SH "SYNOPSIS"
+\fBls\fR
+[\fB\-acdfilqrstACFRS1\fR]
+[\fIfile\ ...\fR]
+.SH "DESCRIPTION"
+For each directory argument,
+\fBls\fR
+lists the contents of the directory; for each file argument,
+\fBls\fR
+repeats its name and any other information requested. By default, the output is sorted alphabetically. When no argument is given, the current directory is listed. When several arguments are given, the arguments are first sorted appropriately, but file arguments are processed before directories and their contents.
+.PP
+There are a large number of options:
+.TP \fB\-a\fR
+List all entries; in the absence of this option, entries whose names begin with a period
+(\fI\&.\fR)
+or whose GS/OS
+`invisible'
+flag is set are not listed.
+.TP \fB\-c\fR
+Use time of file creation for sorting or printing.
+.TP \fB\-d\fR
+If argument is a directory, list only its name; often used with
+\fB\-l\fR
+to get the status of a directory.
+.TP \fB\-f\fR
+Output is not sorted.
+This option turns on
+\fB\-a\fR.
+It also negates the effect of the
+\fB\-c\fR,
+\fB\-r\fR,
+\fB\-S\fR
+and
+\fB\-t\fR
+options.
+This is useful when organizing libraries in alphabetical order for ORCA languages.
+.TP \fB\-l\fR
+List in long format, giving mode, number of links,owner, size in bytes, and time of last modification for each file. If the file is a special file the size field will instead contain the major and minor device numbers. If the file is a symbolic link the pathname of the linked-to file is printed preceded by
+``->''.
+.TP \fB\-q\fR
+force printing of non-graphic characters in file names as the character
+`?';
+this is the default when output is to a terminal.
+.TP \fB\-r\fR
+Reverse the order of sort to get reverse alphabetic or oldest first as appropriate.
+.TP \fB\-s\fR
+Give size in kilobytes of each file.
+.TP \fB\-t\fR
+Sort by time modified (latest first) instead of by name.
+.TP \fB\-A\fR
+List all entries except for the current directory
+(\fI\&.\fR)
+and the parent directory
+(\fI\&.\&.\fR).
+.TP \fB\-C\fR
+force multi-column output; this is the default when output is to a terminal.
+.TP \fB\-F\fR
+Cause directories to be marked with a trailing
+`/',
+sockets with a trailing
+`=',
+executable files with a trailing
+`*',
+and symbolic links to files with a trailing
+`@'.
+Symbolic links to directories are marked with a trailing
+`/',
+unless the
+\fB\-l\fR
+option is also used.
+.TP \fB\-R\fR
+recursively list subdirectories encountered.
+.TP \fB\-S\fR
+Sort by size (largest file first).
+.TP \fB\-1\fR
+force one entry per line output format; this is the default when output is not to a terminal.
+.PP
+The mode printed under the
+\fB\-l\fR
+option contains 11 characters which are interpreted as follows: the first character is
+.PP
+.RS 6n
+.TP \fBe\fR
+if the entry has a resource fork,
+.TP \fBd\fR
+if the entry is a directory;
+.TP \fBb\fR
+if the entry is a block-type special file;
+.TP \fBc\fR
+if the entry is a character-type special file;
+.TP \fBl\fR
+if the entry is a symbolic link;
+.TP \fBs\fR
+if the entry is a socket, or
+.TP \fB\-\fR
+if the entry is a plain file.
+.RE
+.PP
+The next 9 characters are interpreted as three sets of three bits each. The first set refers to owner permissions; the next refers to permissions to others in the same user-group; and the last to all others. Within each set the three characters indicate permission respectively to read, to write, or to execute the file as a program. For a directory,
+`execute'
+permission is interpreted to mean permission to search the directory. The permissions are indicated as follows:
+.PP
+.RS 6n
+.TP \fBi\fR
+if the file is invisible
+.TP \fBd\fR
+if the file can be deleted
+.TP \fBr\fR
+if the file is readable;
+.TP \fBw\fR
+if the file is writable;
+.TP \fBx\fR
+if the file is executable;
+.TP \fB\-\fR
+if the indicated permission is not granted.
+.RE
+.PP
+When the sizes of the files in a directory are listed, a total count of blocks, including indirect blocks is printed.
+.SH "BUGS"
+The output device is assumed to be 80 columns wide.
+.PP
+GNO and GS/OS do not currently support links, user/group permissions, the concept of
+`i-numbers',
+or
+`special'
+files; thus,
+\fBls\fR
+options that deal with these are ignored.

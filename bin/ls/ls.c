@@ -529,7 +529,7 @@ int ch;
         switch(ch) {
 
             case 'a' :
-                fl_all = TRUE;;
+                fl_all = TRUE;
                 break;
 
             case 'c' :
@@ -568,11 +568,12 @@ int ch;
                 fl_nosort = TRUE;
                 break;
                 #endif 
-            case 'r' :
-                more = -1; less = 1;
-                break;
 
             case 'q' :
+                break;
+
+            case 'r' :
+                more = -1; less = 1;
                 break;
 
             case 's' :

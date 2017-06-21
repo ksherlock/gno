@@ -1,0 +1,136 @@
+.Dd August 1, 1996
+.Dt LS 1
+.Os
+.Sh NAME
+.Nm ls
+.Nd list directory contents
+.Sh SYNOPSIS
+.Nm
+.Op Fl acdfilqrstACFRS1
+.Op Ar
+.Sh DESCRIPTION
+For each directory argument,
+.Nm
+lists the contents of the directory; for each file argument,
+.Nm
+repeats its name and any other information requested. By default, the output is sorted alphabetically. When no argument is given, the current directory is listed. When several arguments are given, the arguments are first sorted appropriately, but file arguments are processed before directories and their contents.
+.Pp
+There are a large number of options:
+.Bl -tag -width indent
+.It Fl a
+List all entries; in the absence of this option, entries whose names begin with a period
+.Pq Pa \&.
+or whose GS/OS
+.Sq invisible
+flag is set are not listed.
+.It Fl c
+Use time of file creation for sorting or printing.
+.It Fl d
+If argument is a directory, list only its name; often used with
+.Fl l
+to get the status of a directory.
+.It Fl f
+Output is not sorted.
+This option turns on
+.Fl a .
+It also negates the effect of the
+.Fl c ,
+.Fl r ,
+.Fl S
+and
+.Fl t
+options.
+This is useful when organizing libraries in alphabetical order for ORCA languages.
+.It Fl l
+List in long format, giving mode, number of links,owner, size in bytes, and time of last modification for each file. If the file is a special file the size field will instead contain the major and minor device numbers. If the file is a symbolic link the pathname of the linked-to file is printed preceded by
+.Dq -> .
+.It Fl q
+force printing of non-graphic characters in file names as the character
+.Sq "?" ;
+this is the default when output is to a terminal.
+.It Fl r
+Reverse the order of sort to get reverse alphabetic or oldest first as appropriate.
+.It Fl s
+Give size in kilobytes of each file.
+.It Fl t
+Sort by time modified (latest first) instead of by name.
+.It Fl A
+List all entries except for the current directory
+.Pq Pa \&.
+and the parent directory
+.Pq Pa \&.\&. .
+.It Fl C
+force multi-column output; this is the default when output is to a terminal.
+.It Fl F
+Cause directories to be marked with a trailing
+.Sq / ,
+sockets with a trailing
+.Sq = ,
+executable files with a trailing
+.Sq * ,
+and symbolic links to files with a trailing
+.Sq @ .
+Symbolic links to directories are marked with a trailing
+.Sq / ,
+unless the
+.Fl l
+option is also used.
+.It Fl R
+recursively list subdirectories encountered.
+.It Fl S
+Sort by size (largest file first).
+.It Fl 1
+force one entry per line output format; this is the default when output is not to a terminal.
+.El
+.Pp
+The mode printed under the
+.Fl l
+option contains 11 characters which are interpreted as follows: the first character is
+.Pp
+.Bl -tag -width 4n -offset indent -compact
+.It Sy e
+if the entry has a resource fork,
+.It Sy d
+if the entry is a directory;
+.It Sy b
+if the entry is a block-type special file;
+.It Sy c
+if the entry is a character-type special file;
+.It Sy l
+if the entry is a symbolic link;
+.It Sy s
+if the entry is a socket, or
+.It Sy \-
+if the entry is a plain file.
+.El
+.Pp
+The next 9 characters are interpreted as three sets of three bits each. The first set refers to owner permissions; the next refers to permissions to others in the same user-group; and the last to all others. Within each set the three characters indicate permission respectively to read, to write, or to execute the file as a program. For a directory,
+.Sq execute
+permission is interpreted to mean permission to search the directory. The permissions are indicated as follows:
+.Pp
+.Bl -tag -width 4n -offset indent -compact
+.It Sy i
+if the file is invisible
+.It Sy d
+if the file can be deleted
+.It Sy r
+if the file is readable;
+.It Sy w
+if the file is writable;
+.It Sy x
+if the file is executable;
+.It Sy \-
+if the indicated permission is not granted.
+.El
+.Pp
+When the sizes of the files in a directory are listed, a total count of blocks, including indirect blocks is printed.
+.Sh BUGS
+The output device is assumed to be 80 columns wide.
+.Pp
+GNO and GS/OS do not currently support links, user/group permissions, the concept of
+.Sq i-numbers ,
+or
+.Sq special
+files; thus,
+.Nm
+options that deal with these are ignored.
