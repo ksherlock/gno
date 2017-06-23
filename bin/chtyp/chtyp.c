@@ -144,9 +144,9 @@ int main(int argc, char **argv)
 	    finfo.auxType = auxt;
 	SetFileInfoGS(&finfo);
 	if (_toolErr) {
+		error.error = _toolErr;
 		fprintf(stderr, "%s: ", path.text);
 		fflush(stderr);
-		error.error = _toolErr;
 		ErrorGS(&error);
 		rv = 1;
 		continue;
