@@ -44,7 +44,7 @@ struct directory {
 };
 
 DirEntryRecGS dirinfo;
-ResultBuf32 nameb;
+ResultBuf255 nameb;
 
 
 #define qsort(a,b,c,d) nqsort(a,b,c,d)
@@ -242,7 +242,7 @@ unsigned i,file_count = 0,maxWidth = 0;
 DirEntryRecPtrGS newents,nptr;
 ResultBuf255Ptr newn;
 
-    nameb.bufSize = 36;
+    nameb.bufSize = 255 + 4;
 
     dirinfo.pCount = 14;
     dirinfo.refNum = fd;
@@ -271,11 +271,19 @@ ResultBuf255Ptr newn;
         nptr->name = (ResultBuf255Ptr) &nameb;
         nptr->optionList = NULL;
         GetDirEntry(nptr);
+
         if ((fl_all) || (!(nptr->access & fileInvisible))) {
+            unsigned length;
             file_count++;
-            newn = malloc(37);
-            nameb.bufString.text[nameb.bufString.length] = 0;
-            memcpy(newn,&nameb,36);
+            /* GetDirEntry will truncate names but returns the actual length */
+            length = nameb.bufString.length;
+            if (length > 254) {
+                length = 254;
+                nameb.bufString.length = 254;
+            }
+            newn = malloc(length + 5);
+            memcpy(newn,&nameb,length + 4);
+            newn->bufString.text[length] = 0;
             nptr->name = newn;
             new->num_bytes += (nptr->eof + nptr->resourceEOF);
             if (nptr->name->bufString.length > maxWidth)
