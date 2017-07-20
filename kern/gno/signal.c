@@ -450,6 +450,10 @@ extern void disposevar(int);
 
 void *KERNsignal(int *ERRNO, void (*func)(), int sig )
 {
+	if (sig < 1 || sig > NSIG) {
+		*ERRNO = EINVAL;
+		return (void *)-1;
+	}
 	return Ksignal(ERRNO, func, sig);
 }
 
