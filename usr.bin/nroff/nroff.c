@@ -225,7 +225,7 @@ main (int argc, char *argv[]) {
 	strcpy (s_bold, ps);
 	if (!s_italic[0]) strcpy (s_italic, ps);
     } else { 
-	err(1, "couldn't get standout mode");
+	errx(1, "couldn't get standout mode");
 	/*NOTREACHED*/
     }
 
@@ -237,7 +237,7 @@ main (int argc, char *argv[]) {
 	strcpy (e_bold, ps);
 	if (!e_italic[0]) strcpy (e_italic, ps);
     } else { 
-        err(1, "couldn't get end standout mode");
+        errx(1, "couldn't get end standout mode");
         /*NOTREACHED*/
     }
     
@@ -852,7 +852,7 @@ pswitch (char *p, int *q) {
 	case 'o': 				/* output error log */
 	case 'O': 
 	    if (!*(p+1)) {
-		err(-1, "no error file specified");
+		errx(-1, "no error file specified");
 		/*NOTREACHED*/
 	    }
 	    if ((err_stream = fopen (p+1, "w")) == NULL) {
