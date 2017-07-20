@@ -181,7 +181,7 @@ comand (char *p) {
 	p = skipwd (p);
 	p = skipbl (p);
 	if (!isalpha (*p)) {
-	    warn("invalid or missing number register name");
+	    warnx("invalid or missing number register name");
 	} else {
 	    /*
 	     *   number register format is 1,a,A,i,I,0...1
