@@ -373,7 +373,7 @@ expesc (char *src, char *dest, size_t len) {
 		    name[2] = '\0';
 		    pstr = getstr (name);
 		    if (!pstr) {
-			errx(-1,"string not found");
+			errx(-1,"string not found ( %s )", name);
 		    }
 		    while (*pstr) {
 			*t++ = *pstr++;
@@ -387,7 +387,7 @@ expesc (char *src, char *dest, size_t len) {
 		    name[1] = '\0';
 		    pstr = getstr (name);
 		    if (!pstr) {
-			errx(-1, "string not found");
+			errx(-1, "string not found ( %s )", name);
 		    }
 		    while (*pstr) {
 			*t++ = *pstr++;
