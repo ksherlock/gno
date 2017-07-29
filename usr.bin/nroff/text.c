@@ -446,6 +446,8 @@ putwrd (register char *wrdbuf) {
     int         nextra;
     int     	esc;
     
+    if (*wrdbuf == 0) return;
+
     /*
      *   check if this word puts us over the limit
      */
