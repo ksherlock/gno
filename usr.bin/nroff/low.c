@@ -308,147 +308,54 @@ getfield (register char *p, register char *q, char delim) {
  */
 int
 getwrd (register char *src, register char *dest) {
-#if 0   /* gdr changes */
-    char *orgsrc, *orgdest;
-    
-    orgsrc = src;
-    orgdest = dest;
 
-    /*
-     *   skip leading whitespace
-     */
-    while (*src == ' ' || *src == '\t') {
-	src++;
-    }
-
-    /* find end of word */
-    while (*src != '\0' && !isspace(*src)) {
-	*dest++ = *src++;
-    }
-
-    /* I don't understand what this is supposed to achieve */
-#ifdef WHATTHEFUCK
-    assert (dest - orgdest >= 1);  /* gdr */
-    c = *(dest - 1);
-    if (c == '"') {
-	asssert(dest - orgdest >= 2);  /* gdr */
-	c = *(dest - 2);
-    }
-    if (c == '?' || c == '!') {
-	*dest++ = ' ';
-    }
-    if (c == '.' && (*src == '\n' || *src == '\r' || islower (*p))) {
-	*dest++ = ' ';
-    }
-#endif /* WHATTHEFUCK */
-    *dest = EOS;
-
-    return src - orgsrc;
-#elif 1
     char		c;
-    register int	i;
-    register char  *p;
-    char *orgsrc, *orgdest;
+    char		first;
+    register unsigned	i;
+    register unsigned	j;
 
-    orgsrc = src;
-    orgdest = dest;
     /*
      *   init counter...
      */
     i = 0;
+    j = 0;
 
     /*
      *   skip leading whitespace
      */
-    while (*src == ' ' || *src == '\t') {
-	++i;
-	++src;
-    }
+
+    while (isspace(src[i])) ++i;
+
+    src += i;
     
     /*
      *   set ptr and start to look for end of word
      */
-    p = src;
-    while (*src != ' ' && *src != EOS && *src != '\t') {
-	if (*src == '\n' || *src == '\r') {
-	    break;
-	}
-	*dest = *src++;
-	++dest;
-	++i;
+    first = *src;
+    for(;;) {
+    	c = *src;
+    	if (c == EOS || isspace(c)) break;
+    	dest[j++] = *src;
+    	++src;
     }
 
-    if (dest > orgdest) {
-	c = *(dest - 1);
-	if (c == '"' && (dest > orgdest + 1)) {
-	    c = *(dest - 2);
+    /* if this is the end of a sentence (.!?), append a space. */
+
+    if (j) {
+	c = dest[j - 1];
+	if (c == '"' && j >= 2) {
+	    c = dest[j - 2];
 	}
 	if (c == '?' || c == '!') {
-	    *dest++ = ' ';
-	    ++i;
+	    dest[j++] = ' ';
 	}
-	if (c == '.' && (*src == '\n' || *src == '\r' || islower (*p))) {
-	    *dest++ = ' ';
-	    ++i;
+	if (c == '.' && (*src == '\n' || *src == '\r' || islower (first))) {
+	    dest[j++] = ' ';
 	}
     }
-    *dest = EOS;
+    dest[j] = EOS;
 
-    return (i);
-#else
-    char		c;
-    register int	i;
-    register char  *p;
-    char *orgsrc, *orgdest;
-
-    orgsrc = src;
-    orgdest = dest;
-    /*
-     *   init counter...
-     */
-    i = 0;
-
-    /*
-     *   skip leading whitespace
-     */
-    while (*src == ' ' || *src == '\t') {
-	++i;
-	++src;
-    }
-    
-    /*
-     *   set ptr and start to look for end of word
-     */
-    p = src;
-    while (*src != ' ' && *src != EOS && *src != '\t') {
-	if (*src == '\n' || *src == '\r') {
-	    break;
-	}
-	*dest = *src++;
-	++dest;
-	++i;
-    }
-
-    if (dest > orgdest) {
-	c = *(dest - 1);
-	if (c == '"') {
-	    ASSERT(dest > orgdest + 1,
-		   ("%s:%d: array indexing error", __FILE__, __LINE__));
-	    c = *(dest - 2);
-	}
-	if (c == '?' || c == '!') {
-	    *dest++ = ' ';
-	    ++i;
-	}
-	if (c == '.' && (*src == '\n' || *src == '\r' || islower (*p))) {
-	    *dest++ = ' ';
-	    ++i;
-	}
-    }
-    *dest = EOS;
-
-    return (i);
-#endif
+    return i + j;
 }
 
 
