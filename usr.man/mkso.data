@@ -90,10 +90,10 @@ man3/err.3		man3/vwarn.3
 man3/err.3		man3/vwarnx.3
 man3/err.3		man3/warn.3
 man3/err.3		man3/warnx.3
-man3/execl.2		man3/execle.2
-man3/execl.2		man3/execlp.2
-man3/execl.2		man3/execv.2
-man3/execl.2		man3/execvp.2
+man3/execl.3		man3/execle.3
+man3/execl.3		man3/execlp.3
+man3/execl.3		man3/execv.3
+man3/execl.3		man3/execvp.3
 man3/exit.3		man2/_exit.2
 man3/exit.3		man3/rexit.3
 man3/fflush.3		man3/fpurge.3

@@ -139,7 +139,7 @@ and
 calls.
 (Some protocol families, such as the Internet family,
 support the notion of an
-.Dq implied connect,
+\*(lqimplied connect\*(rq,
 which permits data to be sent piggybacked onto a connect operation by
 using the
 .BR sendto (2)
@@ -165,7 +165,7 @@ as the specific code
 in the global variable
 .IR errno .
 The protocols optionally keep sockets
-.Dq warm
+\*(lqwarm\*(rq
 by forcing transmissions
 roughly every minute in the absence of other activity.
 An error is then indicated if no response can be
@@ -211,8 +211,8 @@ via
 The operation of sockets is controlled by socket level
 .IR options .
 These options are defined in the file
-.Ao Pa sys/socket.h Ac .
-.BR Setsockopt (2)
+<sys/socket.h>.
+.BR setsockopt (2)
 and
 .BR getsockopt (2)
 are used to set and get options, respectively.
