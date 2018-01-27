@@ -1,0 +1,72 @@
+.TH "MORE" "1" "October 16, 1993" "GNO" "General Commands Manual"
+.SH "NAME"
+\fBmore\fR
+\- file perusal filter for crt viewing
+.SH "SYNOPSIS"
+\fBmore\fR
+[\fB\-cs\fR]
+[\fIfile\ ...\fR]
+.SH "DESCRIPTION"
+\fBMore\fR
+is a filter for paging through text one screenful at a time.
+It uses
+termcap(3)
+so it can run on a variety of terminals.
+.SH "OPTIONS"
+Command line options are described below.
+Options are also taken from the environment variable
+\fRMORE\fR
+(make sure to precede them with a dash (``-'')) but command
+line options will override them.
+.TP \fB\-c\fR
+Normally,
+\fBmore\fR
+will repaint the screen by scrolling from the bottom of the screen.
+If the
+\fB\-c\fR
+option is set, when
+\fBmore\fR
+needs to change the entire display, it will paint from the top line down.
+.TP \fB\-s\fR
+The
+\fB\-s\fR
+option causes
+consecutive blank lines to be squeezed into a single blank line.
+.SH "COMMANDS"
+.TP \fBSPACE\fR
+Scroll forward 1 screen.
+.TP \fBRETURN\fR
+Scroll forward 1 line.
+.TP \fBq\fR
+Quit viewing the current file, and move to the next file (if any).
+.TP \fBESC\fR
+Abort
+\fBmore\fR,
+including any more files that may have been specified.
+.SH "ENVIRONMENT"
+\fBMore\fR
+utilizes the following environment variables, if they exist:
+.TP \fRMORE\fR
+This variable may be set with favored options to
+\fBmore\fR.
+.TP \fRTERM\fR
+Specifies terminal type, used by more to get the terminal
+characteristics necessary to manipulate the screen.
+.TP \fRLINES\fR
+Specifies the number of lines on the screen.
+.TP \fRCOLUMNS\fR
+Specifies the number of columns on the screen.
+.SH "HISTORY"
+The
+\fBmore\fR
+command appeared in
+3.0BSD.
+.SH "AUTHORS"
+This version of more was written by
+Jawaid Bazyar
+and
+Derek Taubert,
+with updates by
+Mike Horwath
+and
+Kelvin Sherlock.
