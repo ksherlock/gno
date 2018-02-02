@@ -12,6 +12,8 @@ is a filter for paging through text one screenful at a time.
 It uses
 termcap(3)
 so it can run on a variety of terminals.
+\fIFile\fR
+may be a single dash (``-''), implying stdin.
 .SH "OPTIONS"
 Command line options are described below.
 Options are also taken from the environment variable

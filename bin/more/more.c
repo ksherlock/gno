@@ -234,6 +234,8 @@ void erase_line(unsigned chars) {
 */
 }
 
+unsigned errors = 0;
+unsigned didpipe = 0;
 /*
  * returns: 0 -> eof, 1 -> quit, 2 -> abort.
  *
@@ -254,6 +256,7 @@ int pager(const char *path, unsigned printName, unsigned standardOut) {
         tputs(tcap_cl, 1, tcap_putc);
         buf_flush();
     }
+    if (path && path[0] == '-' && path[1] == 0) path = NULL;
 
     if (path) {
         ispipe = 0;
@@ -266,6 +269,7 @@ int pager(const char *path, unsigned printName, unsigned standardOut) {
             buf_puts(path);
             buf_putx(" is a directory\r");
             buf_stdout();
+            errors++;
             return 0;
         }
         file = buf_open(path);
@@ -276,12 +280,31 @@ int pager(const char *path, unsigned printName, unsigned standardOut) {
             buf_putx(": ");
             buf_puts(strerror(errno));
             buf_putc('\r');
-            buf_flush();
-            exit(1);
+            buf_stdout();
+            errors++;
+            return 0;
         }
 
     } else {
         /* pipe */
+
+        if (isatty(STDIN_FILENO)) {
+            buf_stderr();
+            buf_putx("Can't take input from a terminal\r");
+            buf_stdout();
+            errors++;
+            return 0;
+        }
+
+        if (didpipe) {
+            buf_stderr();
+            buf_putx("Can view standard input only once\r");
+            buf_stdout();
+            errors++;
+            return 0;
+        }
+        didpipe = 1;
+
         ispipe = 1;
         truncated = "stdin";
         file = STDIN_FILENO;
@@ -503,6 +526,8 @@ int main(int argc, char *argv[]) {
 #endif
 
     init_term();
+    errors = 0;
+    didpipe = 0;
 
 
     /* buf_putc(6); tcap_vi -> invisible cursor */
@@ -513,7 +538,7 @@ int main(int argc, char *argv[]) {
 
     for (i = 1; i < argc; ++i) {
         char *cp = argv[i];
-        if (*cp != '-') break;
+        if (cp[0] != '-' || cp[1] == 0) break;
         argscan(cp);
     }
     argc -= i;
@@ -523,13 +548,6 @@ int main(int argc, char *argv[]) {
     buf_stdout();
 
     if (argc == 0) {
-        if (isatty(STDIN_FILENO)) {
-            /* fputs("Can't take input from a terminal\n", stderr); */
-            buf_stderr();
-            buf_putx("Can't take input from a terminal\r");
-            buf_flush();
-            exit(1);
-        }
         pager(NULL, 0, standardOut);
     } else {
         for (i = 0; i < argc; ++i) {
@@ -558,6 +576,6 @@ int main(int argc, char *argv[]) {
     }
     buf_flush();
     /* putchar(5);  tcap_ve -> end invisible cursor */
-    exit(0);
+    exit(errors > 0);
 }
 
