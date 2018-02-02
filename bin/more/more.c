@@ -442,6 +442,8 @@ void init_term(void) {
     if (!MAX_COL) MAX_COL = 80;
 
 
+    tty = open(_PATH_TTY, O_RDONLY);
+
     /* turn off echo mode */
     ioctl(tty, TIOCGETP, &sg);
 
@@ -502,7 +504,6 @@ int main(int argc, char *argv[]) {
 
     init_term();
 
-    tty = open(_PATH_TTY, O_RDONLY);
 
     /* buf_putc(6); tcap_vi -> invisible cursor */
 
