@@ -1,0 +1,70 @@
+.TH "FILE2C" "1" "March 22, 2007" "GNO" "General Commands Manual"
+.SH "NAME"
+\fBfile2c\fR
+\- convert file to c-source
+.SH "SYNOPSIS"
+\fBfile2c\fR
+[\fB\-sx\fR]
+[\fB\-n\fR\ \fIcount\fR]
+[\fIprefix\fR\ [\fIsuffix\fR]]
+.SH "DESCRIPTION"
+The
+\fBfile2c\fR
+utility reads a file from stdin and writes it to stdout, converting each
+byte to its decimal or hexadecimal representation on the fly.
+The byte values are separated by a comma.
+This also means that the last byte value is not followed by a comma.
+By default the byte values are printed in decimal, but when the
+\fB\-x\fR
+option is given, the values will be printed in hexadecimal.
+When
+\fB\-s\fR
+option is given, each line is printed with a leading tab and each comma is
+followed by a space except for the last one on the line.
+.PP
+If more than 70 characters are printed on the same line, that line is
+ended and the output continues on the next line.
+With the
+\fB\-n\fR
+option this can be made to happen after the specified number of
+byte values have been printed.
+The length of the line will not be considered anymore.
+To have all the byte values printed on the same line, give the
+\fB\-n\fR
+option a negative number.
+.PP
+A prefix and suffix strings can be printed before and after the byte values
+(resp.)
+If a suffix is to be printed, a prefix must also be specified.
+The first non-option word is the prefix, which may optionally be followed
+by a word that is to be used as the suffix.
+.PP
+This program is typically used to embed binary files into C source files.
+The prefix is used to define an array type and the suffix is used to end
+the C statement.
+The
+\fB\-n\fR, \fB\-s\fR
+and
+\fB\-x\fR
+options are useful when the binary data represents a bitmap and the output
+needs to remain readable and/or editable.
+Fonts, for example, are a good example of this.
+.SH "EXAMPLES"
+The command:
+.nf
+.sp
+.RS 6n
+date | file2c 'const char date[] = {' ',0};'
+.RE
+.fi
+.PP
+will produce:
+.nf
+.sp
+.RS 6n
+const char date[] = {
+83,97,116,32,74,97,110,32,50,56,32,49,54,58,50,56,58,48,53,
+32,80,83,84,32,49,57,57,53,10
+,0};
+.RE
+.fi
