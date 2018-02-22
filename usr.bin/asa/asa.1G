@@ -1,0 +1,67 @@
+.TH "ASA" "1" "May 9, 2002" "GNO" "General Commands Manual"
+.SH "NAME"
+\fBasa\fR
+\- interpret carriage-control characters
+.SH "SYNOPSIS"
+\fBasa\fR
+[\fIfile\ ...\fR]
+.SH "DESCRIPTION"
+The
+\fBasa\fR
+utility reads files sequentially, mapping
+\fRFORTRAN\fR
+carriage-control characters to line-printer control sequences,
+and writes them to the standard output.
+.PP
+The first character of each line is interpreted as a carriage-control
+character.
+The following characters are interpreted as follows:
+.TP \(laspace\(ra
+Output the rest of the line without change.
+.TP 0
+Output a
+\(lanewline\(ra
+character before printing the rest of the line.
+.TP 1
+Output a
+\(laformfeed\(ra
+character before printing the rest of the line.
+.TP \&+
+The trailing
+\(lanewline\(ra
+of the previous line is replaced by a
+\(lacarriage-return\(ra
+before printing the rest of the line.
+.PP
+Lines beginning with characters other than the above are treated as if they
+begin with
+\(laspace\(ra.
+.SH "EXIT STATUS"
+.br
+The \fBasa\fR utility exits 0 on success, and >0 if an error occurs.
+.SH "EXAMPLES"
+To view a file containing the output of a
+\fRFORTRAN\fR
+program:
+.PP
+.RS 6n
+asa file
+.RE
+.PP
+To format the output of a
+\fRFORTRAN\fR
+program and redirect it to a line-printer:
+.PP
+.RS 6n
+a.out | asa | lpr
+.RE
+.SH "SEE ALSO"
+f77(1)
+.SH "STANDARDS"
+The
+\fBasa\fR
+utility conforms to
+IEEE Std 1003.1-2001 (``POSIX.1'').
+.SH "AUTHORS"
+J.T. Conklin,
+Winning Strategies, Inc.
