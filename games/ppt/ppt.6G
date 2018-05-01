@@ -1,0 +1,50 @@
+.TH "PPT" "6" "November 18, 2014" "GNO" "Games Manual"
+.SH "NAME"
+\fBppt\fR
+\- reformat input as paper tape
+.SH "SYNOPSIS"
+\fBppt\fR
+[\fIstring\ ...\fR]
+.br
+\fBppt\fR
+\fB\-d\fR
+[\fB\-b\fR]
+.SH "DESCRIPTION"
+The
+\fBppt\fR
+command reads the given input and reformats it in the form of paper tape.
+Acceptable input are command line arguments or the standard input.
+.PP
+The options are as follows:
+.TP \fB\-d\fR [\fB\-b\fR]
+Decode paper tape on the standard input back to ASCII.
+Unprintable characters are visually encoded with
+vis(3)
+unless the
+\fB\-b\fR
+option (binary) is also specified.
+A lowercase
+`x'
+is printed for undecipherable input lines.
+.SH "SEE ALSO"
+bcd(6)
+.SH "STANDARDS"
+\fIECMA-10\fR,
+ECMA Standard for Data Interchange on Punched Tape.
+.SH "HISTORY"
+The
+\fBppt\fR
+command first appeared in
+4.3BSD-Tahoe.
+The options
+\fB\-d\fR
+and
+\fB\-b\fR
+first appeared in
+OpenBSD\ 3.3.
+.SH "AUTHORS"
+Keith Bostic
+.br
+Paul Janzen <\fIpjanzen@foatdi.net\fR>
+.br
+Michael Shalayeff <\fImickey@lucifier.net\fR>

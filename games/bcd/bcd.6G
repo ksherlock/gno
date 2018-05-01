@@ -1,0 +1,37 @@
+.TH "BCD" "6" "November 20, 2014" "GNO" "Games Manual"
+.SH "NAME"
+\fBbcd\fR
+\- reformat input as punch cards
+.SH "SYNOPSIS"
+\fBbcd\fR
+[\fB\-l\fR]
+[\fIstring\ ...\fR]
+.br
+\fBbcd\fR
+\fB\-d\fR
+[\fB\-l\fR]
+.SH "DESCRIPTION"
+The
+\fBbcd\fR
+command reads the given input and reformats it in the form of punched cards.
+Acceptable input are command line arguments or the standard input.
+.PP
+The options are as follows:
+.TP \fB\-d\fR
+Decode punch cards on the standard input back to ASCII.
+.TP \fB\-l\fR
+Create or decode 80 column punch cards.
+The default is 48 columns.
+.SH "SEE ALSO"
+ppt(6)
+.SH "STANDARDS"
+\fIISO 1681:1973\fR,
+Information processing--Unpunched paper cards--Specification.
+.PP
+\fIISO 1682:1973\fR,
+Information processing--80 columns punched paper cards--Dimensions and location of rectangular punched holes.
+.SH "HISTORY"
+The
+\fBbcd\fR
+command first appeared in
+3BSD.
