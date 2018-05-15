@@ -928,7 +928,7 @@ value	equ   shellLoc+4
 var	equ   shellLoc+8
 
 	lda   cmdNum
-	and   #$40               ;If bit $40 then c strings
+	and   #$40               ;If bit $40 then p strings
 	beq   orca_1
 	lda   pCount
 	cmp   #3
