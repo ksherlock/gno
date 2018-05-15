@@ -1238,8 +1238,8 @@ case6a	lda	which
 	cmp	#10
 	bne	case6c
 case6b	lda	oncol
-	ora	UP
-	ora	UP+2
+	ora	>UP
+	ora	>UP+2
 	beq	case6c		
 ;
 ; DO THIS LATER!!!!
@@ -1468,7 +1468,7 @@ goout	jsl	$FFFFFF
 ;
 delay	lda	i
 	beq	exit
-	lda	ospeed
+	lda	>ospeed
 	beq	exit
 	bmi	exit
 	cmp	#15
@@ -1490,7 +1490,7 @@ delay	lda	i
 	sta	i
 
 	UDivide (i,mspc10),(i,@x)
-;delayloop	lda	PC
+;delayloop	lda	>PC
 delayloop	lda	#0
 	pha
 goout2	jsl	$FFFFFF
