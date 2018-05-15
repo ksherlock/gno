@@ -1,0 +1,119 @@
+.TH "TPUT" "1" "June 15, 2002" "GNO" "General Commands Manual"
+.SH "NAME"
+\fBtput\fR,
+\fBclear\fR
+\- terminal capability interface
+.SH "SYNOPSIS"
+\fBtput\fR
+[\fB\-T\fR\ \fIterm\fR]
+\fIattribute\ ...\fR
+.br
+\fBclear\fR
+.SH "DESCRIPTION"
+The
+\fBtput\fR
+utility makes terminal-dependent information available to users or shell
+applications.
+When invoked as the
+\fBclear\fR
+utility, the screen will be cleared as if
+.RS 6n
+tput clear
+.RE
+had been executed.
+The options to
+\fBtput\fR
+are as follows:
+.TP \fB\-T\fR
+The terminal name as specified in the
+termcap(5)
+database, for example,
+``vt100''
+or
+``xterm''.
+If not specified,
+\fBtput\fR
+retrieves the
+``\fRTERM\fR''
+variable from the environment.
+.PP
+The
+\fBtput\fR
+utility outputs a string for each
+\fIattribute\fR
+that is of type string; a number for each of type integer.
+Otherwise,
+\fBtput\fR
+exits 0 if the terminal has the capability and 1 if it does not,
+without further action.
+.PP
+If an
+\fIattribute\fR
+is of type string, and takes arguments (e.g.\& cursor movement,
+the termcap
+``cm''
+sequence) the arguments are taken from the command line immediately
+following the attribute.
+.PP
+The following special attributes are available:
+.TP \fBclear\fR
+Clear the screen (the
+termcap(5)
+``cl''
+sequence).
+.TP \fBinit\fR
+Initialize the terminal (the
+termcap(5)
+``is''
+sequence).
+.TP \fBlongname\fR
+Print the descriptive name of the user's terminal type.
+.TP \fBreset\fR
+Reset the terminal (the
+termcap(5)
+``rs''
+sequence).
+.SH "EXIT STATUS"
+The exit status of
+\fBtput\fR
+is as follows:
+.TP 0
+If the last attribute
+\fIattribute\fR
+argument is of type string or integer, its value was successfully written
+to standard output.
+If the argument is of type boolean, the terminal has this attribute.
+.TP 1
+This terminal does not have the specified boolean
+\fIattribute\fR.
+.TP 2
+Usage error.
+.TP 3
+No information is available about the specified terminal type.
+.SH "SEE ALSO"
+termcap(5),
+terminfo(5)
+.SH "STANDARDS"
+The
+\fBtput\fR
+utility conforms to
+IEEE Std 1003.1-2001 (``POSIX.1'').
+.SH "HISTORY"
+The
+\fBtput\fR
+utility appeared in
+4.4BSD.
+.SH "BUGS"
+The
+\fBtput\fR
+utility cannot really distinguish between different types of attributes.
+.PP
+Some termcap entries depend upon having a
+`%'
+in them that is just a
+`%'
+and nothing more.
+Right now we just warn about them if they do not
+have a valid type declaration.
+These warnings are sent to
+stderr.
