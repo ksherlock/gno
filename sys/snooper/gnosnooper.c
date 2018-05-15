@@ -143,6 +143,7 @@ char *s;
       case procWAITSIGCH:
       case procWAIT:        s = "waiting"; break;
       case procPAUSED:      s = "paused"; break;
+      case procSLEEP:       s = "sleeping"; break;
       default:              s = "unknown"; break;
     }
     return s;
