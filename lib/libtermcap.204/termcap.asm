@@ -46,18 +46,9 @@ home	equ	p+4
 termpath	equ	home+4
 cp	equ	termpath+4
 space	equ	cp+4
-bp	equ	space+3
-name	equ	bp+4
-end	equ	name+4
 
-;	subroutine (4:name,4:bp),space
+	subroutine (4:bp,4:name),space-1
 
-	tsc
-	sec
-	sbc	#space-1
-	tcs
-	phd
-	tcd
 
 	ld4	pathbuf,p
 	ld4	pathvec,fname
@@ -218,21 +209,9 @@ donetok	lda	#0	;mark end of vector
 	pei	(name)
 	pei	(bp+2)
 	pei	(bp)
-	jsl	tfindent
+	jsr	tfindent
 
-	tay
-	lda	space+1
-	sta	end-2
-	lda	space
-	sta	end-3
-	pld
-	tsc
-	clc
-	adc	#end-4
-	tcs
-	tya
-	
-	rtl
+	return 2:@a
 
 termcapstr	dc	c'TERMCAP',h'00'
 termpathstr	dc	c'TERMPATH',h'00'
@@ -266,18 +245,8 @@ ibuf	equ	cp+4
 p	equ	ibuf+4
 opencnt	equ	p+4
 space	equ	opencnt+2
-bp	equ	space+3
-name	equ	bp+4
-end	equ	name+4
 
-;	subroutine (4:name,4:bp),space
-
-	tsc
-	sec
-	sbc	#space-1
-	tcs
-	phd
-	tcd
+	lsubroutine (4:bp,4:name),space-1
 
 	mv4	bp,tbuf
 	mv4	pvec,p
@@ -391,7 +360,7 @@ breakloop2	lda	#0
 ;	
 	pei	(name+2)
 	pei	(name)
-	jsl	tnamatch
+	jsr	tnamatch
 	cmp	#0
 	jeq	readloop
 
@@ -399,21 +368,11 @@ breakloop2	lda	#0
 	pei	(ibuf+2)
 	pei	(ibuf)
 	jsl	~DISPOSE
-	jsl	tnchktc
+	jsr	tnchktc
 	tay
 
-exit	lda	space+1
-	sta	end-2
-	lda	space
-	sta	end-3
-	pld
-	tsc
-	clc
-	adc	#end-4
-	tcs
-	tya
-	
-	rtl
+exit	lreturn 2:@y
+
 
 openparm	dc	i2'3'
 openref	dc	i2'0'
@@ -454,17 +413,8 @@ tmp	equ	1
 Np	equ	tmp+2
 Bp	equ	Np+4
 space	equ	Bp+4
-np	equ	space+3
-end	equ	np+4
 
-;	subroutine (4:np),space
-
-	tsc
-	sec
-	sbc	#space-1
-	tcs
-	phd
-	tcd
+	lsubroutine (4:np),space-1
 
 	mv4	tbuf,Bp
 
@@ -514,18 +464,7 @@ scanner	lda	[Bp],y
 	bra	scanner
 
 exit0	ldy	#0
-exit	lda	space+1
-	sta	end-2
-	lda	space
-	sta	end-3
-	pld
-	tsc
-	clc
-	adc	#end-4
-	tcs
-	tya
-	
-	rtl
+exit	lreturn 2:@y
 
                END
 	
@@ -543,17 +482,17 @@ tnchktc	PRIVATE
 
 	using	~TERMGLOBALS
 
-retval	equ	0
+retval	equ	1
 space	equ	retval+2
 
-	subroutine (0:dummy),space
+	lsubroutine (0:dummy),space-1
 
 ;
 ; not important for GNO right now...write it later :)
 ;
 	ld2	1,retval
 
-exit	return 2:retval
+exit	lreturn 2:retval
 
 	END
 
@@ -576,17 +515,8 @@ tmp	equ	1
 retval	equ	tmp+2
 bp	equ	retval+2
 space	equ	bp+4
-id	equ	space+3
-end	equ	id+4
 
-;	subroutine (4:id),space
-
-	tsc
-	sec
-	sbc	#space-1
-	tcs
-	phd
-	tcd
+	subroutine (4:id),space-1
 
 	mv4	tbuf,bp
 	
@@ -676,19 +606,7 @@ dooct	lda	[bp],y
 	iny
 	bra	dooct		
 
-exit	ldy	retval
-	lda	space+1
-	sta	end-2
-	lda	space
-	sta	end-3
-	pld
-	tsc
-	clc
-	adc	#end-4
-	tcs
-	tya
-	
-	rtl
+exit	return 2:retval
 
 	END
 
@@ -709,17 +627,8 @@ bp	equ	1
 tmp	equ	bp+4
 retval	equ	tmp+2
 space	equ	retval+2
-id	equ	space+3
-end	equ	id+4
 
-;	subroutine (4:id),space
-
-	tsc
-	sec
-	sbc	#space-1
-	tcs
-	phd
-	tcd
+	subroutine (4:id),space-1
 
 	stz	retval
 	mv4	tbuf,bp
@@ -767,19 +676,7 @@ gotit	iny
 
 bingo	inc	retval
 
-exit	ldy	retval
-	lda	space+1
-	sta	end-2
-	lda	space
-	sta	end-3
-	pld
-	tsc
-	clc
-	adc	#end-4
-	tcs
-	tya
-	
-	rtl
+exit	return 2:retval
 
 	END
 
@@ -801,18 +698,8 @@ tgetstr	START
 retval	equ	1
 bp	equ	retval+4
 space	equ	bp+4
-id	equ	space+3
-area	equ	id+4
-end	equ	area+4
 
-;	subroutine (4:area,4:id),space
-
-	tsc
-	sec
-	sbc	#space-1
-	tcs
-	phd
-	tcd
+	subroutine (4:id,4:area),space-1
 
 	stz	retval
 	stz	retval+2
@@ -873,24 +760,11 @@ add0	anop
 	pei	(area)
 	pei	(bp+2)
 	pei	(bp)
-	jsl	tdecode
+	jsr	tdecode
 	sta	retval
 	stx	retval+2
                          
-exit	ldy	retval
-	ldx	retval+2
-	lda	space+1
-	sta	end-2
-	lda	space
-	sta	end-3
-	pld
-	tsc
-	clc
-	adc	#end-4
-	tcs
-	tya
-	
-	rtl
+exit	return 4:retval
 
 	END
 
@@ -906,18 +780,9 @@ tdecode	PRIVATE
 ch	equ	1
 cp	equ	ch+2
 space	equ	cp+4
-str	equ	space+3
-area	equ	str+4
-end	equ	area+4
 
-;	subroutine (4:area,4:str),space
+	lsubroutine (4:str,4:area),space-1
 
-	tsc
-	sec
-	sbc	#space-1
-	tcs
-	phd
-	tcd
 
 	lda	[area]
 	sta	cp
@@ -930,7 +795,7 @@ end	equ	area+4
 loop	lda	[str],y
 	and	#$FF
 	jeq	breakloop
-               cmp	#':'
+	cmp	#':'
 	jeq	breakloop
 	iny
 
@@ -1012,20 +877,7 @@ breakloop0	ldy	#2
 	lda	cp+2
 	sta	[area],y	
 
-	ldy	str
-	ldx	str+2
-	lda	space+1
-	sta	end-2
-	lda	space
-	sta	end-3
-	pld
-	tsc
-	clc
-	adc	#end-4
-	tcs
-	tya
-	
-	rtl
+	lreturn 4:str
  
 dp1	dc	c'E^\:nrtbf',h'00'
 dp2	dc	h'1b',c'^\:',h'0a0d09080c'
@@ -1071,19 +923,8 @@ dp	equ	ch+2
 retval	equ	dp+4
 cp	equ	retval+4
 space	equ	cp+4
-CM	equ	space+3
-destcol	equ	CM+4
-destline	equ	destcol+2
-end	equ	destline+2
 
-;	subroutine (2:destline,2:destcol,4:CM),space
-
-	tsc
-	sec
-	sbc	#space-1
-	tcs
-	phd
-	tcd
+	subroutine (4:CM,2:destcol,2:destline),space-1
 
 	ld4	result,dp
 	ld4	oops,retval
@@ -1311,20 +1152,7 @@ doneloop	anop
 ;
 	ld4	result,retval
 
-exit	ldy	retval
-	ldx	retval+2
-	lda	space+1
-	sta	end-2
-	lda	space
-	sta	end-3
-	pld
-	tsc
-	clc
-	adc	#end-4
-	tcs
-	tya
-	
-	rtl
+exit	return 4:retval
 
 oops	dc	c'OOPS!',h'00'
 added	ds	10
@@ -1348,19 +1176,9 @@ mspc10	equ	1
 tmp	equ	mspc10+2
 i	equ	tmp+2
 space	equ	i+2
-cp	equ	space+3
-affcnt	equ	cp+4
-outc	equ	affcnt+2
-end	equ	outc+4
 
-;	subroutine (4:outc,2:affcnt,4:cp),space
 
-	tsc
-	sec
-	sbc	#space-1
-	tcs
-	phd
-	tcd
+	subroutine (4:cp,2:affcnt,4:outc),space-1
 
 	lda	cp
 	ora	cp+2
@@ -1497,17 +1315,8 @@ goout2	jsl	$FFFFFF
 	dec	i
 	bne	delayloop	
 
-exit	lda	space+1
-	sta	end-2
-	lda	space
-	sta	end-3
-	pld
-	tsc
-	clc
-	adc	#end-4
-	tcs
-	
-	rtl
+exit	return
+
 
 tmspc10	dc	i2'1,2000,1333,909,743,666,500,333,166,83,55,41,20,10,5'
 	dc	i2'1,1,1,1,1,1,1,1,1'
