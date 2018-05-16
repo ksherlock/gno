@@ -57,10 +57,12 @@ space	equ	cp+4
 ;
 ; snag the $TERMCAP variable
 ;
-	ph4	#termcapstr
-	jsl	getenv
-	sta	cp
-	stx	cp+2
+	stz pathbuf_os+2
+try_termcap	anop
+	ReadVariable termcap_var
+	ldx pathbuf_os+2
+	bne found_var
+
 ;
 ; $TERMCAP can contain a path to use instead of 31/etc/termcap. Unlike
 ; Unix, $TERMCAP can only contain a path, not an termcap entry. If $TERMCAP
@@ -68,104 +70,44 @@ space	equ	cp+4
 ; path is found in the $TERMPATH variable, or becomes
 ; "$HOME/termcap 31/etc/termcap" if no $TERMPATH exists.
 ;
-	ora	cp+2
-	beq	notermcap
 
-	short	ai	;we have a $TERMCAP so use it
-	ldy	#0
-copy1	lda	[cp],y
-	beq	copy1a
-	sta	pathbuf,y
-	iny
-	bra	copy1
-copy1a	sta	pathbuf,y
-	long	ai
-               pei	(cp+2)
-	pei	(cp)
-	jsl	~DISPOSE
+try_termpath	anop
+	ReadVariable termpath_var
+	ldx pathbuf_os+2
+	beq try_home
+
+
+found_var	anop
+	short a
+	stz pathbuf,x
+	long a
 	jmp	tokenize
 
-notermcap	ph4	#termpathstr	;no $TERMCAP, get $TERMPATH
-	jsl	getenv
-	sta	termpath
-	stx	termpath+2
-	ora	termpath+2
-	beq	notermpath
 
-	short	ai	;we have a $TERMPATH so use it
-	ldy	#0
-copy2	lda	[termpath],y
-	beq	copy2a
-	sta	pathbuf,y
+try_home	anop
+	ReadVariable home_var
+; append _PATH_DEF to pathbuf
+	short a
+	ldy #0
+	ldx pathbuf_os+2
+	beq home_loop
+	lda #':'
+	sta pathbuf,x
+	inx
+
+home_loop	anop
+; short a from above.
+	lda _PATH_DEF,y
+	beq eos
+	sta pathbuf,x
+	inx
 	iny
-	bra	copy2
-copy2a	sta	pathbuf,y
-	long	ai
-	pei	(termpath+2)
-	pei	(termpath)
-	jsl	~DISPOSE
-	jmp	tokenize
+	bra home_loop
+eos	anop
+	sta pathbuf,x
+	long a
 
-notermpath	ph4	#homestr	;see if we can check $HOME
-	jsl	getenv
-	sta	home
-	stx	home+2
-	ora	home+2
-	beq	nohome
 
-	short	ai	;tack $HOME to our path
-	ldy	#0
-copy3	lda	[home],y
-	beq	copy3a
-	sta	pathbuf,y
-	iny
-	bra	copy3
-copy3a         anop
-	phy
-
-	ldy	#0
-	short	m
-lp	lda	[home],y
-               beq	noSep
-	cmp	#':'
-	beq	foundSep
-	cmp	#'/'
-	beq	foundSep
-               iny
-	bra	lp
-noSep	lda	#':'
-
-foundSep       ply
-	sta	pathbuf,y
-	long	m
-
-	lda	#'/'
-	sta	pathbuf,y
-	iny
-	rep	#$31
-	longa	on
-	long	ai
-	tya
-	and	#$FF
-	adc	p
-	sta	p
-	lda	#0
-	adc	p+2
-	sta	p+2
-	pei	(home+2)
-	pei	(home)
-	jsl	~DISPOSE
-
-nohome	short	ai	;tack the default onto the path
-	ldy	#0
-copy4	lda	_PATH_DEF,y
-	beq	copy4a
-	sta	[p],y
-	iny
-	bra	copy4
-copy4a	sta	[p],y
-	long	ai
-;
 ; The search path is now in pathbuf, tokenize it into individual
 ; files to check for.
 ;
@@ -217,6 +159,16 @@ termcapstr	dc	c'TERMCAP',h'00'
 termpathstr	dc	c'TERMPATH',h'00'
 homestr	dc	c'HOME',h'00'	
 _PATH_DEF	dc	c'termcap /etc/termcap',h'00'
+
+
+termcap_str_gs	dc i2'7',c'TERMCAP',h'00'
+termpath_str_gs	dc i2'8',c'TERMPATH',h'00'
+home_str_gs	dc i2'4',c'HOME',h'00'
+
+
+termcap_var	dc i2'3',a4'termcap_str_gs',a4'pathbuf_os',i2'0'
+termpath_var	dc i2'3',a4'termpath_str_gs',a4'pathbuf_os',i2'0'
+home_var	dc i2'3',a4'home_str_gs',a4'pathbuf_os',i2'0'
 
 	END
 
@@ -1323,151 +1275,6 @@ tmspc10	dc	i2'1,2000,1333,909,743,666,500,333,166,83,55,41,20,10,5'
 
 	END
 
-**************************************************************************
-*
-* Quick little routine for reading variables and converting to
-* null terminated strings. We could probably just link the Orca/C
-* library getenv(), but lets stay Orca-free, after all, that's why this
-* is written in assembly! :)
-*
-**************************************************************************
-
-getenv	PRIVATE
-
-newval	equ	1
-len	equ	newval+4
-namebuf	equ	len+2
-retval	equ	namebuf+4
-space	equ	retval+4
-var	equ	space+3
-end	equ	var+4
-
-;	subroutine (4:var),space
-
-	tsc
-	sec
-	sbc	#space-1
-	tcs
-	phd
-	tcd
-
-	stz	retval
-	stz	retval+2
-;
-; get length of variable name
-;
-	short	a
-	ldy	#0
-findlen	lda	[var],y
-	beq	gotlen
-	iny
-	bra	findlen
-gotlen	long	a
-	sty	len
-;
-; allocate a buffer to put the pascal string
-;	
-	iny
-	pea	0
-	phy
-	jsl	~NEW
-	sta	namebuf
-	stx	namebuf+2
-	sta	varparm
-	stx	varparm+2
-	ora	namebuf+2
-	jeq	exit
-;
-; now make a pascal string from the c string
-;	
-	short	ai
-	lda	len
-	sta	[namebuf]
-	ldy	#0
-copyname	lda	[var],y
-	beq	copydone
-               iny
-	sta	[namebuf],y
-	bra	copyname
-copydone	long	ai
-;
-; allocate a return buffer
-;
-	ph4	#255
-	jsl	~NEW
-	sta	newval
-	stx	newval+2
-	sta	varparm+4
-	stx	varparm+6
-	ora	newval+2
-	jeq	exit0
-;
-; Let's go read the variable
-;
-	Read_Variable varparm
-;
-; Was it defined?
-;
-	lda	[newval]
-	and	#$FF
-	jeq	exit1	;return a null if not defined
-;
-; Make a return buffer to return the variable value
-;
-	inc	a
-	pea	0
-	pha
-	jsl	~NEW
-	sta	retval
-	stx	retval+2
-	ora	retval+2
-	jeq	exit1
-;
-; And copy the resulting value
-;
-	short	ai
-	lda	[newval]
-	tay
-copyval	cpy	#0
-	beq	val1
-	lda	[newval],y
-	dey
-	sta	[retval],y
-	bra	copyval
-val1	lda	[newval]
-	tay
-	lda	#0
-	sta	[retval],y
-	long	ai	
-;
-; hasta la vista, baby
-;
-exit1	pei	(newval+2)
-	pei	(newval)
-	jsl	~DISPOSE
-
-exit0	pei	(namebuf+2)
-	pei	(namebuf)
-	jsl	~DISPOSE
-
-exit	ldy	retval
-	ldx	retval+2
-	lda	space+1
-	sta	end-2
-	lda	space
-	sta	end-3
-	pld
-	tsc
-	clc
-	adc	#end-4
-	tcs
-	tya
-	
-	rtl
-                          
-varparm	ds	8
-
-	END
 
 **************************************************************************
 *
@@ -1477,6 +1284,7 @@ varparm	ds	8
 
 ~TERMGLOBALS	PRIVDATA
 
+pathbuf_os dc i2'PBUFSIZ+2',i2'0' ; -3 so it can be null-terminated.
 pathbuf	ds	PBUFSIZ	;holds raw path of filenames
 pathvec	ds	PVECSIZ*4	;to point to names in pathbuf
 pvec	ds	4	;holds usable tail of path vector

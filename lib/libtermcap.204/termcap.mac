@@ -1,4 +1,4 @@
- macro
+	macro
 &l	_ldy &r
 &l	anop
 	aif "&r"="@a",.a
@@ -216,6 +216,10 @@
 &lab jsl $E100A8
  dc i2'&a1'
  dc i4'&a2'
+ mend
+ macro
+&lab ReadVariable &a1
+&lab gsos $014B,&a1
  mend
  macro
 &lab ph4 &parm
