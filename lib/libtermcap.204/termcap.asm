@@ -122,7 +122,7 @@ tokloop	add4	p,#1,p
 	lda	[p]
 	and	#$FF
 	beq	donetok
-               cmp	#' '
+	cmp	#' '
 	bne	tokloop
 	short	a
 	lda	#0
@@ -140,7 +140,7 @@ eatspace	add4	p,#1,p
 	lda	p+2
 	sta	[fname],y
 	add4	fname,#4,fname
-               bra	tokloop
+	bra	tokloop
 
 donetok	lda	#0	;mark end of vector
 	sta	[fname]
@@ -395,7 +395,7 @@ comploop	lda	[Np]
 compbreak	lda	[Np]
 	and	#$FF
 	bne	scanner
-               lda	[Bp],y
+	lda	[Bp],y
 	and	#$FF
 	beq	gotit
 	cmp	#'|'
@@ -418,7 +418,7 @@ scanner	lda	[Bp],y
 exit0	ldy	#0
 exit	lreturn 2:@y
 
-               END
+	END
 	
 **************************************************************************
 *
@@ -715,7 +715,7 @@ add0	anop
 	jsr	tdecode
 	sta	retval
 	stx	retval+2
-                         
+
 exit	return 4:retval
 
 	END
@@ -830,7 +830,7 @@ breakloop0	ldy	#2
 	sta	[area],y	
 
 	lreturn 4:str
- 
+
 dp1	dc	c'E^\:nrtbf',h'00'
 dp2	dc	h'1b',c'^\:',h'0a0d09080c'
 
