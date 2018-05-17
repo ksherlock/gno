@@ -40,14 +40,14 @@ tgetent	START
 
 	using	~TERMGLOBALS
 
-fname	equ	1
-p	equ	fname+4
-home	equ	p+4
-termpath	equ	home+4
-cp	equ	termpath+4
-space	equ	cp+4
+;fname	equ	1
+;p	equ	fname+4
+;home	equ	p+4
+;termpath	equ	home+4
+;cp	equ	termpath+4
+;space	equ	cp+4
 
-	subroutine (4:bp,4:name),space-1
+	subroutine (4:bp,4:name),(4:fname,4:p,4:home,4:termpath,4:cp)
 
 
 	ld4	pathbuf,p
@@ -188,17 +188,17 @@ tfindent	PRIVATE
 
 	using	~TERMGLOBALS
 
-tmp	equ	1
-ch	equ	tmp+4
-cnt	equ	ch+2
-i	equ	cnt+2
-cp	equ	i+2
-ibuf	equ	cp+4
-p	equ	ibuf+4
-opencnt	equ	p+4
-space	equ	opencnt+2
+;tmp	equ	1
+;ch	equ	tmp+4
+;cnt	equ	ch+2
+;i	equ	cnt+2
+;cp	equ	i+2
+;ibuf	equ	cp+4
+;p	equ	ibuf+4
+;opencnt	equ	p+4
+;space	equ	opencnt+2
 
-	lsubroutine (4:bp,4:name),space-1
+	lsubroutine (4:bp,4:name),(4:tmp,2:ch,2:cnt,2:i,4:cp,4:ibuf,4:p,2:opencnt)
 
 	mv4	bp,tbuf
 	mv4	pvec,p
@@ -361,12 +361,12 @@ tnamatch	PRIVATE
 
 	using	~TERMGLOBALS
 
-tmp	equ	1
-Np	equ	tmp+2
-Bp	equ	Np+4
-space	equ	Bp+4
+;tmp	equ	1
+;Np	equ	tmp+2
+;Bp	equ	Np+4
+;space	equ	Bp+4
 
-	lsubroutine (4:np),space-1
+	lsubroutine (4:np),(2:tmp,4:Np,4:Bp)
 
 	mv4	tbuf,Bp
 
@@ -434,10 +434,10 @@ tnchktc	PRIVATE
 
 	using	~TERMGLOBALS
 
-retval	equ	1
-space	equ	retval+2
+;retval	equ	1
+;space	equ	retval+2
 
-	lsubroutine (0:dummy),space-1
+	lsubroutine ,(2:retval)
 
 ;
 ; not important for GNO right now...write it later :)
@@ -463,12 +463,12 @@ tgetnum	START
 
 	using	~TERMGLOBALS
 
-tmp	equ	1
-retval	equ	tmp+2
-bp	equ	retval+2
-space	equ	bp+4
+;tmp	equ	1
+;retval	equ	tmp+2
+;bp	equ	retval+2
+;space	equ	bp+4
 
-	subroutine (4:id),space-1
+	subroutine (4:id),(2:tmp,2:retval,4:bp)
 
 	mv4	tbuf,bp
 	
@@ -575,12 +575,12 @@ tgetflag	START
 
 	using	~TERMGLOBALS
 
-bp	equ	1
-tmp	equ	bp+4
-retval	equ	tmp+2
-space	equ	retval+2
+;bp	equ	1
+;tmp	equ	bp+4
+;retval	equ	tmp+2
+;space	equ	retval+2
 
-	subroutine (4:id),space-1
+	subroutine (4:id),(4:bp,2:tmp,2:retval)
 
 	stz	retval
 	mv4	tbuf,bp
@@ -647,11 +647,11 @@ tgetstr	START
 
 	using	~TERMGLOBALS
 
-retval	equ	1
-bp	equ	retval+4
-space	equ	bp+4
+;retval	equ	1
+;bp	equ	retval+4
+;space	equ	bp+4
 
-	subroutine (4:id,4:area),space-1
+	subroutine (4:id,4:area),(4:retval,4:bp)
 
 	stz	retval
 	stz	retval+2
@@ -729,11 +729,11 @@ exit	return 4:retval
 
 tdecode	PRIVATE
 
-ch	equ	1
-cp	equ	ch+2
-space	equ	cp+4
+;ch	equ	1
+;cp	equ	ch+2
+;space	equ	cp+4
 
-	lsubroutine (4:str,4:area),space-1
+	lsubroutine (4:str,4:area),(2:ch,4:cp)
 
 
 	lda	[area]
@@ -867,16 +867,16 @@ tgoto	START
 
 	using	~TERMGLOBALS
 
-tmp	equ	1
-oncol	equ	tmp+2
-which	equ	oncol+2
-ch	equ	which+2
-dp	equ	ch+2
-retval	equ	dp+4
-cp	equ	retval+4
-space	equ	cp+4
+;tmp	equ	1
+;oncol	equ	tmp+2
+;which	equ	oncol+2
+;ch	equ	which+2
+;dp	equ	ch+2
+;retval	equ	dp+4
+;cp	equ	retval+4
+;space	equ	cp+4
 
-	subroutine (4:CM,2:destcol,2:destline),space-1
+	subroutine (4:CM,2:destcol,2:destline),(2:tmp,2:oncol,2:which,2:ch,4:dp,4:retval,4:cp)
 
 	ld4	result,dp
 	ld4	oops,retval
@@ -1124,13 +1124,13 @@ tputs	START
 
 	using	~TERMGLOBALS
 
-mspc10	equ	1
-tmp	equ	mspc10+2
-i	equ	tmp+2
-space	equ	i+2
+;mspc10	equ	1
+;tmp	equ	mspc10+2
+;i	equ	tmp+2
+;space	equ	i+2
 
 
-	subroutine (4:cp,2:affcnt,4:outc),space-1
+	subroutine (4:cp,2:affcnt,4:outc),(2:mspc10,2:tmp,2:i)
 
 	lda	cp
 	ora	cp+2

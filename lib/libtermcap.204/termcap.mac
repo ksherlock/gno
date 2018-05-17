@@ -15,20 +15,37 @@
 .y
 	mend
  macro
-&l subroutine &parms,&work
+&l subroutine &parms,&locals
 &l anop
- aif c:&work,.a
- lclc &work
-&work setc 0
-.a
  gbla &totallen
  gbla &worklen
-&worklen seta &work
+&worklen seta 0
 &totallen seta 0
- aif c:&parms=0,.e
  lclc &len
  lclc &p
  lcla &i
+
+ aif c:&locals=0,.doparms
+.dolocals
+&i seta 1
+.bb
+&p setc &locals(&i)
+&len amid &p,2,1
+ aif "&len"=":",.cc
+&len amid &p,1,2
+&p amid &p,4,l:&p-3
+ ago .dd
+.cc
+&len amid &p,1,1
+&p amid &p,3,l:&p-2
+.dd
+&p equ &worklen+1
+&worklen seta &worklen+&len
+&i seta &i+1
+ aif &i<=c:&locals,^bb
+.doparms
+
+ aif c:&parms=0,.e
 &i seta 1
 .b
 &p setc &parms(&i)
@@ -41,15 +58,15 @@
 &len amid &p,1,1
 &p amid &p,3,l:&p-2
 .d
-&p equ &totallen+4+&work
+&p equ &totallen+4+&worklen
 &totallen seta &totallen+&len
 &i seta &i+1
  aif &i<=c:&parms,^b
 .e
  tsc
- aif &work=0,.f
+ aif &worklen=0,.f
  sec
- sbc #&work
+ sbc #&worklen
  tcs
 .f
  phd
@@ -61,20 +78,36 @@
 
 
  macro
-&l lsubroutine  &parms,&work
+&l lsubroutine  &parms,&locals
 &l anop
- aif c:&work,.a
- lclc &work
-&work setc 0
-.a
  gbla &totallen
  gbla &worklen
-&worklen seta &work
+&worklen seta 0
 &totallen seta 0
- aif c:&parms=0,.e
  lclc &len
  lclc &p
  lcla &i
+
+ aif c:&locals=0,.doparms
+.dolocals
+&i seta 1
+.bb
+&p setc &locals(&i)
+&len amid &p,2,1
+ aif "&len"=":",.cc
+&len amid &p,1,2
+&p amid &p,4,l:&p-3
+ ago .dd
+.cc
+&len amid &p,1,1
+&p amid &p,3,l:&p-2
+.dd
+&p equ &worklen+1
+&worklen seta &worklen+&len
+&i seta &i+1
+ aif &i<=c:&locals,^bb
+.doparms
+ aif c:&parms=0,.e
 &i seta 1
 .b
 &p setc &parms(&i)
@@ -87,21 +120,21 @@
 &len amid &p,1,1
 &p amid &p,3,l:&p-2
 .d
-&p equ &totallen+3+&work
+&p equ &totallen+3+&worklen
 &totallen seta &totallen+&len
 &i seta &i+1
  aif &i<=c:&parms,^b
 .e
  tsc
- aif &work=0,.f
+ aif &worklen=0,.f
  sec
- sbc #&work
+ sbc #&worklen
  tcs
 .f
  phd
  tcd
  mend
- 
+
  macro
 &l return &r
 &l anop
