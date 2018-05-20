@@ -354,70 +354,70 @@ filename	ds	256
 * against each such name. The normal : terminator after the last
 * name (before the first field) stops us.
 *
-* TODO: Update Bp to be Y indexed...
-*
 **************************************************************************
 
 tnamatch	PRIVATE
 
 	using	~TERMGLOBALS
 
-;tmp	equ	1
-;Np	equ	tmp+2
-;Bp	equ	Np+4
-;space	equ	Bp+4
 
-	lsubroutine (4:np),(2:tmp,4:Np,4:Bp)
+	lsubroutine (4:Np),(4:Bp)
 
 	mv4	tbuf,Bp
 
-	ldy	#0
+	short a
 	lda	[Bp]
-	and	#$FF
+	beq	exit0
 	cmp	#'#'
 	beq	exit0
 
-loop	mv4	np,Np
-
-comploop	lda	[Np]
-	and	#$FF
-	beq	compbreak
-	sta	tmp
-	lda	[Bp],y
-	and	#$FF
-	cmp	tmp
-	bne	compbreak
+comploop0 ldy #0
+comploop	anop
+	lda	[Np],y
+	beq	np0
+	cmp	[Bp],y
+	bne	nextbp
 	iny
-	inc	Np
-	bne	comploop
-	inc	Np+2
-	bra	comploop
+	bra comploop
 
-compbreak	lda	[Np]
-	and	#$FF
-	bne	scanner
-	lda	[Bp],y
-	and	#$FF
-	beq	gotit
-	cmp	#'|'
-	beq	gotit
-	cmp	#':'
-	bne	scanner
-gotit	ldy	#1
+np0	anop
+; check [Bp],y for a match.
+	lda [Bp],y
+	beq gotit
+	cmp #'|'
+	beq gotit
+	cmp #':'
+	beq gotit
+;
+nextbp anop
+; advance bp to the next '|' and start over.
+	lda [Bp],y
+	beq exit0
+	iny
+	cmp #':'
+	beq exit0
+	cmp #'|'
+	bne nextbp
+	long a
+	tya
+	clc
+	adc Bp
+	sta Bp
+	lda #0
+	adc Bp+2
+	sta Bp+2
+	short a
+	bra comploop0
+
+gotit	anop
+	ldy	#1
 	bra	exit
 
-scanner	lda	[Bp],y
-	and	#$FF
-	beq	exit0
-	cmp	#':'
-	beq	exit0
-	iny
-	cmp	#'|'
-	beq	loop
-	bra	scanner
-
-exit0	ldy	#0
-exit	lreturn 2:@y
+exit0	anop
+	ldy	#0
+exit	anop
+	long a
+	lreturn 2:@y
 
 	END
 	
