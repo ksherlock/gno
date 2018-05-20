@@ -47,7 +47,7 @@ tgetent	START
 ;cp	equ	termpath+4
 ;space	equ	cp+4
 
-	subroutine (4:bp,4:name),(4:fname,4:p,4:home,4:termpath,4:cp)
+	subroutine (4:bp,4:name),(4:fname,4:p)
 
 
 	ld4	pathbuf,p
@@ -104,7 +104,8 @@ home_loop	anop
 	iny
 	bra home_loop
 eos	anop
-	sta pathbuf,x
+	sta pathbuf,x ; null-terminate.
+	stx pathbuf_os+2 ; length
 	long a
 
 
