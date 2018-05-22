@@ -1,0 +1,247 @@
+.TH "TERMCAP" "3" "May 31, 2007" "GNO" "Library Functions Manual"
+.SH "NAME"
+\fBtgetent\fR,
+\fBtgetnum\fR,
+\fBtgetflag\fR,
+\fBtgetstr\fR,
+\fBtgoto\fR,
+\fBtputs\fR
+\- terminal independent operation routines
+.SH "SYNOPSIS"
+\fIchar PC;\fR
+.br
+\fIchar *BC;\fR
+.br
+\fIchar *UP;\fR
+.br
+\fIshort ospeed;\fR
+.sp
+\fIint\fR
+.br
+\fBtgetent\fR(\fIchar\ *bp\fR, \fIchar\ *name\fR);
+.PP
+\fIint\fR
+.br
+\fBtgetnum\fR(\fIchar\ *id\fR);
+.PP
+\fIint\fR
+.br
+\fBtgetflag\fR(\fIchar\ *id\fR);
+.PP
+\fIchar *\fR
+.br
+\fBtgetstr\fR(\fIchar\ *id\fR, \fIchar\ **area\fR);
+.PP
+\fIchar *\fR
+.br
+\fBtgoto\fR(\fIchar\ *cm\fR, \fIdestcol\fR, \fIdestline\fR);
+.PP
+\fIvoid\fR
+.br
+\fBtputs\fR(\fIchar\ *cp\fR, \fIint\ affcnt\fR, \fIint\ (*outc)()\fR);
+.SH "DESCRIPTION"
+These functions extract and use capabilities from a terminal capability data
+base, usually
+\fI/etc/termcap\fR,
+the format of which is described in
+termcap(5).
+These are low level routines;
+see
+curses(3)
+for a higher level package.
+.PP
+The
+\fBtgetent\fR()
+function
+extracts the entry for terminal
+\fIname\fR
+into the buffer at
+\fIbp\fR.
+The
+\fIbp\fR
+argument
+should be a character buffer of size
+1024 and must be retained through all subsequent calls to
+\fBtgetnum\fR(),
+\fBtgetflag\fR(),
+and
+\fBtgetstr\fR().
+As an extension
+\fBtgetent\fR()
+can be passed NULL
+for the
+\fIbp\fR
+argument, in which case an internal buffer will be used.
+If repeated calls to
+\fBtgetent\fR()
+are made with a NULL
+\fIbp\fR
+argument, some memory will be leaked on each call subsequent
+to the first.
+The
+\fBtgetent\fR()
+function
+returns \-1 if none of the
+\fBtermcap\fR
+database files could be opened,
+0 if the terminal name given does not have an entry,
+and 1 if all goes well.
+It will look in the environment for a
+\fRTERMCAP\fR
+variable.
+If found, and the value does not begin with a slash,
+and the terminal type
+\fIname\fR
+is the same as the environment string
+\fRTERM\fR,
+the
+\fRTERMCAP\fR
+string is used instead of reading a
+\fBtermcap\fR
+file.
+If it does begin with a slash, the string is used as a path name
+of the
+\fBtermcap\fR
+file to search.
+If
+\fRTERMCAP\fR
+does not begin with a slash and
+\fIname\fR
+is different from
+\fRTERM\fR,
+\fBtgetent\fR()
+searches the files
+\fI$HOME/termcap\fR
+and
+\fI/etc/termcap\fR,
+in that order, unless the environment variable
+\fRTERMPATH\fR
+exists,
+in which case it specifies a list of file pathnames
+(separated by spaces or colons) to be searched instead.
+Whenever multiple files are searched and a
+\fBtc\fR
+field occurs in the requested entry, the entry it names must be found
+in the same file or one of the succeeding files.
+This can speed up entry into programs that call
+\fBtgetent\fR(),
+as well as help debug new terminal descriptions
+or make one for your terminal if you can't write the file
+\fI/etc/termcap\fR.
+.PP
+The
+\fBtgetnum\fR()
+function
+gets the numeric value of capability
+\fIid\fR,
+returning \-1 if it is not given for the terminal.
+The
+\fBtgetflag\fR()
+function
+returns 1 if the specified capability is present in
+the terminal's entry, 0 if it is not.
+The
+\fBtgetstr\fR()
+function
+returns the string value of the capability
+\fIid\fR,
+places it in the buffer at
+\fIarea\fR,
+and advances the
+\fIarea\fR
+pointer.
+It decodes the abbreviations for this field described in
+termcap(5),
+except for cursor addressing and padding information.
+The
+\fBtgetstr\fR()
+function
+returns
+\fRNULL\fR
+if the capability was not found.
+.PP
+The
+\fBtgoto\fR()
+function
+returns a cursor addressing string decoded from
+\fIcm\fR
+to go to column
+\fIdestcol\fR
+in line
+\fIdestline\fR.
+It uses the external variables
+\fIUP\fR
+(from the
+\fBup\fR
+capability)
+and
+\fIBC\fR
+(if
+\fBbc\fR
+is given rather than
+\fBbs\fR)
+if necessary to avoid placing
+\fB\en\fR,
+\fB^D\fR
+or
+\fB^@\fR
+in
+the returned string.
+(Programs which call
+\fBtgoto\fR()
+should be sure to turn off the
+\fRXTABS\fR
+bit(s),
+since
+\fBtgoto\fR()
+may now output a tab.
+Note that programs using termcap should in general turn off
+\fRXTABS\fR
+anyway since some terminals use control-I for other functions,
+such as nondestructive space.)
+If a
+\fB%\fR
+sequence is given which is not understood, then
+\fBtgoto\fR()
+returns
+(\fROOPS\fR).
+.PP
+The
+\fBtputs\fR()
+function
+decodes the leading padding information of the string
+\fIcp\fR;
+\fIaffcnt\fR
+gives the number of lines affected by the operation, or 1 if this is
+not applicable,
+\fIoutc\fR
+is a routine which is called with each character in turn.
+The external variable
+\fIospeed\fR
+should contain the output speed of the terminal as encoded by
+stty(3).
+The external variable
+\fIPC\fR
+should contain a pad character to be used (from the
+\fBpc\fR
+capability)
+if a null
+(\fB^@\fR)
+is inappropriate.
+.SH "FILES"
+.TP \fI/usr/lib/libtermcap\fR
+\fB\-l\fR \fIltermcap\fR
+library
+.TP \fI/etc/termcap\fR
+standard terminal capability database
+.TP \fI$HOME/termcap\fR
+user's terminal capability database
+.SH "SEE ALSO"
+ex(1),
+curses(3),
+termcap(5)
+.SH "HISTORY"
+The
+\fBtgetent\fR
+functions appeared in
+4.0BSD.
