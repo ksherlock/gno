@@ -740,7 +740,7 @@ init (void) {
 static int 
 pswitch (char *p, int *q) {
     int     swgood;
-    char    mfile[256];
+    static char    mfile[256];
     char   *ptmac;
     int	indx;
     int	val;
