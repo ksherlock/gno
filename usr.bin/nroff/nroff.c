@@ -85,7 +85,6 @@ int			stepping;		/* paging */
 int			mc_ing = 0;		/* turned off */
 int			mc_space = 2;
 char			mc_char = '|';
-char			tmpdir[256];
 char			s_standout[20];
 char			e_standout[20];
 char			s_bold[20];
@@ -120,7 +119,6 @@ main (int argc, char *argv[]) {
     register int	i;
     int		swflg;
     int		ifp = 0;
-    char	       *ptmp;
     char	       *pterm;
     static char		capability[100];
     char	       *pcap;
@@ -158,17 +156,7 @@ main (int argc, char *argv[]) {
     err_stream  = stderr;
     dbg_stream  = stderr;
     
-  
-    /*
-     *   this is for tmp files, if ever needed. it SHOULD start
-     *   out without the trailing slash. if not in env, use default
-     */
-    if ((ptmp = getenv ("TMPDIR")) != NULL) {
-	strcpy (tmpdir, ptmp);
-    } else {
-	strcpy (tmpdir, ".");
-    }
-  
+
     /*
      *   handle terminal for \fB, \fI
      */
