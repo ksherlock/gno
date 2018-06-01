@@ -1381,7 +1381,7 @@ getnumeric (char *p) {
 		FINDREG(percent, nreg, scratch);
 		p++;
 		if (nreg < 0) {
-		    errx(-1, "no register match");
+		    errx(-1, "no register match (%)");
 		}
 		
 		/*
@@ -1410,7 +1410,7 @@ getnumeric (char *p) {
 		name[2] = '\0';
 		FINDREG(name, nreg, scratch);
 		if (nreg < 0) {
-		    errx(-1, "no register match");
+		    errx(-1, "no register match (%s)", name);
 		}
 		
 		/*

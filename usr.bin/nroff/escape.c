@@ -206,7 +206,7 @@ expesc (char *src, char *dest, size_t len) {
 		     */
 		    FINDREG(percent, nreg, scratch);
 		    if (nreg < 0) {
-			errx(-1, "no register match");
+			errx(-1, "no register match (%)");
 		    }
 		    
 		    
@@ -283,7 +283,7 @@ expesc (char *src, char *dest, size_t len) {
 		    name[2] = '\0';
 		    FINDREG(name, nreg, scratch);
 		    if (nreg < 0) {
-			errx(-1, "no register match");
+			errx(-1, "no register match (%s)", name);
 		    }
 		    
 		    
