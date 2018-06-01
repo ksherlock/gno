@@ -249,11 +249,12 @@ main (int argc, char *argv[]) {
      *   loop on files
      */
     for (i = 1; i < argc; ++i) {
-	if (*argv[i] != '-' && *argv[i] != '+') {
+        char *cp = argv[i];
+	if (*cp != '-' && *cp != '+') {
 	    /*
 	     *   open this file...
 	     */
-	    if ((sofile[0] = fopen (argv[i], "r")) == NULL_FPTR) {
+	    if ((sofile[0] = fopen (cp, "r")) == NULL_FPTR) {
 		err(-1, "unable to open file %s", argv[i]);
 	    } else {
 		/*
@@ -263,24 +264,19 @@ main (int argc, char *argv[]) {
 		processFile ();
 		fclose (sofile[0]);
 	    }
-	} else if (*argv[i] == '-' && *(argv[i]+1) == 0) {
+	} else if (cp[0] == '-' && cp[1] == 0) {
 	    /*
 	     *   - means read stdin (anywhere in file list)
 	     */
 	    sofile[0] = stdin;
 	    ifp = 1;
-	    sleep(1);
 	    processFile ();
 	}
     }
-    
-    
-    /*
-     *   if no files, usage (should really use stdin...)
-     */
-    if ((ifp == 0 && swflg == FALSE) || argc <= 1) {
-	usage ();
-	err_exit (-1);
+    if (argc == 1) {
+            sofile[0] = stdin;
+            ifp = 1;
+            processFile ();        
     }
     
     /*
