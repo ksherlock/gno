@@ -261,6 +261,8 @@
 #define	S_ITALIC 132
 #define	E_ITALIC 133
 
+#define NBSP 134
+
 /*
  *	basic unit (b.u.) conversions. in nroff, all output is fixed spaced,
  *	at least in THIS nroff. so unit conversion to b.u. amount to 1 Em per

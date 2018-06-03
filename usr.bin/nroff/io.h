@@ -53,8 +53,8 @@
     case E_BOLD:     tputs(e_bold, 1, tprchar);        break; \
     case S_ITALIC:   tputs(s_italic, 1, tprchar);      break; \
     case E_ITALIC:   tputs(e_italic, 1, tprchar);      break; \
-    case 13:         break; \
-    default:        putc(c,fp); \
+    case NBSP:       putc(' ', fp); break; \
+    default:         if (c != 13) putc(c,fp); \
     } \
 }
 

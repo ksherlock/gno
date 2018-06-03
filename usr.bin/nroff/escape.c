@@ -29,9 +29,6 @@ segment "escape____";
 #pragma optimize 79
 #endif
 
-#define INVERSE '\xF'
-#define NORMAL  '\xE'
-
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -435,15 +432,22 @@ expesc (char *src, char *dest, size_t len) {
 	    case '`':	/*   \`		grave, like \(ga		*/
 	    case '\'':	/*   \'		accute, like \(aa		*/
 	    case '.':	/*   \.		period				*/
-	    case ' ':	/*   \(space)	space				*/
 
 		/* verbatim */
 		*t++ = *(s+1);
 		s  += 2;
 		break;
 
+	    case ' ':	/*   \(space)	non-breaking space				*/
+	    case '~':   /* paddable non-breaking space */
+		/* verbatim */
+		*t++ = NBSP;
+		s  += 2;
+		break;
+
+
 	    case '0':	/*   \0		digital width space		*/
-		*t++ = ' ';
+		*t++ = NBSP;
 		s  += 2;
 		break;
 
@@ -484,7 +488,7 @@ expesc (char *src, char *dest, size_t len) {
 		delim = *s++;
 		val   = atoi (s);
 		for (i = 0; i < val; i++) {
-		    *t++ = ' ';
+		    *t++ = NBSP;
 		}
 		while (*s != delim) {
 		    if (*s == 0) {
