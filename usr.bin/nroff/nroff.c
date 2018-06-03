@@ -61,7 +61,10 @@ segment "main______";
 
 static void	init (void);
 static void	processFile (void);
-static int	pswitch (char *p, int *q);
+
+static int optind = 0;
+static void pswitch(int argc, char **argv);
+
 static void	usage (void);
 
 /*************************************************************************
@@ -118,7 +121,6 @@ int
 main (int argc, char *argv[]) {
     register int	i;
     int		swflg;
-    int		ifp = 0;
     char	       *pterm;
     static char		capability[100];
     char	       *pcap;
@@ -237,45 +239,38 @@ main (int argc, char *argv[]) {
     /*
      *   parse cmdline flags
      */
-    for (i = 1; i < argc; ++i) {   
-	if (*argv[i] == '-' || *argv[i] == '+') {
-	    if (pswitch (argv[i], &swflg) == ERR) {
-		err_exit (-1);
-	    }
-	}
-    }
+    pswitch(argc, argv);
+    argc -= optind;
+    argv += optind;
 
     /*
      *   loop on files
      */
-    for (i = 1; i < argc; ++i) {
+    for (i = 0; i < argc; ++i) {
         char *cp = argv[i];
-	if (*cp != '-' && *cp != '+') {
+        if (cp[0] == '-' && cp[1] == 0) {
+            /*
+             *   - means read stdin (anywhere in file list)
+             */
+            sofile[0] = stdin;
+            processFile ();                
+        } else {
 	    /*
 	     *   open this file...
 	     */
 	    if ((sofile[0] = fopen (cp, "r")) == NULL_FPTR) {
-		err(-1, "unable to open file %s", argv[i]);
+		err(-1, "unable to open file %s", cp);
 	    } else {
 		/*
 		 *   do it for this file...
 		 */
-		ifp = 1;
 		processFile ();
 		fclose (sofile[0]);
 	    }
-	} else if (cp[0] == '-' && cp[1] == 0) {
-	    /*
-	     *   - means read stdin (anywhere in file list)
-	     */
-	    sofile[0] = stdin;
-	    ifp = 1;
-	    processFile ();
-	}
+        }
     }
-    if (argc == 1) {
+    if (argc == 0) {
             sofile[0] = stdin;
-            ifp = 1;
             processFile ();        
     }
     
@@ -728,6 +723,187 @@ init (void) {
 }
 
 
+/* can't use getopt since, eg, +5 is an option */
+static void pswitch(int argc, char **argv) {
+
+    char *optarg;
+    char   *ptmac;
+    int i;
+    int indx;
+    int val;
+
+    static char    mfile[256];
+
+
+    optind = 0;
+
+    for (i = 1; i < argc; ++i) {
+        char *cp = argv[i];
+        char c = cp[0];
+        if (c == '+') {
+            c = cp[1];
+            if (isdigit(c)) {
+                pg.frstpg = ctod(cp+1);
+            } else {
+                warnx("Invalid flag: +%c", c);
+                usage();
+                exit(1);
+            }
+            continue;
+        }
+        if (c != '-') break;
+        c = cp[1];
+        optarg = cp + 2;
+
+        /* -- */
+        if (c == '-' && !*optarg) { ++i; break; }
+
+        switch(c) {
+            case 'h': usage(); exit(0); break;
+            case 'v':
+                printf ("%s %s\n", progname, version); exit(0);
+                break;
+
+            case 'a':               /* font changes */
+                dc.dofnt = NO;
+                break;
+                
+            case 'b':               /* backspace */
+                dc.bsflg = TRUE;
+                break;
+                
+            case 'd':               /* debug mode */
+                if ((dbg_stream = fopen (dbgfile, "w")) == NULL) {
+                    warn ("unable to open debug file %s, using stderr", dbgfile);
+                    dbg_stream  = stderr;
+                }
+                debugging  = TRUE;
+                break;
+                
+        #ifdef GEMDOS
+            case 'h':               /* hold screen */
+                hold_screen = TRUE;
+                break;
+        #endif
+
+            case 'l':               /* to lpr (was P) */
+        #ifdef GEMDOS
+                out_stream = (FILE *) 0;
+        #else
+                out_stream = fopen (printer, "w");
+        #endif
+                setPrinting(TRUE);
+                break;
+                
+            case 'm':               /* macro file */
+                /*
+                 *   build macro file name. start with lib
+                 *
+                 *   put c:\lib\tmac in environment so we can
+                 *   read it here. else use default. if you want
+                 *   file from cwd, "setenv TMACDIR ." from shell.
+                 *
+                 *   we want file names like "tmac.an" (for -man)
+                 */
+                if ((ptmac = getenv ("TMACDIR")) != NULL) {
+                    /*
+                     *   this is the lib path (e.g. "c:\lib\tmac")
+                     */
+                    strcpy (mfile, ptmac);
+                    
+                    /*
+                     *   this is the prefix (i.e. "\tmac.")
+                     */
+                    strcat (mfile, TMACPRE);
+                } else {
+                    /*
+                     *   use default lib/prefix (i.e.
+                     *   "c:\lib\tmac\tmac.")
+                     */
+                    strcpy (mfile, TMACFULL);
+                }
+
+                /*
+                 *   finally, add extension (e.g. "an")
+                 */
+                strcat (mfile, optarg);
+                
+                /*
+                 *   open file and read it
+                 */
+                if ((sofile[0] = fopen (mfile, "r")) == NULL_FPTR) {
+                    err(-1, "unable to open macro file %s", mfile);
+                    /*NOTREACHED*/
+                }
+                processFile ();
+                fclose (sofile[0]);
+                break;
+                
+            case 'o':               /* output error log */
+                if (!*optarg) {
+                    errx(-1, "no error file specified");
+                    /*NOTREACHED*/
+                }
+                if ((err_stream = fopen (optarg, "w")) == NULL) {
+                err(-1, "unable to open error file %s", optarg);
+                /*NOTREACHED*/
+                }
+                err_set_file(err_stream);
+                break;
+
+            case 'p':               /* .po, .pn */
+                if (*optarg == 'o') {   /* -po___ */
+                    set (&pg.offset, ctod (optarg+1), '1', 0, 0, HUGE);
+                    set_ireg (".o", pg.offset, 0);
+                } else if (*optarg == 'n') { /* -pn___ */
+                    set (&pg.curpag, ctod (optarg+1) - 1, '1', 0, -HUGE, HUGE);
+                    pg.newpag = pg.curpag + 1;
+                    set_ireg ("%", pg.newpag, 0);
+                } else if (*optarg == 'l') { /* -pl___ */
+                    set (&pg.plval, ctod (optarg+1) - 1, '1', 0,
+                     pg.m1val + pg.m2val + pg.m3val + pg.m4val + 1,
+                     HUGE);
+                    set_ireg (".p", pg.plval, 0);
+                    pg.bottom = pg.plval - pg.m3val - pg.m4val;
+                } else {                    /* -p___ */
+                    set (&pg.offset, ctod (optarg), '1', 0, 0, HUGE);
+                    set_ireg (".o", pg.offset, 0);
+                }
+                break;
+                
+            case 'r':               /* set number reg */
+                if (isalpha (optarg)) {
+                    /*
+                     *   indx is the user num register and val
+                     *   is the final value.
+                     */
+                    indx = tolower (*optarg) - 'a';
+                    val  = atoi (optarg+1);
+                    set (&dc.nr[indx], val, '1', 0, -INFINITE, INFINITE);
+                } else {
+                    warnx("invalid number register name (%c)", *optarg);                        
+                }
+                break;
+                
+            case 's':               /* page step mode */
+                stepping = TRUE;
+                break;
+
+            default:
+                if (isdigit(c)) {
+                    pg.lastpg = ctod(cp+1);
+                } else {
+                    warnx("Invalid flag: -%c", c);
+                    usage();
+                    exit(1);
+                }
+                break;
+        }
+    }
+    optind = i;
+}
+
+#if 0
 /*
  * pswitch
  *
@@ -928,7 +1104,7 @@ pswitch (char *p, int *q) {
     
     return (OK);
 }
-
+#endif
 
 /*
  * processFile
