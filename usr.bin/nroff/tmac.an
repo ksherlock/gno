@@ -20,6 +20,8 @@
 .\" some perdefined strings (quotes, etc)
 .\"
 .ds S s
+.ds xu "
+.ds xm "
 .ds ` "`
 .ds ' "'
 .ds lq ""
@@ -88,6 +90,7 @@
 .\" set to 1 in TH if ONLINE is set. it is used in the EX macro to force
 .\" an immediate exit at the end.
 .\"
+.\" D is the .PD space value.
 .in 0.0i
 .po 0.0i
 .lt 7.2i
@@ -97,6 +100,7 @@
 .m3 3
 .m4 3
 .nr X 0
+.nr D 1
 .\"
 .\" **************************************************************************
 .\"
@@ -131,6 +135,7 @@
 .\"
 .de TH
 .\" define Se as default chapter name based on input chapter number
+.ds Se "
 .if $2=0 .ds Se "General Information
 .if $2=1 .ds Se "Commands and Applications
 .if $2=2 .ds Se "System Calls
@@ -210,7 +215,7 @@
 .\"
 .de TP
 .br
-.sp 1
+.sp \\nD
 .\" change to 0.5i for "normal" nroff output...
 .in 0.8i
 \&$1 $2 $3 $4 $5 $6 $7 $8 $9
@@ -223,7 +228,7 @@
 .\"
 .de IP
 .br
-.sp 1
+.sp \\nD
 .\" change to 0.5i for "normal" nroff output...
 .in 0.8i
 \&$1 $2 $3 $4 $5 $6 $7 $8 $9
@@ -236,17 +241,18 @@
 .\"
 .de HP
 .br
-.sp 1
+.sp \\nD
 .\" change to 0.5i for "normal" nroff output...
 .in 0.8i
 .in +0.8i
+.ti -0.8i
 ..
 .\" ----------------------------------------------------------------------- RP
 .\" relative indented paragraph with tag. MUST end with .RE
 .\"
 .de RP
 .br
-.sp 1
+.sp \\nD
 .\".if !\\n(.i>8 .in 0.8i
 \&$1 $2 $3 $4 $5 $6 $7 $8 $9
 .br
@@ -266,7 +272,7 @@
 .\" start a new unindented paragraph
 .\"
 .de PP
-.sp 1
+.sp \\nD
 .\" change to 0.5i for "normal" nroff output...
 .in 0.8i
 ..
@@ -274,7 +280,7 @@
 .\" start a new unindented paragraph (same as PP)
 .\"
 .de LP
-.sp 1
+.sp \\nD
 .\" change to 0.5i for "normal" nroff output...
 .in 0.8i
 ..
@@ -282,7 +288,7 @@
 .\" main section heading
 .\"
 .de SH
-.sp 1
+.sp \\nD
 .ne 3
 .\" change to 0.5i for "normal" nroff output...
 .in 0.8i
@@ -295,7 +301,7 @@
 .\" subsection heading, same indent
 .\"
 .de SS
-.sp 1
+.sp \\nD
 .ne 3
 .\" change to 0.5i for "normal" nroff output...
 .in 0.8i
@@ -361,13 +367,52 @@
 .\" small text
 .\"
 .de SM
-\&\fB$1\fR
+\&\fR$1\fP
+..
+.\" ----------------------------------------------------------------------- SB
+.\" small, bold text
+.\"
+.de SB
+\&\fB$1\fP
 ..
 .\" ----------------------------------------------------------------------- IX
 .\" make index entry (ignored by this nroff...)
 .\"
 .de IX
 ..
+.\" ----------------------------------------------------------------------- AT
+.\" obsolete AT version macro.
+.de AT
+..
+.\" ----------------------------------------------------------------------- PD
+.\" vertical paragraph distance.
+.de PD
+.nr D 1v
+.if \n(.$>0 .nr D \\$1v
+..
+.\" ----------------------------------------------------------------------- OP
+.\" (GNU) optional command line argument.
+.\" .OP key [value]
+.de OP
+.if \n(.$=1 [\fB$1\fR]
+.if \n(.$=2 [\fB$1\fR \fI$2\fR] 
+..
+.\" ----------------------------------------------------------------------- UR
+.\" .UR uri / ... / .UE  -- URL
+.\" .MT uri / ... / .ME  -- mailto
+.de UR
+.ds xu "$1
+.. 
+.de UE
+[\fI\*(xu\fP]
+..
+.de MT
+.ds xm "$1
+.. 
+.de ME
+[\fI\*(xm\fP]
+..
+
 .\" ----------------------------------------------------------------------- }D
 .\" debug. use (e.g. print current indent):
 .\"
