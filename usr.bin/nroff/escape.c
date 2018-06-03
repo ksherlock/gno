@@ -46,7 +46,7 @@ segment "escape____";
 #include "escape.h"
 #include "macros.h"
 
-static char *specialchar (char *s);
+const char *specialchar (const char *s);
 
 /*
  * expesc
@@ -559,115 +559,6 @@ expesc (char *src, char *dest, size_t len) {
 
     strcpy (src, dest);
 }
-
-
-
-/*
- * specialchar
- *	handles \(xx escape sequences for special characters
- */
-static char *
-specialchar (register char *s) {
-    register char	c1;
-    register char	c2;
-    
-    c1 = *s;
-    c2 = *(s+1);
-    
-    /*
-     *   symbols (std font)
-     */
-    if (c1 == 'e' && c2 == 'm') {return "-";}	/* dash */
-    if (c1 == 'h' && c2 == 'y') {return "-";}	/* hyphen */
-    if (c1 == 'L' && c2 == 'q') { return "``"; } /* Left quote */
-    if (c1 == 'R' && c2 == 'q') { return "''"; } /* Right quote */
-    if (c1 == 'o' && c2 == 'q') { return "`"; } /* open quote */
-    if (c1 == 'c' && c2 == 'q') { return "'"; } /* close quote */
-    if (c1 == 'r' && c2 == 'g') { return "(r)"; } /* registered */
-    if (c1 == 'c' && c2 == 'o') { return "(c)"; }	/* copyrite */
-    if (c1 == 't' && c2 == 'm') { return "(tm)"; }	/* trademark */
-    if (c1 == 'b' && c2 == 'u') { return "*"; }	/* bullet */
-
-    if (c1 == 'p' && c2 == 'l') { return "+"; }	/* math plus */
-    if (c1 == 'm' && c2 == 'i') { return "-"; }	/* math minus */
-    if (c1 == 'e' && c2 == 'q') { return "="; }	/* math equal */
-    if (c1 == '*' && c2 == '*') { return "*"; }	/* math star */
-    if (c1 == 's' && c2 == 'l') { return "/"; }	/* slash */
-    if (c1 == 'u' && c2 == 'l') { return "_"; }	/* underrule */
-    if (c1 == 'a' && c2 == 'p') { return "~"; }	/* approximates */
-    if (c1 == '1' && c2 == '4') { return "1/4"; }	/* 1/4 */
-    if (c1 == '1' && c2 == '2') { return "1/2"; }	/* 1/2 */
-    if (c1 == '3' && c2 == '4') { return "3/4"; }	/* 3/4 */
-
-
-    return "";
-
-#if 0
-    if (c1 == 'b' && c2 == 'u') {*c = 0xF9; return 2;}	/* bullet */
-    if (c1 == 's' && c2 == 'q') {*c = 0xF9; return 2;}	/* square */
-    if (c1 == 'r' && c2 == 'u') {*c = 0x5F; return 2;}	/* rule */
-    if (c1 == '1' && c2 == '2') {*c = 0xAB; return 2;}	/* 1/2 */
-    if (c1 == '1' && c2 == '4') {*c = 0xAC; return 2;}	/* 1/4 */
-    if (c1 == 'd' && c2 == 'e') {*c = 0xF8; return 2;}	/* degree */
-    if (c1 == 'd' && c2 == 'g') {*c = 0xBB; return 2;}	/* dagger */
-    if (c1 == 'f' && c2 == 'm') {*c = 0xBA; return 2;}	/* dagger */
-    if (c1 == 'c' && c2 == 't') {*c = 0x9B; return 2;}	/* cent */
-    if (c1 == 'c' && c2 == 'o') {*c = 0xBD; return 2;}	/* copyrite */
-    if (c1 == 'r' && c2 == 'g') {*c = 0xBE; return 2;}	/* registered */
-    if (c1 == 't' && c2 == 'm') {*c = 0xBF; return 2;}	/* trademark */
-    if (c1 == 'p' && c2 == '2') {*c = 0xFD; return 2;}	/* ^2 */
-    if (c1 == 'p' && c2 == '3') {*c = 0xFE; return 2;}	/* ^3 */
-    if (c1 == 'p' && c2 == 'n') {*c = 0xFC; return 2;}	/* ^n */
-    if (c1 == 'a' && c2 == 'a') {*c = 0xBA; return 2;}	/* acute */
-    if (c1 == 'g' && c2 == 'a') {*c = 0x60; return 2;}	/* grave */
-    if (c1 == 'd' && c2 == 't') {*c = 0xFA; return 2;}	/* dot */
-    if (c1 == 'p' && c2 == 'p') {*c = 0xBC; return 2;}	/* paragraph */
-    if (c1 == '^' && c2 == 'g') {*c = 0x07; return 2;}	/* ring bell */
-    if (c1 == 'u' && c2 == 'a') {*c = 0x01; return 2;}	/* up arrow */
-    if (c1 == 'd' && c2 == 'a') {*c = 0x02; return 2;}	/* dn arrow */
-    if (c1 == '-' && c2 == '>') {*c = 0x03; return 2;}	/* rt arrow */
-    if (c1 == '<' && c2 == '-') {*c = 0x04; return 2;}	/* lf arrow */
-    if (c1 == 'd' && c2 == 'i') {*c = 0xF6; return 2;}	/* divide */
-    if (c1 == 's' && c2 == 'r') {*c = 0xFB; return 2;}	/* sq root */
-    if (c1 == '=' && c2 == '=') {*c = 0xF0; return 2;}	/* == */
-    if (c1 == '>' && c2 == '=') {*c = 0xF2; return 2;}	/* >= */
-    if (c1 == '<' && c2 == '=') {*c = 0xF3; return 2;}	/* <= */
-    if (c1 == '+' && c2 == '-') {*c = 0xF1; return 2;}	/* +- */
-    if (c1 == '~' && c2 == '=') {*c = 0xF7; return 2;}	/* ~= */
-    if (c1 == 'a' && c2 == 'p') {*c = 0x7E; return 2;}	/* approx */
-    if (c1 == 'n' && c2 == 'o') {*c = 0xAA; return 2;}	/* not */
-    if (c1 == 'm' && c2 == 'o') {*c = 0xEE; return 2;}	/* member */
-    if (c1 == 'c' && c2 == 'a') {*c = 0xEF; return 2;}	/* intersect */
-    if (c1 == 'c' && c2 == 'u') {*c = 0x55; return 2;}	/* union */
-    if (c1 == 'i' && c2 == '1') {*c = 0xF4; return 2;}	/* integral1 */
-    if (c1 == 'i' && c2 == '2') {*c = 0xF5; return 2;}	/* integral2 */
-    if (c1 == 'b' && c2 == 'r') {*c = 0x7C; return 2;}	/* box v rule */
-    if (c1 == 'b' && c2 == 'v') {*c = 0x7C; return 2;}	/* bold vert */
-    if (c1 == 'p' && c2 == 'l') {*c = 0x2B; return 2;}	/* math plus */
-    if (c1 == 'm' && c2 == 'i') {*c = 0x2D; return 2;}	/* math minus */
-    if (c1 == 'e' && c2 == 'q') {*c = 0x3D; return 2;}	/* math equal */
-    if (c1 == '*' && c2 == '*') {*c = 0x2A; return 2;}	/* math star */
-    if (c1 == 's' && c2 == 'l') {*c = 0x2F; return 2;}	/* slash */
-    if (c1 == 'u' && c2 == 'l') {*c = 0x5F; return 2;}	/* underrule */
-    if (c1 == 's' && c2 == 'c') {*c = 0xDD; return 2;}	/* section */
-    
-    
-    /*
-     *   greek
-     */
-    if (c1 == '*' && c2 == 'a') {*c = 0xE0; return 2;}	/* alpha */
-    if (c1 == '*' && c2 == 'b') {*c = 0xE1; return 2;}	/* beta */
-    if (c1 == '*' && c2 == 'g') {*c = 0xE2; return 2;}	/* gamma */
-    if (c1 == '*' && c2 == 'd') {*c = 0x7F; return 2;}	/* delta */
-    if (c1 == '*' && c2 == 's') {*c = 0xE4; return 2;}	/* sigma */
-    if (c1 == '*' && c2 == 'p') {*c = 0xE3; return 2;}	/* pi */
-    if (c1 == '*' && c2 == 'm') {*c = 0xE6; return 2;}	/* mu */
-    
-    *c = ' ';
-    return 0;
-#endif
-}
-
 
 
 

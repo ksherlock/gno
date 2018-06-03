@@ -298,7 +298,7 @@
 #define MXMLEN		1000	/* max length of each macro definition (250) */
 #define MNLEN		10	/* max length of macro name */
 #define MAXREGS		100	/* max number of registers (2-char) */
-#define MAXPBB		5000	/* size of push back buffer */
+#define MAXPBB		1000	/* size of push back buffer */
 
 
 /*
