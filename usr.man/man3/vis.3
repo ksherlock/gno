@@ -166,14 +166,6 @@ There are three forms of encoding.
 All forms use the backslash character '\e' to introduce a special
 sequence; two backslashes are used to represent a real backslash.
 These are the visual formats:
-.de zb
-.br
-.in +0.8i
-..
-.de ze
-.sp 1
-.in -0.8i
-..
 .IP (default)
 Use an 'M'
 to represent meta characters (characters with the 8th
@@ -182,37 +174,28 @@ bit set), and use carat
 to represent control characters see
 .BR iscntrl (3).
 The following formats are used:
-.sp 1
-\e^C
-.zb
+.RS
+.IP \e^C
 Represents the control character
 .BR C .
 Spans characters '\e000' through '\e037',
 and '\e177' (as '\e^?').
-.ze
-\eM-C
-.zb
+.IP \eM-C
 Represents character
 .RB ' C '
 with the 8th bit set.
 Spans characters '\e241'
 through '\e376'.
-.ze
-\eM^C
-.zb
+.IP \eM^C
 Represents control character
 .BR C
 with the 8th bit set.
 Spans characters '\e200' through '\e237', and '\e377' (as '\eM^?').
-.ze
-\e040
-.zb
+.IP \e040
 Represents ASCII space.
-.ze
-\e240
-.zb
+.IP \e240
 Represents Meta-space.
-.ze
+.RE
 .IP VIS_CSTYLE
 Use C-style backslash sequences to represent standard non-printable
 characters.
