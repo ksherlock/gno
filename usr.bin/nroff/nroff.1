@@ -35,8 +35,8 @@ generally used only for program development.
 The following command line options are available:
 .IP -d
 Set debug mode.
-.IP -h
-Hold before exit (Atari TOS only).
+.\" .IP -h
+.\" Hold before exit (Atari TOS only).
 .IP -m<name>
 Process  macro  file  tmac.<name>.
 Thus -man would cause the file tmac.an to be loaded.
@@ -492,18 +492,17 @@ The are also used to toggle certain actions such as font selection.
 The escape sequences include:
 .sp
 .eo
-.\" .ec -
 .nf
 \\          backslash character
 \e          printable version of escape character
-\'          accute accent (equivalent to \\(aa)
-\`          grave accent (equivalent to \\(ga)
+\'          accute accent (equivalent to \(aa)
+\`          grave accent (equivalent to \(ga)
 \-          minus sign
 \.          period
 \<space>    a single, unpaddable space
 \0          digit-width space
-\|          1\6em space (zero space in nroff)
-\^          1\12em space (zero space in nroff)
+\|          1/6em space (zero space in nroff)
+\^          1/12em space (zero space in nroff)
 \&          non-printing zero-width character
 \"          beginning of comment
 \%          default hyphenation character
@@ -512,54 +511,55 @@ The escape sequences include:
 \fc         font change (c = R,I,B,S,P)
 \nx         interpolate number register x
 \t          horizontal tab
-.fi
-.sp
-.ne 5
-The Atari ST (TOS) version of nroff includes the following special
-characters. NOTE: THESE ARE NOT AVAILABLE UNDER Minix OR Unix(tm)!
-.sp
-.nf
-\(co        copyright
-\(rg        registered
-\(tm        trademark
-\(12        1/2
-\(14        1/4
-\(p2        exponent 2
-\(p3        exponent 3
-\(pn        exponent n
-\(aa        acute
-\(ga        grave
-\(de        degree
-\(dg        dagger
-\(ct        cent
-\(bu        bullet
-\(pp        paragraph
-\(^g        ring bell
-\(ua        up arrow
-\(da        dn arrow
-\(->        rt arrow
-\(<-        lf arrow
-\(di        divide
-\(sr        sq root
-\(==        ==
-\(>=        >=
-\(<=        <=
-\(+-        +-
-\(~=        ~=
-\(ap        approx
-\(no        not
-\(mo        memeber
-\(ca        intersect
-\(cu        union
-\(*a        alpha
-\(*b        beta
-\(*g        gamma
-\(*d        delta
-\(*s        sigma
-\(*p        pi
-\(*m        mu
+
 .fi
 .ec
+.\" .ne 5
+.\" The Atari ST (TOS) version of nroff includes the following special
+.\" characters. NOTE: THESE ARE NOT AVAILABLE UNDER Minix OR Unix(tm)!
+.\" .sp
+.\" .nf
+.\" \(co        copyright
+.\" \(rg        registered
+.\" \(tm        trademark
+.\" \(12        1/2
+.\" \(14        1/4
+.\" \(p2        exponent 2
+.\" \(p3        exponent 3
+.\" \(pn        exponent n
+.\" \(aa        acute
+.\" \(ga        grave
+.\" \(de        degree
+.\" \(dg        dagger
+.\" \(ct        cent
+.\" \(bu        bullet
+.\" \(pp        paragraph
+.\" \(^g        ring bell
+.\" \(ua        up arrow
+.\" \(da        dn arrow
+.\" \(->        rt arrow
+.\" \(<-        lf arrow
+.\" \(di        divide
+.\" \(sr        sq root
+.\" \(==        ==
+.\" \(>=        >=
+.\" \(<=        <=
+.\" \(+-        +-
+.\" \(~=        ~=
+.\" \(ap        approx
+.\" \(no        not
+.\" \(mo        memeber
+.\" \(ca        intersect
+.\" \(cu        union
+.\" \(*a        alpha
+.\" \(*b        beta
+.\" \(*g        gamma
+.\" \(*d        delta
+.\" \(*s        sigma
+.\" \(*p        pi
+.\" \(*m        mu
+.\" .fi
+.\" .ec
 .SH PREDEFINED GENERAL NUMBER REGISTERS
 The following number registers are available for both reading and writing.
 They are accessed with the \\n(xx and \\nx escape and can be set with .nr:
@@ -579,8 +579,9 @@ yr          last 2 digits of current year
 .sp
 The following number registers are available for reading only:
 .nf
-.cc +
+.ne 5
 
+.cc +
 .$          number of args available in current macro
 .A          always 1 in nroff
 .H          available horizontal resolution
@@ -594,7 +595,6 @@ The following number registers are available for reading only:
 .p          current page length
 .v          current vertical spacing
 +cc .
-
 .fi
 .SH NOTES
 There are several missing features, notably diversions, traps,
@@ -647,13 +647,10 @@ This should be changed to dynamically allocated buffers or
 write to intermediate files on small memory systems (i.e. Minix).
 .SH FILES
 .nf
-.ec |
 /lib/tmac/tmac.*   predefined macros (see ENVIRONMENT)
 nroff.dbg          debugging output
 stderr             default error output stream
 stdout             output stream
-
-.ec \
 .fi
 .SH AUTHOR
 .nf
