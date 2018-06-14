@@ -3,24 +3,26 @@
 \fBmore\fR
 \- file perusal filter for crt viewing
 .SH "SYNOPSIS"
+.HP 5n
 \fBmore\fR
 [\fB\-cs\fR]
 [\fIfile\ ...\fR]
 .SH "DESCRIPTION"
-\fBMore\fR
+\fBmore\fR
 is a filter for paging through text one screenful at a time.
 It uses
 termcap(3)
 so it can run on a variety of terminals.
-\fIFile\fR
-may be a single dash (``-''), implying stdin.
+If no
+\fIfile\fR
+is specified, or if
+\fIfile\fR
+is a single dash
+(\(oq-\(cq),
+the standard input is used.
 .SH "OPTIONS"
-Command line options are described below.
-Options are also taken from the environment variable
-\fRMORE\fR
-(make sure to precede them with a dash (``-'')) but command
-line options will override them.
-.TP \fB\-c\fR
+The options are as follows:
+.IP "\fB\-c\fR" 8n
 Normally,
 \fBmore\fR
 will repaint the screen by scrolling from the bottom of the screen.
@@ -29,34 +31,36 @@ If the
 option is set, when
 \fBmore\fR
 needs to change the entire display, it will paint from the top line down.
-.TP \fB\-s\fR
+.IP "\fB\-s\fR" 8n
 The
 \fB\-s\fR
 option causes
 consecutive blank lines to be squeezed into a single blank line.
 .SH "COMMANDS"
-.TP \fBSPACE\fR
+.IP "\fBSPACE\fR" 12n
 Scroll forward 1 screen.
-.TP \fBRETURN\fR
+.IP "\fBRETURN\fR" 12n
 Scroll forward 1 line.
-.TP \fBq\fR
+.IP "\fBq\fR" 12n
 Quit viewing the current file, and move to the next file (if any).
-.TP \fBESC\fR
+.IP "\fBESC\fR" 12n
 Abort
 \fBmore\fR,
 including any more files that may have been specified.
 .SH "ENVIRONMENT"
-\fBMore\fR
+\fBmore\fR
 utilizes the following environment variables, if they exist:
-.TP \fRMORE\fR
-This variable may be set with favored options to
+.IP "\fRMORE\fR" 12n
+Default command line options to use with
 \fBmore\fR.
-.TP \fRTERM\fR
+The options should be space-separated and must be prefixed with a dash
+(\(oq-\(cq).
+.IP "\fRTERM\fR" 12n
 Specifies terminal type, used by more to get the terminal
 characteristics necessary to manipulate the screen.
-.TP \fRLINES\fR
+.IP "\fRLINES\fR" 12n
 Specifies the number of lines on the screen.
-.TP \fRCOLUMNS\fR
+.IP "\fRCOLUMNS\fR" 12n
 Specifies the number of columns on the screen.
 .SH "HISTORY"
 The

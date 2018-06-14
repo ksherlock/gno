@@ -94,12 +94,18 @@ The characters in the
 function
 field in the table have the following meanings
 (more than one may apply to a capability):
-.Bd -unfilled
-N	Indicates numeric parameter(s).
-P	Indicates that padding may be specified.
-*	Indicates that padding may be based on the number of lines affected.
-o	Indicates capability is obsolete.
-.Ed
+.\" .Bd -unfilled
+.Pp
+.Bl -tag -width "NN" -compact
+.It N
+Indicates numeric parameter(s).
+.It P
+Indicates that padding may be specified.
+.It *
+Indicates that padding may be based on the number of lines affected.
+.It o
+Indicates capability is obsolete.
+.El
 .Pp
 .Dq Obsolete
 capabilities have no

@@ -46,7 +46,7 @@
 .\" .Op Fl / Ar pattern
 .Op Ar
 .Sh DESCRIPTION
-.Nm More
+.Nm
 is a filter for paging through text one screenful at a time.
 It uses
 .Xr termcap  3
@@ -54,15 +54,16 @@ so it can run on a variety of terminals.
 .\" There is even limited support
 .\" for hardcopy terminals.  (On a hardcopy terminal, lines which should be
 .\" printed at the top of the screen are prefixed with an up-arrow.)
-.Ar File
-may be a single dash (``-''), implying stdin.
+If no
+.Ar file
+is specified, or if
+.Ar file
+is a single dash
+.Pq Ql - ,
+the standard input is used.
 .Sh OPTIONS
-Command line options are described below.
-Options are also taken from the environment variable
-.Ev MORE
-(make sure to precede them with a dash (``-'')) but command
-line options will override them.
-.Bl -tag -width flag
+The options are as follows:
+.Bl -tag -width Ds
 .It Fl c
 Normally,
 .Nm
@@ -285,12 +286,14 @@ including any more files that may have been specified.
 .\" .Nm more .
 .\" .El
 .Sh ENVIRONMENT
-.Nm More
+.Nm
 utilizes the following environment variables, if they exist:
 .Bl -tag -width Fl
 .It Ev MORE
-This variable may be set with favored options to
-.Nm more .
+Default command line options to use with
+.Nm .
+The options should be space-separated and must be prefixed with a dash
+.Pq Ql - .
 .\" .It Ev EDITOR
 .\" Specify default editor.
 .\" .It Ev SHELL

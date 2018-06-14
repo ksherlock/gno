@@ -18,27 +18,45 @@
 .sp
 \fIint\fR
 .br
+.PD 0
+.HP 4n
 \fBtgetent\fR(\fIchar\ *bp\fR, \fIchar\ *name\fR);
+.PD
 .PP
 \fIint\fR
 .br
+.PD 0
+.HP 4n
 \fBtgetnum\fR(\fIchar\ *id\fR);
+.PD
 .PP
 \fIint\fR
 .br
+.PD 0
+.HP 4n
 \fBtgetflag\fR(\fIchar\ *id\fR);
+.PD
 .PP
 \fIchar *\fR
 .br
+.PD 0
+.HP 4n
 \fBtgetstr\fR(\fIchar\ *id\fR, \fIchar\ **area\fR);
+.PD
 .PP
 \fIchar *\fR
 .br
+.PD 0
+.HP 4n
 \fBtgoto\fR(\fIchar\ *cm\fR, \fIdestcol\fR, \fIdestline\fR);
+.PD
 .PP
 \fIvoid\fR
 .br
+.PD 0
+.HP 4n
 \fBtputs\fR(\fIchar\ *cp\fR, \fIint\ affcnt\fR, \fIint\ (*outc)()\fR);
+.PD
 .SH "DESCRIPTION"
 These functions extract and use capabilities from a terminal capability data
 base, usually
@@ -229,13 +247,18 @@ if a null
 (\fB^@\fR)
 is inappropriate.
 .SH "FILES"
-.TP \fI/usr/lib/libtermcap\fR
-\fB\-l\fR \fIltermcap\fR
+.TP 21n
+\fI/usr/lib/libtermcap\fR
+\fB\-l\fR \fItermcap\fR
 library
-.TP \fI/etc/termcap\fR
+.PD 0
+.TP 21n
+\fI/etc/termcap\fR
 standard terminal capability database
-.TP \fI$HOME/termcap\fR
+.TP 21n
+\fI$HOME/termcap\fR
 user's terminal capability database
+.PD
 .SH "SEE ALSO"
 ex(1),
 curses(3),
