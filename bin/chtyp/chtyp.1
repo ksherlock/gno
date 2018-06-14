@@ -8,7 +8,7 @@
 .SH SYNOPSIS
 .BR chtyp
 [ [
-.IR -t " " ftype 
+.IR -t " " ftype
 ] [
 .IR -a " " atype
 ] ] | [
@@ -24,7 +24,7 @@ hexadecimal with a leading 0x, or octal with a leading 0)
 or by a three letter abbreviation.  Abbreviations are from
 the official File Type Notes Index.
 .LP
-Auxilary types may only be specified as a number (decimal,
+Auxiliary types may only be specified as a number (decimal,
 hexadecimal, or octal).
 .LP
 If a file type is specified with no aux type, or vice versa,
@@ -43,19 +43,19 @@ The file type may be specified as a number (in decimal, as a
 hexadecimal number with a leading 0x, or as an octal number
 with a leading 0) or by one of the official three letter
 abbreviations listed in the File Type Notes Index.  Types set
-by abbreviation may not have their auxilary file types set
-due to the large variety of assigned auxilary types for each
+by abbreviation may not have their auxiliary file types set
+due to the large variety of assigned auxiliary types for each
 file type.
 .IP "\fB-a\fR \fIatype\fR"
-Set the auxilary file type of the indicated files to the
+Set the auxiliary file type of the indicated files to the
 .IR atype
-specified.  The auxilary type may only be specified as a 
+specified.  The auxiliary type may only be specified as a
 number.
 .IP "\fB-l\fR \fIlang\fR"
-Set the file type and auxilary file type to that of a source
+Set the file type and auxiliary file type to that of a source
 file of the selected
 .IR lang "."
-The 
+The
 .IR -l
 flag may not be used with the
 .IR -t
@@ -63,7 +63,7 @@ or
 .IR -a
 flags.
 .IP
-Valid language types are: 
+Valid language types are:
 APWC, APWTXT, ASM, CC, DESKTOP, DISASM, EXEC, GSOFT,
 IBASIC, LINKER, MDBASIC MODULA2, PASCAL, PS, REZ,
 SDEASM, SDECMD, TMLPASCAL
@@ -73,6 +73,6 @@ The
 utility exits 0 on success, and >0 if an error occurs.
 .SH HISTORY
 .BR chtyp
-was originally written by Greg Thompson.  Jawaid Bazyar rewrote it 
+was originally written by Greg Thompson.  Jawaid Bazyar rewrote it
 later for GNO/ME, and it has since been rewritten from scratch for
 GNO/ME v2.0.6 by Evan Day <day@engr.orst.edu>.
