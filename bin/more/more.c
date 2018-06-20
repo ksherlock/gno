@@ -26,7 +26,7 @@
 #include <paths.h>
 
 #include <sgtty.h>
-#include <sys/ioctl_compat.h>
+#include <sys/ioctl.compat.h>
 
 #ifdef __ORCAC__
 #include <gno/gno.h>
@@ -102,7 +102,7 @@ void quit(int code) {
 
 char i_buf[1024];
 unsigned b_ind = 0;
-unsigned b_size = 0;
+int b_size = 0;
 int b_ref;
 unsigned b_eof;
 unsigned long b_mark;
@@ -132,8 +132,9 @@ int buf_peek(void) {
             return EOF;
         b_size = read(b_ref, i_buf, 1024);
         b_ind = 0;
-        if (!b_size) {
+        if (b_size <= 0) {
             b_eof = 1;
+            b_size = 0;
             return EOF;
         }
     }
@@ -148,8 +149,9 @@ int buf_getc(void) {
             return EOF;
         b_size = read(b_ref, i_buf, 1024);
         b_ind = 0;
-        if (!b_size) {
+        if (b_size <= 0) {
             b_eof = 1;
+            b_size = 0;
             return EOF;
         }
     }
@@ -400,7 +402,7 @@ int pager(const char *path, unsigned printName, unsigned standardOut) {
 
             end = b_oind;
             if (start > end)
-                start += OBUFSIZE;
+                end += OBUFSIZE;
             l = end - start;
 
             tputs(tcap_se, 1, tcap_putc);
@@ -516,7 +518,7 @@ stackResults(void) {
 #endif
 
 
-int main(int argc, char *argv[]) {
+int main(int argc, char **argv) {
     int i;
     int standardOut;
 
