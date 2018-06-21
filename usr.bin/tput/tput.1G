@@ -4,11 +4,15 @@
 \fBclear\fR
 \- terminal capability interface
 .SH "SYNOPSIS"
+.HP 5n
 \fBtput\fR
 [\fB\-T\fR\ \fIterm\fR]
 \fIattribute\ ...\fR
 .br
+.PD 0
+.HP 6n
 \fBclear\fR
+.PD
 .SH "DESCRIPTION"
 The
 \fBtput\fR
@@ -24,17 +28,17 @@ had been executed.
 The options to
 \fBtput\fR
 are as follows:
-.TP \fB\-T\fR
+.IP "\fB\-T\fR" 8n
 The terminal name as specified in the
 termcap(5)
 database, for example,
-``vt100''
+\(Lqvt100\(Rq
 or
-``xterm''.
+\(Lqxterm\(Rq.
 If not specified,
 \fBtput\fR
 retrieves the
-``\fRTERM\fR''
+\(Lq\fRTERM\fR\(Rq
 variable from the environment.
 .PP
 The
@@ -51,44 +55,44 @@ If an
 \fIattribute\fR
 is of type string, and takes arguments (e.g.\& cursor movement,
 the termcap
-``cm''
+\(Lqcm\(Rq
 sequence) the arguments are taken from the command line immediately
 following the attribute.
 .PP
 The following special attributes are available:
-.TP \fBclear\fR
+.IP "\fBclear\fR" 14n
 Clear the screen (the
 termcap(5)
-``cl''
+\(Lqcl\(Rq
 sequence).
-.TP \fBinit\fR
+.IP "\fBinit\fR" 14n
 Initialize the terminal (the
 termcap(5)
-``is''
+\(Lqis\(Rq
 sequence).
-.TP \fBlongname\fR
+.IP "\fBlongname\fR" 14n
 Print the descriptive name of the user's terminal type.
-.TP \fBreset\fR
+.IP "\fBreset\fR" 14n
 Reset the terminal (the
 termcap(5)
-``rs''
+\(Lqrs\(Rq
 sequence).
 .SH "EXIT STATUS"
 The exit status of
 \fBtput\fR
 is as follows:
-.TP 0
+.IP "0" 8n
 If the last attribute
 \fIattribute\fR
 argument is of type string or integer, its value was successfully written
 to standard output.
 If the argument is of type boolean, the terminal has this attribute.
-.TP 1
+.IP "1" 8n
 This terminal does not have the specified boolean
 \fIattribute\fR.
-.TP 2
+.IP "2" 8n
 Usage error.
-.TP 3
+.IP "3" 8n
 No information is available about the specified terminal type.
 .SH "SEE ALSO"
 termcap(5),
@@ -97,7 +101,7 @@ terminfo(5)
 The
 \fBtput\fR
 utility conforms to
-IEEE Std 1003.1-2001 (``POSIX.1'').
+IEEE Std 1003.1-2001 (\(LqPOSIX.1\(Rq).
 .SH "HISTORY"
 The
 \fBtput\fR
@@ -109,9 +113,9 @@ The
 utility cannot really distinguish between different types of attributes.
 .PP
 Some termcap entries depend upon having a
-`%'
+\(oq%\(cq
 in them that is just a
-`%'
+\(oq%\(cq
 and nothing more.
 Right now we just warn about them if they do not
 have a valid type declaration.

@@ -3,6 +3,7 @@
 \fBprintf\fR
 \- formatted output
 .SH "SYNOPSIS"
+.HP 7n
 \fBprintf\fR
 \fIformat\fR\ [\fIarguments\ ...\fR]
 .SH "DESCRIPTION"
@@ -29,13 +30,15 @@ or
 otherwise it is evaluated as a C constant, with the following extensions:
 .PP
 .RS 6n
-.TP \fB\(bu\fR
+.PD 0
+.IP "\fB\(bu\fR" 4n
 A leading plus or minus sign is allowed.
-.TP \fB\(bu\fR
+.IP "\fB\(bu\fR" 4n
 If the leading character is a single or double quote, the value is the
 \fRASCII\fR
 code of the next character.
 .RE
+.PD
 .PP
 The format string is reused as often as necessary to satisfy the
 \fIarguments\fR.
@@ -43,49 +46,52 @@ Any extra format specifications are evaluated with zero or the null
 string.
 .PP
 Character escape sequences are in backslash notation as defined in the
-ANSI X3.159-1989 (``ANSI C89''),
+ANSI X3.159-1989 (\(LqANSI\~C89\(Rq),
 with extensions.
 The characters and their meanings
 are as follows:
 .PP
 .RS 6n
-.TP \fB\\ea\fR
+.PD 0
+.IP "\fB\ea\fR" 8n
 Write a <bell> character.
-.TP \fB\\eb\fR
+.IP "\fB\eb\fR" 8n
 Write a <backspace> character.
-.TP \fB\\ec\fR
+.IP "\fB\ec\fR" 8n
 Ignore remaining characters in this string.
-.TP \fB\\ef\fR
+.IP "\fB\ef\fR" 8n
 Write a <form-feed> character.
-.TP \fB\\en\fR
+.IP "\fB\en\fR" 8n
 Write a <new-line> character.
-.TP \fB\\er\fR
+.IP "\fB\er\fR" 8n
 Write a <carriage return> character.
-.TP \fB\\et\fR
+.IP "\fB\et\fR" 8n
 Write a <tab> character.
-.TP \fB\\ev\fR
+.IP "\fB\ev\fR" 8n
 Write a <vertical tab> character.
-.TP \fB\\e\'\fR
+.IP "\fB\e\'\fR" 8n
 Write a <single quote> character.
-.TP \fB\\e\\e\fR
+.IP "\fB\e\e\fR" 8n
 Write a backslash character.
-.TP \fB\\e\fR\fInum\fR
-.TP \fB\\e0\fR\fInum\fR
+.IP "\fB\e\fR\fInum\fR" 8n
+.IP "\fB\e0\fR\fInum\fR" 8n
 Write an 8-bit character whose
 \fRASCII\fR
 value is the 1-, 2-, or 3-digit
 octal number
 \fInum\fR.
 .RE
+.PD
 .PP
 Each format specification is introduced by the percent character
 (``%'').
 The remainder of the format specification includes,
 in the following order:
-.TP Zero or more of the following flags:
+.IP "Zero or more of the following flags:" 8n
 .PP
 .RS 8n
-.TP \fB#\fR
+.PD 0
+.IP "\fB#\fR" 8n
 A `#' character
 specifying that the value should be printed in an ``alternate form''.
 For
@@ -117,33 +123,36 @@ and
 \fBG\fR
 formats, trailing zeros are not removed from the result as they
 would otherwise be;
-.TP \fB\&\-\fR
+.PD
+.IP "\fB\&\-\fR" 8n
 A minus sign `\-' which specifies
 \fIleft adjustment\fR
 of the output in the indicated field;
-.TP \fB\&+\fR
+.IP "\fB\&+\fR" 8n
 A `+' character specifying that there should always be
 a sign placed before the number when using signed formats.
-.TP `\&\ \&'
+.IP "\(oq\&\ \&\(cq" 8n
 A space specifying that a blank should be left before a positive number
 for a signed format.
 A `+' overrides a space if both are used;
-.TP \fB\&0\fR
+.IP "\fB\&0\fR" 8n
 A zero `0' character indicating that zero-padding should be used
 rather than blank-padding.
 A `\-' overrides a `0' if both are used;
+.PD 0
 .PP
 .RE
-.TP Field Width:
+.PD
+.IP "Field Width:" 8n
 An optional digit string specifying a
 \fIfield width\fR;
 if the output string has fewer characters than the field width it will
 be blank-padded on the left (or right, if the left-adjustment indicator
 has been given) to make up the field width (note that a leading zero
 is a flag, but an embedded zero is part of a field width);
-.TP Precision:
+.IP "Precision:" 8n
 An optional period,
-`\fB\&.\&\fR',
+\(oq\fB\&.\&\fR\(cq,
 followed by an optional digit string giving a
 \fIprecision\fR
 which specifies the number of digits to appear after the decimal point,
@@ -154,7 +163,7 @@ and
 formats, or the maximum number of characters to be printed
 from a string; if the digit string is missing, the precision is treated
 as zero;
-.TP Format:
+.IP "Format:" 8n
 .br
 A character which indicates the type of format to use (one of
 \fBdiouxXfFeEgGaAcsb\fR).
@@ -167,19 +176,19 @@ may be prefixed by an
 to request that additional precision be used, if available.
 .PP
 A field width or precision may be
-`\fB\&*\fR'
+\(oq\fB\&*\fR\(cq
 instead of a digit string.
 In this case an
 \fIargument\fR
 supplies the field width or precision.
 .PP
 The format characters and their meanings are:
-.TP \fBdiouXx\fR
+.IP "\fBdiouXx\fR" 12n
 The
 \fIargument\fR
 is printed as a signed decimal (d or i), unsigned octal, unsigned decimal,
 or unsigned hexadecimal (X or x), respectively.
-.TP \fBfF\fR
+.IP "\fBfF\fR" 12n
 The
 \fIargument\fR
 is printed in the style `[\-]ddd.ddd' where the number of d's
@@ -188,26 +197,26 @@ the argument.
 If the precision is missing, 6 digits are given; if the precision
 is explicitly 0, no digits and no decimal point are printed.
 The values infinity and NaN are printed as
-`inf'
+\(oqinf\(cq
 and
-`nan',
+\(oqnan\(cq,
 respectively.
-.TP \fBeE\fR
+.IP "\fBeE\fR" 12n
 The
 \fIargument\fR
 is printed in the style
 \fBe\fR
-`[-\fId.ddd\fR\(+-\fIdd\fR]'
+\(oq[-\fId.ddd\fR\(+-\fIdd\fR]\(cq
 where there
 is one digit before the decimal point and the number after is equal to
 the precision specification for the argument; when the precision is
 missing, 6 digits are produced.
 The values infinity and NaN are printed as
-`inf'
+\(oqinf\(cq
 and
-`nan',
+\(oqnan\(cq,
 respectively.
-.TP \fBgG\fR
+.IP "\fBgG\fR" 12n
 The
 \fIargument\fR
 is printed in style
@@ -217,36 +226,36 @@ or in style
 \fBe\fR
 (\fBE\fR)
 whichever gives full precision in minimum space.
-.TP \fBaA\fR
+.IP "\fBaA\fR" 12n
 The
 \fIargument\fR
 is printed in style
-`[-\fIh.hhh\fR\(+-\fRp\fR\fId\fR]'
+\(oq[-\fIh.hhh\fR\(+-\fRp\fR\fId\fR]\(cq
 where there is one digit before the hexadecimal point and the number
 after is equal to the precision specification for the argument;
 when the precision is missing, enough digits are produced to convey
 the argument's exact double-precision floating-point representation.
 The values infinity and NaN are printed as
-`inf'
+\(oqinf\(cq
 and
-`nan',
+\(oqnan\(cq,
 respectively.
-.TP \fBc\fR
+.IP "\fBc\fR" 12n
 The first character of
 \fIargument\fR
 is printed.
-.TP \fBs\fR
+.IP "\fBs\fR" 12n
 Characters from the string
 \fIargument\fR
 are printed until the end is reached or until the number of characters
 indicated by the precision specification is reached; however if the
 precision is 0 or missing, all characters in the string are printed.
-.TP \fBb\fR
+.IP "\fBb\fR" 12n
 As for
 \fBs\fR,
 but interpret character escapes in backslash notation in the string
 \fIargument\fR.
-.TP \fB\&%\fR
+.IP "\fB\&%\fR" 12n
 Print a `%'; no argument is used.
 .PP
 The decimal point
@@ -258,7 +267,7 @@ a field; padding takes place only if the specified field width exceeds
 the actual width.
 .SH "EXIT STATUS"
 .br
-The \fBprintf\fR utility exits 0 on success, and >0 if an error occurs.
+The \fBprintf\fR utility exits\~0 on success, and\~>0 if an error occurs.
 .SH "COMPATIBILITY"
 The traditional
 BSD
@@ -273,7 +282,7 @@ printf(3)
 The
 \fBprintf\fR
 command is expected to be compatible with the
-IEEE Std 1003.2 (``POSIX.2'')
+IEEE Std 1003.2 (\(LqPOSIX.2\(Rq)
 specification.
 .SH "HISTORY"
 The
@@ -304,5 +313,5 @@ format, the argument will be truncated at the \e000 character.
 .PP
 Multibyte characters are not recognized in format strings (this is only
 a problem if
-`%'
+\(oq%\(cq
 can appear inside a multibyte character).

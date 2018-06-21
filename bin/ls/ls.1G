@@ -3,6 +3,7 @@
 \fBls\fR
 \- list directory contents
 .SH "SYNOPSIS"
+.HP 3n
 \fBls\fR
 [\fB\-acdfilqrstACFRS1\fR]
 [\fIfile\ ...\fR]
@@ -18,20 +19,20 @@ When several arguments are given, the arguments are first sorted appropriately,
 but file arguments are processed before directories and their contents.
 .PP
 There are a large number of options:
-.TP \fB\-a\fR
+.IP "\fB\-a\fR" 8n
 List all entries; in the absence of this option, entries whose names begin
 with a period
 (\fI\&.\fR)
 or whose GS/OS
-`invisible'
+\(oqinvisible\(cq
 flag is set are not listed.
-.TP \fB\-c\fR
+.IP "\fB\-c\fR" 8n
 Use time of file creation for sorting or printing.
-.TP \fB\-d\fR
+.IP "\fB\-d\fR" 8n
 If argument is a directory, list only its name; often used with
 \fB\-l\fR
 to get the status of a directory.
-.TP \fB\-f\fR
+.IP "\fB\-f\fR" 8n
 Output is not sorted.
 This option turns on
 \fB\-a\fR.
@@ -44,51 +45,51 @@ and
 options.
 This is useful when organizing libraries in alphabetical order for ORCA
 languages.
-.TP \fB\-l\fR
+.IP "\fB\-l\fR" 8n
 List in long format, giving mode, number of links,owner, size in bytes, and
 time of last modification for each file.
 If the file is a special file the size field will instead contain the major and
 minor device numbers.
 If the file is a symbolic link the pathname of the linked-to file is printed
 preceded by
-``->''.
-.TP \fB\-q\fR
+\(Lq->\(Rq.
+.IP "\fB\-q\fR" 8n
 force printing of non-graphic characters in file names as the character
-`?';
+\(oq?\(cq;
 this is the default when output is to a terminal.
-.TP \fB\-r\fR
+.IP "\fB\-r\fR" 8n
 Reverse the order of sort to get reverse alphabetic or oldest first as
 appropriate.
-.TP \fB\-s\fR
+.IP "\fB\-s\fR" 8n
 Give size in kilobytes of each file.
-.TP \fB\-t\fR
+.IP "\fB\-t\fR" 8n
 Sort by time modified (latest first) instead of by name.
-.TP \fB\-A\fR
+.IP "\fB\-A\fR" 8n
 List all entries except for the current directory
 (\fI\&.\fR)
 and the parent directory
 (\fI\&.\&.\fR).
-.TP \fB\-C\fR
+.IP "\fB\-C\fR" 8n
 force multi-column output; this is the default when output is to a terminal.
-.TP \fB\-F\fR
+.IP "\fB\-F\fR" 8n
 Cause directories to be marked with a trailing
-`/',
+\(oq/\(cq,
 sockets with a trailing
-`=',
+\(oq=\(cq,
 executable files with a trailing
-`*',
+\(oq*\(cq,
 and symbolic links to files with a trailing
-`@'.
+\(oq@\(cq.
 Symbolic links to directories are marked with a trailing
-`/',
+\(oq/\(cq,
 unless the
 \fB\-l\fR
 option is also used.
-.TP \fB\-R\fR
+.IP "\fB\-R\fR" 8n
 recursively list subdirectories encountered.
-.TP \fB\-S\fR
+.IP "\fB\-S\fR" 8n
 Sort by size (largest file first).
-.TP \fB\-1\fR
+.IP "\fB\-1\fR" 8n
 force one entry per line output format; this is the default when output is not
 to a terminal.
 .PP
@@ -98,21 +99,23 @@ option contains 11 characters which are interpreted as follows: the first
 character is
 .PP
 .RS 6n
-.TP \fBe\fR
+.PD 0
+.IP "\fBe\fR" 6n
 if the entry has a resource fork,
-.TP \fBd\fR
+.IP "\fBd\fR" 6n
 if the entry is a directory;
-.TP \fBb\fR
+.IP "\fBb\fR" 6n
 if the entry is a block-type special file;
-.TP \fBc\fR
+.IP "\fBc\fR" 6n
 if the entry is a character-type special file;
-.TP \fBl\fR
+.IP "\fBl\fR" 6n
 if the entry is a symbolic link;
-.TP \fBs\fR
+.IP "\fBs\fR" 6n
 if the entry is a socket, or
-.TP \fB\-\fR
+.IP "\fB\-\fR" 6n
 if the entry is a plain file.
 .RE
+.PD
 .PP
 The next 9 characters are interpreted as three sets of three bits each.
 The first set refers to owner permissions; the next refers to permissions to
@@ -120,24 +123,26 @@ others in the same user-group; and the last to all others.
 Within each set the three characters indicate permission respectively to read,
 to write, or to execute the file as a program.
 For a directory,
-`execute'
+\(oqexecute\(cq
 permission is interpreted to mean permission to search the directory.
 The permissions are indicated as follows:
 .PP
 .RS 6n
-.TP \fBi\fR
+.PD 0
+.IP "\fBi\fR" 6n
 if the file is invisible
-.TP \fBd\fR
+.IP "\fBd\fR" 6n
 if the file can be deleted
-.TP \fBr\fR
+.IP "\fBr\fR" 6n
 if the file is readable;
-.TP \fBw\fR
+.IP "\fBw\fR" 6n
 if the file is writable;
-.TP \fBx\fR
+.IP "\fBx\fR" 6n
 if the file is executable;
-.TP \fB\-\fR
+.IP "\fB\-\fR" 6n
 if the indicated permission is not granted.
 .RE
+.PD
 .PP
 When the sizes of the files in a directory are listed, a total count of blocks,
 including indirect blocks is printed.
@@ -146,9 +151,9 @@ The output device is assumed to be 80 columns wide.
 .PP
 GNO and GS/OS do not currently support links, user/group permissions, the
 concept of
-`i-numbers',
+\(oqi-numbers\(cq,
 or
-`special'
+\(oqspecial\(cq
 files; thus,
 \fBls\fR
 options that deal with these are ignored.

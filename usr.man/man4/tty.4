@@ -19,9 +19,9 @@ Terminals are controlled through calls to the
 system call:
 .nf
 
-	#include <sgtty.h>
+    #include <sgtty.h>
 
-	ioctl(int \fIfiledes\fR, unsigned long \fIcode\fR, void *\fIarg\fR);
+    ioctl(int \fIfiledes\fR, unsigned long \fIcode\fR, void *\fIarg\fR);
 
 .fi
 This is a very flexible interface where
@@ -72,7 +72,7 @@ by opening the file
 and issuing the system call:
 .nf
 
-	ioctl (\fIfd\fR, TIOCNOTTY, NULL);
+    ioctl(\fIfd\fR, TIOCNOTTY, NULL);
 
 .fi
 where
@@ -100,38 +100,38 @@ routines.
 .\" done is to have a kernel code review to see what the current
 .\" implementation does.  In the interim, I have left (commented out)
 .\" the descriptions from the v2.0.1 manual page, below.
-.\"						-- Devin Reade
+.\"                     -- Devin Reade
 .\"
 .\" cooked mode
 .\"
-.\"	On Unix systems, this mode also allows for input editing.  It
-.\"	is called cooked mode and is the normal state of the terminal driver.
-.\"	Due to the history of the Apple II and it's operating systems, this
-.\"	this precedent was not followed.  Instead, to get input editing
-.\"	features, use the ReadLine Toolbox call.  Cooked-mode input editing
-.\"	may be implemented for future releases of GNO.
-.\"	
+.\" On Unix systems, this mode also allows for input editing.  It
+.\" is called cooked mode and is the normal state of the terminal driver.
+.\" Due to the history of the Apple II and it's operating systems, this
+.\" this precedent was not followed.  Instead, to get input editing
+.\" features, use the ReadLine Toolbox call.  Cooked-mode input editing
+.\" may be implemented for future releases of GNO.
+.\" 
 .\" newline mode
-.\"	
-.\"	This  mode  is  selected by using the GS/OS NewLine call.  Input is
-.\"	collected until one of the newline characters specified in the
-.\"	NewLine call is encountered.  At that point, the line of input is
-.\"	returned, even if less than the number of bytes requested in the
-.\"	Read call are read.  I/O processing features are enabled and
-.\"	disabled independently of newline mode; see cooked, cbreak, and raw.
-.\"	
+.\" 
+.\" This  mode  is  selected by using the GS/OS NewLine call.  Input is
+.\" collected until one of the newline characters specified in the
+.\" NewLine call is encountered.  At that point, the line of input is
+.\" returned, even if less than the number of bytes requested in the
+.\" Read call are read.  I/O processing features are enabled and
+.\" disabled independently of newline mode; see cooked, cbreak, and raw.
+.\" 
 .\" cbreak mode
-.\"	
-.\"	With GNO, this mode is the default state of the terminal driver,
-.\"	and is synonymous with cooked mode.  The requested number of
-.\"	characters are read without regard to any newline setting; input
-.\"	is not line buffered before being returned to the process.
-.\"	
+.\" 
+.\" With GNO, this mode is the default state of the terminal driver,
+.\" and is synonymous with cooked mode.  The requested number of
+.\" characters are read without regard to any newline setting; input
+.\" is not line buffered before being returned to the process.
+.\" 
 .\" raw mode
-.\"	
-.\"	Like cbreak mode, except that no input or output processing whatsoever
-.\"	is performed.  The driver does not check for any special characters.
-.\"	
+.\" 
+.\" Like cbreak mode, except that no input or output processing whatsoever
+.\" is performed.  The driver does not check for any special characters.
+.\" 
 There are three modes in which terminal drivers operate.  These modes 
 control how the driver deals with I/O.
 .RS
@@ -163,11 +163,11 @@ The basic ioctls use the sgttyb structure:
 .nf
 
 struct sgttyb {
-	char	sg_ispeed;
-	char	sg_ospeed;
-	char	sg_erase;
-	char	sg_kill;
-	short	sg_flags;
+    char    sg_ispeed;
+    char    sg_ospeed;
+    char    sg_erase;
+    char    sg_kill;
+    short   sg_flags;
 };
 
 .fi
@@ -184,24 +184,24 @@ These symbolic names for the baud rate settings are defined in <sgtty.h>.
 .RS
 .nf
 
-B0		0	(hang up dataphone)
-B50		1	50 baud
-B75		2	75 baud
-B110		3	110 baud
-B134		4	134.5 baud
-B150		5	150 baud
-B200		6	200 baud
-B300		7	300 baud
-B600		8	600 baud
-B1200	9	1200 baud
-B1800	10	1800 baud
-B2400	11	2400 baud
-B4800	12	4800 baud
-B9600	13	9600 baud
-B19200	14	19200 baud
-EXTA		14	19200 baud
-B38400	15	38400 baud
-EXTB		15	38400 baud
+B0      0   (hang up dataphone)
+B50     1   50 baud
+B75     2   75 baud
+B110    3   110 baud
+B134    4   134.5 baud
+B150    5   150 baud
+B200    6   200 baud
+B300    7   300 baud
+B600    8   600 baud
+B1200   9   1200 baud
+B1800   10  1800 baud
+B2400   11  2400 baud
+B4800   12  4800 baud
+B9600   13  9600 baud
+B19200  14  19200 baud
+EXTA    14  19200 baud
+B38400  15  38400 baud
+EXTB    15  38400 baud
 
 .fi
 .RE
@@ -213,14 +213,14 @@ sg_flags is a bitmapped value that indicates various state settings for
 the terminal driver (values are in hex).
 .nf
 
-EVENP	0x80	Use Even parity (serial devices only)
-ODDP		0x40	Use Odd parity (serial devices only)
-RAW		0x20	Raw mode: wake up on all characters,
-			8-bit interface
-CRMOD	0x10	Map CR into LF; output LF as CR-LF
-ECHO		0x08	Echo (full duplex)
-CBREAK	0x02	Return each character as soon as typed
-TANDEM	0x01	Automatic flow control
+EVENP   0x80    Use Even parity (serial devices only)
+ODDP    0x40    Use Odd parity (serial devices only)
+RAW     0x20    Raw mode: wake up on all characters,
+                8-bit interface
+CRMOD   0x10    Map CR into LF; output LF as CR-LF
+ECHO    0x08    Echo (full duplex)
+CBREAK  0x02    Return each character as soon as typed
+TANDEM  0x01    Automatic flow control
 
 .fi
 .LP
@@ -347,16 +347,16 @@ automatically included by <sgtty.h>:
 .nf
 
 struct tchars {
-	char	t_intrc;	/* interrupt */
-	char	t_quitc;	/* quit */
-	char	t_startc;	/* start output */
-	char	t_stopc;	/* stop output */
-	char	t_eofc;	/* end-of-file */
-	char	t_brkc;	/* input delimiter (like nl) */
+    char    t_intrc;    /* interrupt */
+    char    t_quitc;    /* quit */
+    char    t_startc;   /* start output */
+    char    t_stopc;    /* stop output */
+    char    t_eofc;     /* end-of-file */
+    char    t_brkc;     /* input delimiter (like nl) */
 };
 
 .fi
-The default values for these characters are ^C, ^\, ^Q, ^S, ^D and -1
+The default values for these characters are ^C, ^\\, ^Q, ^S, ^D and -1
 respectively.  A value of -1 for any of the characters means that the
 effect of that character is ignored.  The stop and start characters may
 be the same to produce a 'toggle' effect.  It is not recommended to set
@@ -377,29 +377,34 @@ The third "structure" in the terminal interface is a local mode word;
 .IR arg 
 points to an int variable, which is broken up into bitfields.
 .\" From the GNO v2.0.1 man page:
-.\"	None of the options are currently implemented for the console driver.
-.\"	Other drivers may implement them; see the appropriate manpages for
-.\"	details.
+.\" None of the options are currently implemented for the console driver.
+.\" Other drivers may implement them; see the appropriate manpages for
+.\" details.
 The various bitfields in this word are as follows:
 .RS
 .LP
 .nf
-LCRTBS	0x0001	Backspace on erase rather than echoing erase
-LPRTERA	0x0002	Printing terminal erase mode
-LCRTERA	0x0004	Erase character echoes as backspace-space-backspace
-LTILDE	0x0008	Convert ~ to ` on output (for Hazeltine terminals)
-LMDMBUF	0x0010	Stop/start output when carrier drops
-LLITOUT	0x0020	Suppress output translations
-LTOSTOP	0x0040	Send SIGTTOU for background output (not implemented)
-LFLUSHO	0x0080	Output is being flushed
-LNOHANG	0x0100	Don't send hangup when carrier drops
-LPASSOUT	0x0200	Cooked mode with 8-bit output
-LCRTKIL	0x0400	BS-space-BS erase entire line on line kill
-LPASS8	0x0800	Pass all 8 bits through on input, in any mode
-LCTLECH	0x1000	Echo input control chars as ^?
-LPENDIN	0x2000	Retype pending input at next read or input character
-LDECCTQ	0x4000	Only ^Q restarts output after ^S
-LNOFLSH	0x8000	Inhibit flushing of pending I/O when intr char is typed
+LCRTBS    0x0001  Backspace on erase rather than echoing erase
+LPRTERA   0x0002  Printing terminal erase mode
+LCRTERA   0x0004  Erase character echoes as backspace-space-
+                  backspace
+LTILDE    0x0008  Convert ~ to ` on output (for Hazeltine
+                  terminals)
+LMDMBUF   0x0010  Stop/start output when carrier drops
+LLITOUT   0x0020  Suppress output translations
+LTOSTOP   0x0040  Send SIGTTOU for background output (not
+                  implemented)
+LFLUSHO   0x0080  Output is being flushed
+LNOHANG   0x0100  Don't send hangup when carrier drops
+LPASSOUT  0x0200  Cooked mode with 8-bit output
+LCRTKIL   0x0400  BS-space-BS erase entire line on line kill
+LPASS8    0x0800  Pass all 8 bits through on input, in any mode
+LCTLECH   0x1000  Echo input control chars as ^?
+LPENDIN   0x2000  Retype pending input at next read or input
+                  character
+LDECCTQ   0x4000  Only ^Q restarts output after ^S
+LNOFLSH   0x8000  Inhibit flushing of pending I/O when intr char
+                  is typed
 .fi
 .LP
 The ioctl's used to access the local mode follow.  In all cases
@@ -425,12 +430,12 @@ and is again defined in <ioctl.h>.
 .nf
 
 struct ltchars {
-	char	t_suspc;	/* stop process signal */
-	char	t_dsuspc;	/* delayed stop process signal */
-	char	t_rprntc;	/* reprint line */
-	char	t_flushc;	/* flush output (toggles) */
-	char	t_werasc;	/* word erase */
-	char	t_lnextc;	/* literal next character */
+    char    t_suspc;    /* stop process signal */
+    char    t_dsuspc;   /* delayed stop process signal */
+    char    t_rprntc;   /* reprint line */
+    char    t_flushc;   /* flush output (toggles) */
+    char    t_werasc;   /* word erase */
+    char    t_lnextc;   /* literal next character */
 };
 
 .fi
@@ -456,10 +461,10 @@ recorded in a winsize structure, and is defined in <ioctl.h>:
 .LP
 .nf
 struct winsize {
-	unsigned short	ws_row;	/* rows, in characters */
-	unsigned short	ws_col;	/* columns, in characters */
-	unsigned short	ws_xpixel;	/* horizontal size, pixels */
-	unsigned short	ws_ypixel;	/* vertical size, pixels */
+    unsigned short  ws_row;     /* rows, in characters */
+    unsigned short  ws_col;     /* columns, in characters */
+    unsigned short  ws_xpixel;  /* horizontal size, pixels */
+    unsigned short  ws_ypixel;  /* vertical size, pixels */
 };
 .fi
 .LP

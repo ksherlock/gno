@@ -3,6 +3,7 @@
 \fBasa\fR
 \- interpret carriage-control characters
 .SH "SYNOPSIS"
+.HP 4n
 \fBasa\fR
 [\fIfile\ ...\fR]
 .SH "DESCRIPTION"
@@ -16,17 +17,17 @@ and writes them to the standard output.
 The first character of each line is interpreted as a carriage-control
 character.
 The following characters are interpreted as follows:
-.TP \(laspace\(ra
+.IP "\(laspace\(ra" 11n
 Output the rest of the line without change.
-.TP 0
+.IP "0" 11n
 Output a
 \(lanewline\(ra
 character before printing the rest of the line.
-.TP 1
+.IP "1" 11n
 Output a
 \(laformfeed\(ra
 character before printing the rest of the line.
-.TP \&+
+.IP "\&+" 11n
 The trailing
 \(lanewline\(ra
 of the previous line is replaced by a
@@ -38,7 +39,7 @@ begin with
 \(laspace\(ra.
 .SH "EXIT STATUS"
 .br
-The \fBasa\fR utility exits 0 on success, and >0 if an error occurs.
+The \fBasa\fR utility exits\~0 on success, and\~>0 if an error occurs.
 .SH "EXAMPLES"
 To view a file containing the output of a
 \fRFORTRAN\fR
@@ -61,7 +62,7 @@ f77(1)
 The
 \fBasa\fR
 utility conforms to
-IEEE Std 1003.1-2001 (``POSIX.1'').
+IEEE Std 1003.1-2001 (\(LqPOSIX.1\(Rq).
 .SH "AUTHORS"
 J.T. Conklin,
 Winning Strategies, Inc.
