@@ -1,0 +1,152 @@
+.TH "STTY" "1" "June 20, 2018" "GNO" "General Commands Manual"
+.SH "NAME"
+\fBstty\fR
+\- set and view terminal options and parameters
+.SH "SYNOPSIS"
+.HP 5n
+\fBstty\fR
+[options\ ...]
+.SH "DESCRIPTION"
+The
+\fBstty\fR
+utility sets certain I/O options on the current output terminal, placing its output on the diagnostic output.
+With no argument, it reports the current terminal characteristics.
+.PP
+The following commands are available to set the terminal
+characteristics:
+.IP "\fInumber\fR" 12n
+Set terminal baud rate to the number given, if possible.
+.PD 0
+.IP "\fBeven\fR" 12n
+Allow even parity input.
+.IP "\fB\-even\fR" 12n
+Disallow even parity input.
+.IP "\fBodd\fR" 12n
+Allow odd parity input.
+.IP "\fB\-odd\fR" 12n
+Disallow odd parity input.
+.IP "\fBraw\fR" 12n
+Enable raw mode input (no input processing (erase, kill, interrupt, ...); parity bit passed back).
+.IP "\fB\-raw\fR" 12n
+Negate raw mode.
+.IP "\fBcbreak\fR" 12n
+Make each character available to
+read(2)
+as received; no erase and kill processing, but all other processing (interrupt, suspend, ...) is performed.
+.IP "\fB\-cbreak\fR" 12n
+Make characters available to
+read(2)
+only when newline is received.
+.IP "\fBnl\fR" 12n
+Allow carriage return for new-line, and output CR-LF for carriage return or new-line.
+.IP "\fB\-nl\fR" 12n
+Accept only new-line to end lines.
+.IP "\fBecho\fR" 12n
+Echo back every character typed.
+.IP "\fB\-echo\fR" 12n
+Do not echo characters.
+.IP "\fBlcase\fR" 12n
+Map upper case to lower case.
+.IP "\fB\-lcase\fR" 12n
+Do not map case.
+.IP "\fBtandem\fR" 12n
+Enable flow control, so that the system sends out the stop character when its internal queue is in
+danger of overflowing on input, and sends the start character when it is ready to accept further
+input.
+.IP "\fB\-tandem\fR" 12n
+disable flow control.
+.IP "\fBtabs\fR" 12n
+Preserve tabs.
+.IP "\fB\-tabs\fR" 12n
+Replace tabs by spaces when printing.
+.IP "\fBctlecho\fR" 12n
+Echo control characters as
+\(Lq^x\(Rq
+(and delete as \(Lq^?\(Rq).
+.IP "\fB\-ctlecho\fR" 12n
+Control characters echo as themselves.
+.IP "\fBcrterase\fR" 12n
+Wipe out erased characters with
+\(Lqbackspace-space-backspace\(Rq.
+.IP "\fB\-crterase\fR" 12n
+Leave erased characters visible; just backspace.
+.IP "\fBcooked\fR" 12n
+Alias for
+\fB\-raw\fR.
+.IP "[\fB\-\fR]\fBcrmod\fR" 12n
+Alias for
+[\fB\-\fR]\fBnl\fR.
+.IP "[\fB\-\fR]\fBlctlech\fR" 12n
+Alias for
+[\fB\-\fR]\fBctlecho\fR.
+.IP "[\fB\-\fR]\fBlcrtera\fR" 12n
+Alias for
+[\fB\-\fR]\fBcrterase\fR.
+.PD
+.PP
+For the following commands which take a character argument
+\fIc\fR,
+you may also specify
+\fIc\fR
+as
+\(Lqundef\(Rq,
+to set the value to be undefined.
+A value of
+\(Lq^x\(Rq,
+a 2 character sequence, is also interpreted as a control character, with
+\(Lq^?\(Rq
+representing delete.
+.IP "\fBsusp\fR \fIc\fR" 12n
+Set the suspend character to
+\fIc\fR
+(default ^Z).
+.PD 0
+.IP "\fBstop\fR \fIc\fR" 12n
+Set the stop character to
+\fIc\fR
+(default ^S).
+.IP "\fBstart\fR \fIc\fR" 12n
+Set the start character to
+\fIc\fR
+(default ^Q).
+.IP "\fBquit\fR \fIc\fR" 12n
+Set the quit character to
+\fIc\fR
+(default ^\\).
+.IP "\fBerase\fR \fIc\fR" 12n
+Set the erase character to
+\fIc\fR
+(default ^?).
+.IP "\fBintr\fR \fIc\fR" 12n
+Set the interrupt character to
+\fIc\fR
+(default ^C).
+.IP "\fBeof\fR \fIc\fR" 12n
+Set the suspend character to
+\fIc\fR
+(default ^D).
+.IP "\fBwerase\fR \fIc\fR" 12n
+Set the word erase character to
+\fIc\fR
+(default ^W).
+.IP "\fBrprnt\fR \fIc\fR" 12n
+Set the reprint line character to
+\fIc\fR
+(default ^R).
+.IP "\fBflush\fR \fIc\fR" 12n
+Set the reprint flush character to
+\fIc\fR
+(default ^O).
+.IP "\fBlnext\fR \fIc\fR" 12n
+Set the literal next character to
+\fIc\fR
+(default ^V).
+.IP "\fBdsusp\fR \fIc\fR" 12n
+Set the delayed suspend character to
+\fIc\fR
+(default ^Y).
+.PD
+.SH "SEE ALSO"
+tty(4)
+.SH "BUGS"
+Not all characters and modes are supported by the GNO ttys.

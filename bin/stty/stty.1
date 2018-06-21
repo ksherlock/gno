@@ -1,0 +1,155 @@
+.Dd $Mdocdate: June 20 2018 $
+.Dt STTY 1
+.Os
+.Sh NAME
+.Nm stty
+.Nd set and view terminal options and parameters
+.Sh SYNOPSIS
+.Nm
+.Op options ...
+.Sh DESCRIPTION
+The
+.Nm
+utility sets certain I/O options on the current output terminal, placing its output on the diagnostic output.
+With no argument, it reports the current terminal characteristics.
+.Pp
+The following commands are available to set the terminal
+characteristics:
+.Pp
+.Bl -tag -compact -width Fl
+.It Ar number
+Set terminal baud rate to the number given, if possible.
+.It Cm even
+Allow even parity input.
+.It Cm Fl even
+Disallow even parity input.
+.It Cm odd
+Allow odd parity input.
+.It Cm Fl odd
+Disallow odd parity input.
+.It Cm raw
+Enable raw mode input (no input processing (erase, kill, interrupt, ...); parity bit passed back).
+.It Cm Fl raw
+Negate raw mode.
+.It Cm cbreak
+Make each character available to
+.Xr read 2
+as received; no erase and kill processing, but all other processing (interrupt, suspend, ...) is performed.
+.It Cm Fl cbreak
+Make characters available to
+.Xr read 2
+only when newline is received.
+.It Cm nl
+Allow carriage return for new-line, and output CR-LF for carriage return or new-line.
+.It Cm Fl nl
+Accept only new-line to end lines.
+.It Cm echo
+Echo back every character typed.
+.It Cm Fl echo
+Do not echo characters.
+.It Cm lcase
+Map upper case to lower case.
+.It Cm Fl lcase
+Do not map case.
+.It Cm tandem
+Enable flow control, so that the system sends out the stop character when its internal queue is in
+danger of overflowing on input, and sends the start character when it is ready to accept further
+input.
+.It Cm Fl tandem
+disable flow control.
+.It Cm tabs
+Preserve tabs.
+.It Cm Fl tabs
+Replace tabs by spaces when printing.
+.It Cm ctlecho
+Echo control characters as
+.Dq ^x
+.Pq and delete as Dq ^? .
+.It Cm Fl ctlecho
+Control characters echo as themselves.
+.It Cm crterase
+Wipe out erased characters with
+.Dq backspace-space-backspace .
+.It Cm Fl crterase
+Leave erased characters visible; just backspace.
+.It Cm cooked
+Alias for
+.Cm Fl raw .
+.It Cm Oo Fl Oc Ns Cm crmod
+Alias for
+.Cm Oo Fl Oc Ns Cm nl .
+.It Cm Oo Fl Oc Ns Cm lctlech
+Alias for
+.Cm Oo Fl Oc Ns Cm ctlecho .
+.It Cm Oo Fl Oc Ns Cm lcrtera
+Alias for
+.Cm Oo Fl Oc Ns Cm crterase .
+.El
+.Pp
+For the following commands which take a character argument
+.Ar c ,
+you may also specify
+.Ar c
+as
+.Dq undef ,
+to set the value to be undefined.
+A value of
+.Dq ^x ,
+a 2 character sequence, is also interpreted as a control character, with
+.Dq ^?
+representing delete.
+.Pp
+.Bl -tag -compact -width Fl
+.It Cm susp Ar c
+Set the suspend character to
+.Ar c
+(default ^Z).
+.It Cm stop Ar c
+Set the stop character to
+.Ar c
+(default ^S).
+.It Cm start Ar c
+Set the start character to
+.Ar c
+(default ^Q).
+.It Cm quit Ar c
+Set the quit character to
+.Ar c
+(default ^\\).
+.It Cm erase Ar c
+Set the erase character to
+.Ar c
+(default ^?).
+.It Cm intr Ar c
+Set the interrupt character to
+.Ar c
+(default ^C).
+.It Cm eof Ar c
+Set the suspend character to
+.Ar c
+(default ^D).
+.It Cm werase Ar c
+Set the word erase character to
+.Ar c
+(default ^W).
+.It Cm rprnt Ar c
+Set the reprint line character to
+.Ar c
+(default ^R).
+.It Cm flush Ar c
+Set the reprint flush character to
+.Ar c
+(default ^O).
+.It Cm lnext Ar c
+Set the literal next character to
+.Ar c
+(default ^V).
+.It Cm dsusp Ar c
+Set the delayed suspend character to
+.Ar c
+(default ^Y).
+.El
+.Sh SEE ALSO
+.Xr tty 4
+.Sh BUGS
+Not all characters and modes are supported by the GNO ttys.

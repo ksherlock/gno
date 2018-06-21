@@ -12,36 +12,36 @@
 #include <gno/gno.h>
 #include <unistd.h>
 
-typedef struct opts {
-    char *name;
-    int item;
-} opts_s;
+struct sgttyb sg;
+struct tchars tc;
+struct ltchars ltc;
+struct winsize wz;
+long localmode;
+
 
 /* B0 - B57600 are defined before these others */
-#define LCRTERA_ON      16
-#define LCRTERA_OFF     17
-#define LCTLECH_ON      18
-#define LCTLECH_OFF     19
-#define CRMOD_ON        20
-#define CRMOD_OFF       21
-#define ECHO_ON         22
-#define ECHO_OFF        23
-#define RAW_ON          24
-#define RAW_OFF         25
-#define CBREAK_ON       26
-#define CBREAK_OFF      27
-#define SUSP_C          28
-#define STOP_C          29
-#define START_C         30
-#define QUIT_C          31
-#define ERASE_C         32
-#define INTR_C          33
-#define EOF_C           34
-#define WERASE_C        35
-#define RPRNT_C         36
-#define FLUSH_C         37
-#define LNEXT_C         38
-#define DSUSP_C         39
+enum {
+    LCRTERA_ON = 18,
+    LCRTERA_OFF,
+    LCTLECH_ON,
+    LCTLECH_OFF,
+
+    COOKED_ON,
+
+    SUSP_C,
+    STOP_C,
+    START_C,
+    QUIT_C,
+    ERASE_C,
+    INTR_C,
+    EOF_C,
+    WERASE_C,
+    RPRNT_C,
+    FLUSH_C,
+    LNEXT_C,
+    DSUSP_C
+};
+
 
 char *baudtbl[] = {
 "0",
@@ -61,6 +61,11 @@ char *baudtbl[] = {
 "19200",
 "38400"};
 
+#if 0
+typedef struct opts {
+    char *name;
+    int item;
+} opts_s;
 opts_s options[] = {
     "75",	B75,
     "110",	B110,
@@ -78,14 +83,21 @@ opts_s options[] = {
     "57600",	B57600,
     "lcrtera", 	LCRTERA_ON,
     "-lcrtera", LCRTERA_OFF,
+    "crterase", LCRTERA_ON,
+    "-crterase",        LCRTERA_OFF,
     "lctlech",	LCTLECH_ON,
     "-lctlech",	LCTLECH_OFF,
+    "ctlecho",  LCTLECH_ON,
+    "-ctlecho", LCTLECH_OFF,
     "crmod",	CRMOD_ON,
     "-crmod",	CRMOD_OFF,
+    "nl",       CRMOD_ON,
+    "-nl",      CRMOD_OFF,
     "echo",	ECHO_ON,
     "-echo",	ECHO_OFF,
     "raw",	RAW_ON,
-    "-raw",	RAW_OFF,
+    "-raw",     RAW_OFF,
+    "cooked",	RAW_OFF,
     "cbreak",	CBREAK_ON,
     "-cbreak",	CBREAK_OFF,
     "susp",	SUSP_C,
@@ -112,45 +124,142 @@ int i;
     }
     return 0;
 }
+#endif
+enum {
+    TSPEED,
+    TMODE,
+    TLMODE,
+    TCHAR,
+    TOTHER,
+};
+typedef struct opts {
+    char *name;
+    int type;
+    int value;
+} opts_s;
+/* pre-sorted */
+opts_s options[] = {
+    { "110",      TSPEED, B110 },
+    { "1200",     TSPEED, B1200 },
+    { "134",      TSPEED, B134 },
+    { "150",      TSPEED, B150 },
+    { "1800",     TSPEED, B1800 },
+    { "19200",    TSPEED, B19200 },
+    { "2400",     TSPEED, B2400 },
+    { "300",      TSPEED, B300 },
+    { "38400",    TSPEED, B38400 },
+    { "4800",     TSPEED, B4800 },
+    { "57600",    TSPEED, B57600 },
+    { "600",      TSPEED, B600 },
+    { "75",       TSPEED, B75 },
+    { "9600",     TSPEED, B9600 },
+    { "cbreak",   TMODE,  CBREAK },
+    { "cooked",   TOTHER, COOKED_ON },
+    { "crmod",    TMODE,  CRMOD },
+    { "crterase", TLMODE, LCRTERA_ON },
+    { "ctlecho",  TLMODE, LCTLECH_ON },
+    { "dsusp",    TCHAR,  DSUSP_C },
+    { "echo",     TMODE,  ECHO },
+    { "eof",      TCHAR,  EOF_C },
+    { "erase",    TCHAR,  ERASE_C },
+    { "even",     TMODE,  EVENP },
+    { "flush",    TCHAR,  FLUSH_C },
+    { "intr",     TCHAR,  INTR_C },
+    { "lcase",    TMODE,  LCASE },
+    { "lcrtera",  TLMODE, LCRTERA_ON },
+    { "lctlech",  TLMODE, LCTLECH_ON },
+    { "lnext",    TCHAR,  LNEXT_C },
+    { "nl",       TMODE,  CRMOD },
+    { "odd",      TMODE,  ODDP },
+    { "quit",     TCHAR,  QUIT_C },
+    { "raw",      TMODE,  RAW },
+    { "rprnt",    TCHAR,  RPRNT_C },
+    { "start",    TCHAR,  START_C },
+    { "stop",     TCHAR,  STOP_C },
+    { "susp",     TCHAR,  SUSP_C },
+    { "tabs",     TMODE,  XTABS },
+    { "tandem",   TMODE,  TANDEM },
+    { "werase",   TCHAR,  WERASE_C },
+};
+
+
+int lookup(char *s) {
+    unsigned negate = 0;
+    unsigned item;
+
+    // binary search...
+    unsigned begin = 0;
+    unsigned end = sizeof(options) / sizeof(options[0]);
+    unsigned mid;
+    int cmp;
+
+    if (s[0] == '-') { negate = 1; ++s; }
+
+    for (;;) {
+        mid = (begin+end)>>1;
+        cmp = strcmp(options[mid].name, s);
+        if (cmp == 0) {
+            int type = options[mid].type;
+            int value = options[mid].value;
+
+            if (type == TMODE) {
+                if (negate) sg.sg_flags &= ~value;
+                else sg.sg_flags |= value;
+                return 0;
+            }
+            if (type == TLMODE) {
+                if (negate) ++value;
+                return value;
+            }
+            if (negate) return -1;
+            if (type == TSPEED) {
+                sg.sg_ispeed = sg.sg_ospeed = value;
+                return 0;
+            }
+            return value;
+        }
+        if (cmp < 0) {
+            begin = mid + 1;
+            if (begin >= end) return -1;
+        } else {
+            end = mid;
+            if (end <= begin) return -1;
+        }
+    }
+    return -1;
+
+}
+
 
 void usage(void)
 {
-    fprintf(stderr,"usage: stty [ option ]...\n"
-    		"\toption: [-]raw,[-]echo,[-]cbreak,[baud]\n"
-    		"\toption c: intr, susp, stop, start, eof, erase\n"
-		"\t\twhere c is ^X or \\0OCTAL or \\xHEX\n");
+    fputs("usage: stty [option ...]\n", stderr);
     exit(1);
 }
 
 char parsechar(char *s)
 {
 int x;
+int l = strlen(s);
 
     if (s[0] == '^') {
-	if (strlen(s) != 2) usage();
+	if (l != 2) usage();
 	if (s[1] == '?') return 0x7f;
         else return toupper(s[1])-64;
     }
-    else if (s[0] == '\\') {
-	    if (isdigit(s[1]) && (s[0] != 0))
-        	sscanf(s+1,"%d",&x);
-        else if (toupper(s[1]) == 'X')
-	        sscanf(s+2,"%x",&x);
-        else if (s[1] == '0')
-	        sscanf(s+1,"%o",&x);
-        else usage();
-        printf("char: %d\n",x);
-        return x;
+    if (s[0] == '\\') {
+        char *cp = NULL;
+        long l;
+        if (!isdigit(s[1])) usage();
+        l = strtol(s+1, &cp, 0);
+        if (l < 0 || l > 255 || *cp) usage();
+        return l;
     }
-    if (strlen(s) != 1) usage();
+    if (l == 5 && !strcmp(s, "undef")) return 0xff;
+    if (l != 1) usage();
     return s[0];
 }
 
-struct sgttyb sg;
-struct tchars tc;
-struct ltchars ltc;
-struct winsize wz;
-long localmode;
 
 char *dash[] = {"","-"};
 
@@ -198,7 +307,7 @@ void printCurSettings(void)
 	dash[(localmode & LPENDIN) == 0],
 	dash[(localmode & LNOFLSH) == 0]);
 
-    printf("erase  kill   werase rprnt  flush  lnext  susp   intr   quit   stop   eof\n");
+    fputs("erase  kill   werase rprnt  flush  lnext  susp   intr   quit   stop   eof\n", stdout);
     printf("%-7s",doctrl(sg.sg_erase));
     printf("%-7s",doctrl(sg.sg_kill));
     printf("%-7s",doctrl(ltc.t_werasc));
@@ -225,6 +334,7 @@ stackResults(void) {
 int main(int argc, char *argv[])
 {
 int i,item;
+char c;
 
 #ifdef __STACK_CHECK__
     _beginStackCheck();
@@ -241,81 +351,52 @@ int i,item;
         exit(0);
     }
 
-    for (i = 1; i < argc;) {
-      switch (item = lookup(argv[i])) {
-
+    for (i = 1; i < argc; ++i) {
+      item = lookup(argv[i]);
+      if (item >= SUSP_C) c = parsechar(argv[++i]);
+      switch (item) {
+        case 0: break;
         case INTR_C:
-	        tc.t_intrc = parsechar(argv[i+1]);
-	        i++;
+	        tc.t_intrc = c;
         	break;
 	case SUSP_C:
-	        ltc.t_suspc = parsechar(argv[i+1]);
-	        i++;
+	        ltc.t_suspc = c;
         	break;
         case DSUSP_C:
-                ltc.t_dsuspc = parsechar(argv[i+1]);
-                i++;
+                ltc.t_dsuspc = c;
                 break;
         case STOP_C:
-            	tc.t_stopc = parsechar(argv[i+1]);
-	        i++;
+            	tc.t_stopc = c;
         	break;
 	case START_C:
-	        tc.t_startc = parsechar(argv[i+1]);
-	        i++;
+	        tc.t_startc = c;
         	break;
         case QUIT_C:
-	        tc.t_quitc = parsechar(argv[i+1]);
-	        i++;
+	        tc.t_quitc = c;
         	break;
 	case ERASE_C:
-		sg.sg_erase = parsechar(argv[i+1]);
-		i++;
+		sg.sg_erase = c;
 		break;
 	case EOF_C:
-		tc.t_eofc = parsechar(argv[i+1]);
-		i++;
+		tc.t_eofc = c;
 		break;
         case WERASE_C:
-                ltc.t_werasc = parsechar(argv[i+1]);
-                i++;
+                ltc.t_werasc = c;
                 break;
         case FLUSH_C:
-                ltc.t_flushc = parsechar(argv[i+1]);
-                i++;
+                ltc.t_flushc = c;
                 break;
         case LNEXT_C:
-                ltc.t_lnextc = parsechar(argv[i+1]);
-                i++;
+                ltc.t_lnextc = c;
                 break;
         case RPRNT_C:
-                ltc.t_rprntc = parsechar(argv[i+1]);
-                i++;
+                ltc.t_rprntc = c;
                 break;
-	case ECHO_ON:
-	        sg.sg_flags |= ECHO;
-        	break;
-        case ECHO_OFF:
-	        sg.sg_flags &= ~ECHO;
-        	break;
-        case RAW_OFF:
+
+        case COOKED_ON:
         	sg.sg_flags &= ~RAW;
         	break;
-        case RAW_ON:
-	        sg.sg_flags |= RAW;
-        	break;
-        case CBREAK_OFF:
-        	sg.sg_flags &= ~CBREAK;
-        	break;
-        case CBREAK_ON:
-	        sg.sg_flags |= CBREAK;
-        	break;
-        case CRMOD_OFF:
-        	sg.sg_flags &= ~CRMOD;
-        	break;
-        case CRMOD_ON:
-	        sg.sg_flags |= CRMOD;
-        	break;
+
         case LCTLECH_ON:
         	localmode |= LCTLECH;
 	        break;
@@ -329,13 +410,10 @@ int i,item;
 		localmode &= ~LCRTERA;
 		break;
         default:
-        	if ((item != 0) && (item <= B38400)) {
-	            sg.sg_ispeed = item;
-	            sg.sg_ospeed = item;
-                } else usage();
+                printf("unknown mode %s\n", argv[i]);
+                usage();
                 break;
       }
-      i++;
     }
     ioctl(STDIN_FILENO,TIOCSETP,&sg);
     ioctl(STDIN_FILENO,TIOCSETC,&tc);
