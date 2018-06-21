@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <err.h>
 #include <sys/syslimits.h>
 
 static ResultBuf255 name = { 255 };
@@ -25,8 +26,7 @@ void reset_env(void) {
 	for(;;) {
 		ReadIndexedGS(&dcb);
 		if (_toolErr) {
-			fprintf(stderr, "env: ReadIndexedGS: $04x\n", _toolErr);
-			exit(1);
+			errx(1, "ReadIndexedGS: $%04x", _toolErr);
 		}
 
 		if (name.bufString.length == 0) break;
@@ -38,8 +38,7 @@ void reset_env(void) {
 
 		UnsetVariableGS(&unset_dcb);
 		if (_toolErr) {
-			fprintf(stderr, "env: UnsetVariableGS: $04x\n", _toolErr);
-			exit(1);
+			errx(1, "UnsetVariableGS: $%04x", _toolErr);
 		}
 	}
 }
@@ -49,8 +48,7 @@ void unset_env(const char *cp) {
 
 	unsigned len = strlen(cp);
 	if (memchr(cp, '=', len) || len > 255) {
-		fprintf(stderr, "env: unsetenv %s: Invalid argument\n", cp);
-		exit(1);
+		errx(1, "unsetenv %s: Invalid argument", cp);
 	}
 
 	name.bufString.length = len;
@@ -58,14 +56,13 @@ void unset_env(const char *cp) {
 
 	UnsetVariableGS(&unset_dcb);
 	if (_toolErr) {
-		fprintf(stderr, "env: UnsetVariableGS %s: $04x\n", cp, _toolErr);
-		exit(1);
+		errx(1, "UnsetVariableGS %s: $%04x", cp, _toolErr);
 	}
 }
 
 /*
 char get_env(const char *cp) {
-	static ReadVariableGSPB dcb = { 3, &name.bufString, &value.bufString, 0 };
+	static ReadVariableGSPB dcb = { 3, &name.bufString, &value, 0 };
 
 	int len = strlen(cp);
 	if (len > 255) return NULL;
@@ -85,18 +82,23 @@ char get_env(const char *cp) {
 }
 */
 
+#undef _PATH_DEFPATH
+#define _PATH_DEFPATH "/usr/bin /bin"
+
 char *get_path(void) {
 
-	static GSString32 name = { 4, "path" };
-	static ReadVariableGSPB dcb = { 3, &name, &value.bufString, 0 };
+	static GSString32 name = { 4, "PATH" };
+	static ReadVariableGSPB dcb = { 3, &name, &value, 0 };
+ResultBuf255 tmp = value;
 
 	int len;
+	char *cp = _PATH_DEFPATH;
 
 	ReadVariableGS(&dcb);
 	if (_toolErr) return _PATH_DEFPATH;
 
 	if ((len = value.bufString.length)) {
-		char *cp = malloc(len + 1);
+		cp = malloc(len + 1);
 		memcpy(cp, value.bufString.text, len);
 		cp[len] = 0;
 		return cp;
@@ -117,8 +119,7 @@ int set_env(const char *cp) {
 		if (cp[i] != '=') continue;
 
 		if (i == 0 || i > 255) {
-			fprintf(stderr, "env: setenv %s: Invalid argument\n", cp);
-			exit(1);
+			errx(1, "setenv %s: Invalid argument", cp);
 		}
 
 		name.bufString.length = i;
@@ -129,8 +130,7 @@ int set_env(const char *cp) {
 	cp += i + 1;
 	l = strlen(cp);
 	if (l > 255) {
-		fprintf(stderr, "env: setenv %s: Invalid argument\n", cp);
-		exit(1);
+		errx(1, "setenv %s: Invalid argument", cp);
 	}
 
 	value.bufString.length = l;
@@ -138,8 +138,7 @@ int set_env(const char *cp) {
 
 	SetGS(&dcb);
 	if (_toolErr) {
-		fprintf(stderr, "env: SetGS %s: $04x\n", cp, _toolErr);
-		exit(1);
+		errx(1, "SetGS %s: $%04x", cp, _toolErr);
 	}
 
 	return 1;
@@ -151,7 +150,7 @@ void print_env(void) {
 	for (dcb.index = 1;;++dcb.index) {
 		ReadIndexedGS(&dcb);
 		if (_toolErr) {
-			fprintf(stderr, "env: ReadIndexedGS: $04x\n", _toolErr);
+			warnx("ReadIndexedGS: $%04x", _toolErr);
 			//exit(1);
 		}
 		if (name.bufString.length == 0) break;
@@ -165,8 +164,8 @@ void print_env(void) {
 
 
 void usage(void) {
-	fprintf(stderr, "usage: env [-iv] [-P utilpath] [-u name] [name=value ...]\n");
-	fprintf(stderr, "           [utility [argument ...]]\n");
+	fputs("usage: env [-iv] [-P utilpath] [-u name] [name=value ...]\n", stderr);
+	fputs("           [utility [argument ...]]\n", stderr);
 	exit(1);
 }
 
@@ -197,6 +196,7 @@ char *find_path(const char *arg, char *path) {
 	while ((d = strsep(&path, " "))) {
 		unsigned l = strlen(d);
 
+
 		if (l + len + 2 > PATH_MAX) continue;
 
 		memcpy(buffer.text, d, l);
@@ -212,8 +212,7 @@ char *find_path(const char *arg, char *path) {
 	}
 
 	// enoent.
-	fprintf(stderr, "env: %s: No such file or directory.\n", arg);
-	exit(127);
+	errx(127, "%s: No such file or directory.", arg);
 }
 
 #if defined(__STACK_CHECK__)
@@ -230,7 +229,7 @@ int main(int argc, char **argv) {
 	unsigned i;
 	int ch;
 	const char *path;
-	const char *search_path;
+	const char *search_path = 0;
 	static unsigned zero = 0;
 
 
@@ -244,8 +243,7 @@ int main(int argc, char **argv) {
 	PushVariablesGS(&zero);
 
 	if (_toolErr) {
-		fprintf(stderr, "env: PushVariablesGS: $04x\n", _toolErr);
-		exit(1);
+		errx(1, "PushVariablesGS: $%04x", _toolErr);
 	}
 
 
@@ -272,8 +270,7 @@ int main(int argc, char **argv) {
 
 			case 'S':
 				// not a posix flag.
-				fprintf(stderr, "env: -S is not supported\n");
-				exit(1);
+				errx(1, "-S is not supported");
 				break;
 
 			case '?':
