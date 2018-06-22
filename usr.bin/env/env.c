@@ -4,6 +4,7 @@
 #include <shell.h>
 #include <gsos.h>
 
+#include <ctype.h>
 #include <errno.h>
 #include <paths.h>
 #include <stdio.h>
@@ -22,6 +23,8 @@ unsigned _v = 0;
 
 void reset_env(void) {
 	static ReadIndexedGSPB dcb = { 4, &name, &value, 1, 0 };
+
+	if (_v) fprintf(stderr, "#env clearing environ\n");
 
 	for(;;) {
 		ReadIndexedGS(&dcb);
@@ -47,6 +50,9 @@ void unset_env(const char *cp) {
 
 
 	unsigned len = strlen(cp);
+
+	if (_v) fprintf(stderr, "#env unset:\t%s\n", cp);
+
 	if (memchr(cp, '=', len) || len > 255) {
 		errx(1, "unsetenv %s: Invalid argument", cp);
 	}
@@ -89,7 +95,7 @@ char *get_path(void) {
 
 	static GSString32 name = { 4, "PATH" };
 	static ReadVariableGSPB dcb = { 3, &name, &value, 0 };
-ResultBuf255 tmp = value;
+	ResultBuf255 tmp = value;
 
 	int len;
 	char *cp = _PATH_DEFPATH;
@@ -127,6 +133,8 @@ int set_env(const char *cp) {
 		break;
 	}
 
+	if (_v) fprintf(stderr, "#env setenv:\t%s\n", cp);
+
 	cp += i + 1;
 	l = strlen(cp);
 	if (l > 255) {
@@ -141,6 +149,71 @@ int set_env(const char *cp) {
 		errx(1, "SetGS %s: $%04x", cp, _toolErr);
 	}
 
+	return 1;
+}
+
+/* return 0 if absolute path or prefix-based path */
+int relative(const char *cp) {
+	char c;
+
+	c = cp[0];
+
+	if (isdigit(c)) {
+		unsigned pfx = c - '0';
+		c = cp[1];
+		if (isdigit(c)) {
+			pfx = pfx * 10 + c - '0';
+			c = cp[2];
+		}
+		if (pfx > 31) return 1;
+	} else if (c == '*' || c == '@') {
+		c = cp[1];
+	}
+	if (c == '/' || c == ':' || c == 0) return 0;
+	return 1;
+}
+
+int set_prefix(const char *cp) {
+
+	/* union of ResultBuf255Ptr / GSString255Ptr */
+	static PrefixRecGS dcb = { 2, 0, (ResultBuf255Ptr)&value.bufString };
+	int pfx = -1;
+	unsigned l;
+	char *ptr = cp;
+
+	if (_v) fprintf(stderr, "#env setprefix:\t%s\n", cp);
+
+	if (isdigit(*cp)) pfx = strtol(cp, &ptr, 10);
+	if (pfx < 0 || pfx > 31 || *ptr != '=' ) errx(1, "setprefix %s: invalid argument", cp);
+
+	++ptr; /* = */
+	l = strlen(ptr);
+	if (l == 0 || l > 255) {
+		errx(1, "setprefix %s: Invalid argument", cp);
+	}
+
+	/* in SetPrefixGS, relative paths are relative
+	   to the prefix being set, not prefix 0
+	   to counteract this, make it relative to prefix 0
+	*/
+	if (pfx && relative(ptr)) {
+		if (l > 253) 
+			errx(1, "setprefix %s: Invalid argument", cp);
+
+		value.bufString.length = l + 2;
+		value.bufString.text[0] = '0';
+		value.bufString.text[1] = ':';
+		memcpy(value.bufString.text + 2 , ptr, l);	
+	} else {
+		value.bufString.length = l;
+		memcpy(value.bufString.text, ptr, l);	
+	}
+
+	dcb.prefixNum = pfx;
+	SetPrefixGS(&dcb);
+	if (_toolErr) {
+		errx(1, "SetPrefixGS %s: $%04x", cp, _toolErr);
+	}
 	return 1;
 }
 
@@ -164,7 +237,7 @@ void print_env(void) {
 
 
 void usage(void) {
-	fputs("usage: env [-iv] [-P utilpath] [-u name] [name=value ...]\n", stderr);
+	fputs("usage: env [-iv] [-P utilpath] [-u name] [-x prefix=value] [name=value ...]\n", stderr);
 	fputs("           [utility [argument ...]]\n", stderr);
 	exit(1);
 }
@@ -247,7 +320,7 @@ int main(int argc, char **argv) {
 	}
 
 
-	while ((ch = getopt(argc, argv, "-ivP:S:u:")) != -1) {
+	while ((ch = getopt(argc, argv, "-ivP:S:u:x:")) != -1) {
 		switch(ch) {
 			case 'v':
 				_v++;
@@ -255,13 +328,16 @@ int main(int argc, char **argv) {
 
 			case 'i':
 			case '-':
-				if (_v) fprintf(stderr, "#env clearing environ\n");
 				reset_env();
 				break;
 
 			case 'u':
-				if (_v) fprintf(stderr, "#env unsetting %s\n", optarg);
 				unset_env(optarg);
+				break;
+
+			case 'x':
+				/* GNO-specific: set prefix */
+				set_prefix(optarg);
 				break;
 
 			case 'P':
@@ -283,7 +359,6 @@ int main(int argc, char **argv) {
 	argv += optind;
 
 	for( ; argc; ++argv, --argc) {
-
 		if (!set_env(*argv)) break;
 	}
 
@@ -294,7 +369,9 @@ int main(int argc, char **argv) {
 
 	path = find_path(argv[0], search_path);
 	if (_v) {
-		fprintf(stderr, "#env executing: %s\n", path);
+		fprintf(stderr, "#env executing:\t%s\n", path);
+		for (i = 0; i < argc; ++i) 
+			fprintf(stderr, "#env    arg[%d]= '%s'\n", i, argv[i]);
 	}
 	execv(path, argv);
 
