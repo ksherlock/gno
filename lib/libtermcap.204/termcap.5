@@ -416,8 +416,7 @@ ca\||\|concept100\||\|c100\||\|concept\||\|c104\||\|concept100-4p\||\|HDS Concep
 	:.ta=8\et:te=\eEv    \e200\e200\e200\e200\e200\e200\eEp\er\en:\e
 	:ti=\eEU\eEv  8p\eEp\er:ue=\eEg:ul:up=\eE;:us=\eEG:\e
 	:vb=\eEk\e200\e200\e200\e200\e200\e200\e200\e200\e200\e200\e200\e200\e200\e200\eEK:\e
-	:ve=\eEw:vs=\eEW:vt#8:xn:\e
-	:bs:cr=^M:dC#9:dT#8:nl=^J:ta=^I:pt:
+	:ve=\eEw:vs=\eEW:vt#8:xn:bs:cr=^M:dC#9:dT#8:nl=^J:ta=^I:pt:
 .Ed
 .Pp
 Entries may continue onto multiple lines by giving a
@@ -1730,7 +1729,9 @@ should indicate
 .Sy \&xt
 (destructive tabs).
 This glitch is also taken to mean that it is not possible
-to position the cursor on top of a \*(lqmagic cookie\*(rq, and that
+to position the cursor on top of a
+.Dq magic cookie ,
+and that
 to erase standout mode it is necessary to use delete and insert line.
 .Pp
 The Beehive Superbee, which is unable to correctly transmit the
@@ -1790,9 +1791,14 @@ hence does not turn on the function key labels when in visual mode.
 This is useful for different modes for a terminal, or for different
 user preferences.
 .Sh FILES
-.Bl -tag -width /etc/termcap -compact
+.Bl -tag -width /usr/lib/libtermcap -compact
+.It Pa /usr/lib/libtermcap
+.Fl l Ar termcap
+library.
 .It Pa /etc/termcap
-File containing terminal descriptions.
+standard terminal capability database.
+.It Pa $HOME/termcap
+user's terminal capability database.
 .El
 .Sh SEE ALSO
 .\" .Xr cap_mkdb 1 ,

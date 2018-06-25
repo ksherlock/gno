@@ -247,17 +247,14 @@ if a null
 (\fB^@\fR)
 is inappropriate.
 .SH "FILES"
-.TP 21n
-\fI/usr/lib/libtermcap\fR
+.IP "\fI/usr/lib/libtermcap\fR" 21n
 \fB\-l\fR \fItermcap\fR
-library
+library.
 .PD 0
-.TP 21n
-\fI/etc/termcap\fR
-standard terminal capability database
-.TP 21n
-\fI$HOME/termcap\fR
-user's terminal capability database
+.IP "\fI/etc/termcap\fR" 21n
+standard terminal capability database.
+.IP "\fI$HOME/termcap\fR" 21n
+user's terminal capability database.
 .PD
 .SH "SEE ALSO"
 ex(1),
