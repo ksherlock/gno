@@ -16,6 +16,18 @@ class TableParser < Object
 		@chunk = ""
 		@padding = 3
 		@width = 71 # + 7 tab = 78
+
+		@escape = { 
+			'\fB' => '',
+			'\fR' => '',
+			'\fI' => '',
+			'\fP' => '',
+			'\&' => '',
+			'\|' => '',
+			'\^' => '',
+			'\%' => '',
+		}
+		@escape.default = 'x'
 	end
 	
 	def process(line)
@@ -53,7 +65,7 @@ class TableParser < Object
 			tmp = justify(lines)
 			tmp.each {|x|
 				x.sub!(/[\t ]+$/ , '')
-				io.puts x
+				io.puts x unless x.empty?
 			}
 
 		}
@@ -113,7 +125,6 @@ class TableParser < Object
 			tmp += line;
 			tmp += " " * (@sizes[ix] - plain[ix].length + @padding)
 		}
-		tmp.sub!(/[\t ]+$/ , '')
 		rv = [tmp]
 		rv.push(*extra)
 		return rv
@@ -137,11 +148,16 @@ class TableParser < Object
 	end
 
 	def strip_fmt(x)
-		x = x.gsub(/\\f[BIRP]/, '')
-		x = x.gsub(/\\~/, '') # non-breaking space.
-		x = x.gsub(/\\./, 'x')
 
-		return x
+
+		x.gsub(/[^\\]|\\f.|\\./) {|m|
+			m.length == 1 ? m : @escape[m]
+		}
+		# x = x.gsub(/\\f[BIRP]/, '')
+		# x = x.gsub(/\\[0~ ]/, ' ') # non-breaking space.
+		# x = x.gsub(/\\[&|^%]/, '') # 0-width space.
+		# x = x.gsub(/\\./, 'x')
+
 	end
 	
 end
