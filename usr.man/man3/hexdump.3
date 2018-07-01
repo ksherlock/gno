@@ -1,0 +1,62 @@
+.TH "HEXDUMP" "3" "March 21, 2017" "GNO" "Library Functions Manual"
+.SH "NAME"
+\fBhexdump\fR
+\- dump a block of bytes to standard out in hexadecimal form
+.SH "SYNOPSIS"
+\fB#include <libutil.h>\fR
+.sp
+\fIvoid\fR
+.br
+.PD 0
+.HP 4n
+\fBhexdump\fR(\fIvoid\ *ptr\fR, \fIint\ length\fR, \fIconst\ char\ *hdr\fR, \fIint\ flags\fR);
+.PD
+.SH "DESCRIPTION"
+The
+\fBhexdump\fR()
+function prints an array of bytes to standard out in hexadecimal form,
+along with the ASCII representation of the bytes, if possible.
+By default, each line of output will start with an offset count, followed by 16
+hexadecimal values, followed by 16 ASCII characters.
+.IP "\fIptr\fR" 8n
+Pointer to the array of bytes to print.
+It does not need to be
+\fRNUL\fR-terminated.
+.IP "\fIlength\fR" 8n
+Number of bytes to print.
+.IP "\fIhdr\fR" 8n
+Pointer to a
+\fRNUL\fR-terminated character string that will be prepended to each
+line of output.
+A value of
+\fRNULL\fR
+implies that no header will be printed.
+.IP "\fIflags\fR" 8n
+Flags for controlling the formatting of the output.
+.PP
+.RS 8n
+.PD 0
+.IP "Bits 0-7" 19n
+Integer value of the number of bytes to display on each line.
+A value of 0 implies that the default value of 16 will be used.
+.PD
+.IP "Bits 8-15" 19n
+Character ASCII value to use as the separator for the hexadecimal output.
+A value of 0 implies that the default value of 32
+(ASCII space)
+will be used.
+.IP "\fRHD_OMIT_COUNT\fR" 19n
+Do not print the offset column at the beginning of each line.
+.IP "\fRHD_OMIT_HEX\fR" 19n
+Do not print the hexadecimal values on each line.
+.IP "\fRHD_OMIT_CHARS\fR" 19n
+Do not print the character values on each line.
+.PD 0
+.PP
+.RE
+.PD
+.SH "SEE ALSO"
+ascii(7)
+.SH "AUTHORS"
+This manual page was written by
+Scott Long.

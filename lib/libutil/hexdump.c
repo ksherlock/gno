@@ -44,55 +44,53 @@ __FBSDID("$FreeBSD$");
 #include <stdio.h>
 
 void
-hexdump(const void *ptr, int length, const char *hdr, int flags)
+hexdump(const void *ptr, int length, const char *hdr, long flags)
 {
-	int i, j, k;
-	int cols;
+	unsigned i, j, k;
+	unsigned cols;
 	const unsigned char *cp;
-	char delim;
+	unsigned delim;
 
-	if ((flags & HD_DELIM_MASK) != 0)
-		delim = (flags & HD_DELIM_MASK) >> 8;
-	else
+	if (length <= 0) return;
+
+	delim = ((unsigned)flags & HD_DELIM_MASK) >> 8;
+	if (!delim)
 		delim = ' ';
 
-	if ((flags & HD_COLUMN_MASK) != 0)
-		cols = flags & HD_COLUMN_MASK;
-	else
+	cols = (unsigned)flags & HD_COLUMN_MASK;
+	if (!cols)
 		cols = 16;
 
 	cp = ptr;
 	for (i = 0; i < length; i+= cols) {
 		if (hdr != NULL)
-			printf("%s", hdr);
+			fputs(hdr, stdout);
 
 		if ((flags & HD_OMIT_COUNT) == 0)
 			printf("%04x  ", i);
 
 		if ((flags & HD_OMIT_HEX) == 0) {
-			for (j = 0; j < cols; j++) {
-				k = i + j;
+			for (j = 0, k = i; j < cols; j++, k++) {
 				if (k < length)
 					printf("%c%02x", delim, cp[k]);
 				else
-					printf("   ");
+					fputs("   ", stdout);
 			}
 		}
 
 		if ((flags & HD_OMIT_CHARS) == 0) {
-			printf("  |");
-			for (j = 0; j < cols; j++) {
-				k = i + j;
+			fputs("  |", stdout);
+			for (j = 0, k = i; j < cols; j++, k++) {
 				if (k >= length)
-					printf(" ");
+					fputc(' ', stdout);
 				else if (cp[k] >= ' ' && cp[k] <= '~')
 					printf("%c", cp[k]);
 				else
-					printf(".");
+					fputc('.', stdout);
 			}
-			printf("|");
+			fputc('|', stdout);
 		}
-		printf("\n");
+		fputc('\n', stdout);
 	}
 }
 
