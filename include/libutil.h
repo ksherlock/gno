@@ -34,7 +34,7 @@ struct winsize;
 struct utmp;
 
 __BEGIN_DECLS
-void	setproctitle __P((const char *fmt, ...));
+void	hexdump(const void *_ptr, int _length, const char *_hdr, int _flags);
 void	login __P((struct utmp *ut));
 int	login_tty __P((int fd));
 int	logout __P((char *line));
@@ -42,5 +42,13 @@ void	logwtmp __P((char *line, char *name, char *host));
 int	openpty __P((int *amaster, int *aslave, char *name,
 		     struct termios *termp, struct winsize *winp));
 __END_DECLS
+
+
+/* Flags for hexdump(3). */
+#define	HD_COLUMN_MASK		0xff
+#define	HD_DELIM_MASK		0xff00
+#define	HD_OMIT_COUNT		(1L << 16)
+#define	HD_OMIT_HEX		(1L << 17)
+#define	HD_OMIT_CHARS		(1L << 18)
 
 #endif /* !_LIBUTIL_H_ */

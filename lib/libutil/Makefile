@@ -5,7 +5,7 @@
 #
 
 LIB		= util
-SRCS		= login.o logintty.o logwtmp.o
+SRCS		= hexdump.o login.o logintty.o logwtmp.o
 OPTIMIZE	= 78
 
 .INCLUDE: 	/src/gno/lib/lib.mk
