@@ -5,8 +5,6 @@
 #pragma optimize - 1
 #pragma lint - 1
 
-typedef struct childInfo *chldInfoPtr;
-
 #define KERNEL
 #include <ctype.h>
 #include <errno.h>
@@ -22,6 +20,7 @@ typedef struct childInfo *chldInfoPtr;
 #include <gno/kvm.h>
 #include <gno/proc.h>
 #include <gno/signal.h>
+#include <gno/wait.h>
 //#include <gno/kerntool.h>
 
 /* ORCA Console control codes */
@@ -91,6 +90,42 @@ struct snoop {
     word *pgrpInfo;
     pipeDataPtr pipeDat;
 };
+
+static char *sig_names[32] = {
+    "",
+    "SIGHUP",
+    "SIGINT",
+    "SIGQUIT",
+    "SIGILL",
+    "SIGTRAP",
+    "SIGABRT",
+    "SIGEMT",
+    "SIGFPE",
+    "SIGKILL",
+    "SIGBUS",
+    "SIGSEGV",
+    "SIGSYS",
+    "SIGPIPE",
+    "SIGALRM",
+    "SIGTERM",
+    "SIGURG",
+    "SIGSTOP",
+    "SIGTSTP",
+    "SIGCONT",
+    "SIGCHLD",
+    "SIGTTIN",
+    "SIGTTOU",
+    "SIGIO",
+    "SIGXCPU",
+    "SIGXFSZ",
+    "SIGVTALRM",
+    "SIGPROF",
+    "SIGWINCH",
+    "SIGINFO",
+    "SIGUSR1",
+    "SIGUSR2"
+};
+
 
 
 /* clang-format off */
@@ -230,11 +265,14 @@ void print_pr(const struct pentry *pr, const kvmt *ps) {
 
 }
 
+
 void details(kvmt *ps) {
     int pid;
     struct pentry *pr;
     unsigned page = 0;
     unsigned c;
+
+    enum { MaxPage = 4 };
 
     fputs("Select process to detail: ", stdout);
     pid = ReadInt();
@@ -341,20 +379,82 @@ void details(kvmt *ps) {
 
         fputs("Signals\n\n", stdout);
         if (siginfo) {
-            printf("  mask:    %08lx\n", siginfo->signalmask);
-            printf("  pending: %08lx\n", siginfo->sigpending);
+            unsigned i;
+            void *fn;
+            unsigned line;
+            unsigned long mask = 0x00000001;
+
+            unsigned long blocked = siginfo->signalmask;
+            unsigned long pending = siginfo->sigpending;
+
+            printf("  mask:    %08lx\n", blocked);
+            printf("  pending: %08lx\n", pending);
+
+
+            line = 5;
+            for (i = 1; i <32; ++i, mask <<= 1) {
+                fn = siginfo->v_signal[i];
+
+                if (i & 0x01) {
+                    putchar(30);
+                    putchar(32 + 0);
+                    putchar(32 + line);
+ 
+                } else {
+                    putchar(30);
+                    putchar(32 + 40);
+                    putchar(32 + line);
+                    ++line;
+                }
+                printf("%2d %-8s ", i, sig_names[i]+3);
+                if (blocked & mask) fputs("blocked, ", stdout); 
+                if (pending & mask) fputs("pending, ", stdout); 
+                if (fn == SIG_DFL) fputs("default", stdout);
+                else if (fn == SIG_IGN) fputs("ignored", stdout);
+                else printf("%02x/%04x",
+                    (unsigned)((unsigned long)fn >> 16), (unsigned)fn);
+
+                //fputc('\n', stdout);
+            }
+
+/*
+
+*/
         }
+    }
+    if (page == 4) {
+        chldInfoPtr ptr = pr->waitq;
+
+        fputs("Waiting Children\n\n", stdout);
+
+        fputs("PID Status\n", stdout);
+        while (ptr) {
+            unsigned w_status = ptr->status.w_status;
+            unsigned st = WEXITSTATUS(w_status);
+
+            printf("%4d", ptr->pid);
+            if (WIFEXITED(w_status)) {
+                printf("exited (%d)", st);
+            } else if (WIFSTOPPED(w_status)) {
+                printf("stopped (%d - %s)", st, st < NSIG ? sig_names[st] : "");
+            } else {
+                printf("terminated (%d - %s)", st, st < NSIG ? sig_names[st] : "");                
+            }
+            fputc('\n', stdout);
+            ptr = ptr->next;
+        }
+
     }
 
     for(;;) {
         c = ReadKey();
         if (c == LEFT) {
-            if (page == 0) page = 3;
+            if (page == 0) page = MaxPage;
             else --page;
             goto redraw;
         }
         if (c == RIGHT) {
-            if (page >= 3) page = 0;
+            if (page >= MaxPage) page = 0;
             else ++page;
             goto redraw;
         }
