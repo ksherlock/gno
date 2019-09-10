@@ -272,7 +272,7 @@ void details(kvmt *ps) {
     unsigned page = 0;
     unsigned c;
 
-    enum { MaxPage = 4 };
+    enum { MaxPage = 5 };
 
     fputs("Select process to detail: ", stdout);
     pid = ReadInt();
@@ -416,13 +416,21 @@ void details(kvmt *ps) {
 
                 //fputc('\n', stdout);
             }
-
-/*
-
-*/
         }
     }
     if (page == 4) {
+        fputs("Children\n\n", stdout);
+        print_pr_header();
+
+        kern_kvm_setproc(ps, &errno);
+        while ((pr = kern_kvm_nextproc(ps, &errno)) != NULL) {
+            if (pr->parentpid == pid) print_pr(pr, ps);
+        }
+
+        /* reload pid */
+        pr = kern_kvm_getproc(ps, pid, &errno);
+    } 
+    if (page == 5) {
         chldInfoPtr ptr = pr->waitq;
 
         fputs("Waiting Children\n\n", stdout);
@@ -538,8 +546,9 @@ void Start(void) {
     HLock(h);
     sn = (struct snoop *)(((byte *)*h) + 0x1D);
 
+    /* ??? */
     t = sn->si->tblockCP;
-    printf("Blocked: %d\n", (t == -1) ? t : (t / 128));
+    //printf("Blocked: %d\n", (t == -1) ? t : (t / 128));
 
     ps = kern_kvm_open(&errno);
     if (!ps) {
@@ -548,6 +557,7 @@ void Start(void) {
     }
 
 redraw:
+    putchar(HOME);
     fputs("GNO Snooper 3.0\n\n", stdout);
     #if 0
     printf("handle: %06lX ptr: %06lX\n", (unsigned long)h, (unsigned long)sn);
