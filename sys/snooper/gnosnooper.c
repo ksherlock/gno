@@ -10,6 +10,7 @@
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 #include <locator.h>
 #include <memory.h>
@@ -234,6 +235,42 @@ char *getstate(int st) {
     return s;
 }
 
+/* should look up in the DeviceName table, but don't have access to it */
+/* standard setup:
+0 - .null
+1 - .ttyb (printer)
+2 - .ttya (modem)
+3 - .ttyco (console)
+4 - unused
+5 - unused
+6-36 (even) .ptq0 ... .ptqf
+7-37 (odd) .ttq0 ... .ttqf
+
+.ttyco and ptys are hard-coded.
+.null and .ttya/b are from the tty.config file
+*/
+const char *devname(unsigned tt) {
+    static char buffer[12];
+    static char conv[] = "0123456789abcdef";
+    static char type[] = "pt";
+
+    static char *names[] = {
+        "null",
+        "ttyb",
+        "ttya",
+        "ttyco"
+    };
+
+    if (tt < 4) return names[tt];
+    if (tt >= 6 && tt < 38) {
+        /* even = pty, odd = tty */
+        tt -= 6;
+        sprintf(buffer, "%ctyq%c", type[tt&0x01], conv[tt >> 1]);
+        return buffer;
+    }
+    sprintf(buffer, "tty%02u", tt);
+    return buffer;
+}
 void print_pr_header(void) {
     fputs(" PID    STATE   TTY pgrp userID    TIME COMMAND\n", stdout);
 }
@@ -251,8 +288,8 @@ void print_pr(const struct pentry *pr, const kvmt *ps) {
         cmd = "<forked>";
     else
         cmd += 8;
-    printf("%4d %8s tty%02d   %02d   %04X %6lus %-20s\n", ps->pid, s,
-           pr->ttyID, pr->pgrp, pr->userID, pr->ticks / 60, cmd);
+    printf("%4d %8s %5s   %02d   %04X %6lus %-20s\n", ps->pid, s,
+           devname(pr->ttyID), pr->pgrp, pr->userID, pr->ticks / 60, cmd);
 
     if (state == procSUSPENDED) {
         state = pr->stoppedState;
@@ -291,16 +328,61 @@ void details(kvmt *ps) {
     putchar(HOME);
     if (page == 0) {
         /* Details */
+
+        #if 0
         print_pr_header();
         print_pr(pr, ps);
         putchar('\n');
+#endif
+        struct sigrec *siginfo = pr->siginfo;
+        const char *cmd = pr->args;
+        unsigned flags = pr->flags;
 
+        if (cmd) cmd += 8;
+        else cmd = "<forked>";
+
+        printf("           PID: %u\n", ps->pid);
+        printf("        Parent: %u\n", pr->parentpid);
+        printf("       Command: %s\n", cmd);
+        printf("         State: %s", getstate(pr->processState));
+        if (pr->processState == procBLOCKED)
+            printf(" on sem: %c/%d", (pr->psem & 0x8000) ? 'k' : 'u', pr->psem & 0x7FFF);
+        putchar('\n');
+        fputs("           TTY: ", stdout);
+        fputs(devname(pr->ttyID), stdout);
+        putchar('\n');
+        fputs(" Process Group: ", stdout);
+        if (pr->pgrp) printf("%u", pr->pgrp);
+        putchar('\n');
+        printf("       User ID: %04x\n", pr->userID);
+        printf("          Time: %lus\n", pr->ticks / 60);
+
+        printf("   Signal Mask: %08lx\n", siginfo->signalmask);
+        printf("Signal Pending: %08lx\n", siginfo->sigpending);
+
+        printf("  Execute Hook: %p\n", pr->executeHook);
+
+        printf("         Flags: %04x ", flags);
+        if (flags & FL_RESOURCE) fputs(" resource", stdout);
+        if (flags & FL_FORKED) fputs(" forked", stdout);
+        if (flags & FL_COMPLIANT) fputs(" compliant", stdout);
+        if (flags & FL_NORMTERM) fputs(" normterm", stdout);
+        if (flags & FL_RESTART) fputs(" restart", stdout);
+        if (flags & FL_NORESTART) fputs(" no restart", stdout);
+        if (flags & FL_QDSTARTUP) fputs(" qdstartup", stdout);
+        if (flags & FL_MSGRECVD) fputs(" msg recvd", stdout);
+        if (flags & FL_SELECTING) fputs(" selecting", stdout);
+        putchar('\n');
+
+        printf("     ToolStack: %d\n", pr->t2StackPtr);
+        printf("      SANE WAP: %04X\n", pr->SANEwap);
+
+        putchar('\n');
         printf("A:%04X X:%04X Y:%04X S: %04X D:%04X B:%02X K:%02X PC:%04X\n\n",
                pr->irq_A, pr->irq_X, pr->irq_Y, pr->irq_S, pr->irq_D, pr->irq_B,
                pr->irq_K, pr->irq_PC);
 
-        printf("toolStack: %d,parent: %d\n", pr->t2StackPtr, pr->parentpid);
-        printf("SANEwap: %04X\n", pr->SANEwap);
+
 
     }
     if (page == 1) {
@@ -325,7 +407,7 @@ void details(kvmt *ps) {
                         printf(" pipe(%u)", fd->refNum);
                         break;
                     case rtTTY:
-                        printf(" tty%02u", fd->refNum - 1);
+                        printf(" dev(%u) %s", fd->refNum-1, devname(fd->refNum-1));
                         break;
                     case rtSOCKET:
                         printf(" socket(%u)", fd->refNum);
@@ -387,11 +469,12 @@ void details(kvmt *ps) {
             unsigned long blocked = siginfo->signalmask;
             unsigned long pending = siginfo->sigpending;
 
+/*
             printf("  mask:    %08lx\n", blocked);
             printf("  pending: %08lx\n", pending);
+*/
 
-
-            line = 5;
+            line = 3;
             for (i = 1; i <32; ++i, mask <<= 1) {
                 fn = siginfo->v_signal[i];
 
@@ -471,7 +554,89 @@ void details(kvmt *ps) {
     }
 }
 
-void dumppgrp(struct snoop *sn) {
+
+struct pgrp_pid {
+    unsigned pgrp;
+    unsigned pid;
+};
+
+static int pgrp_pid_compare(void *a, void *b) {
+    struct pgrp_pid *aa = a;
+    struct pgrp_pid *bb = b;
+    int rv = aa->pgrp - bb->pgrp;
+    if (rv == 0) rv = aa->pid - bb->pid;
+    return rv;
+}
+
+void dumppgrp(struct snoop *sn, kvmt *ps) {
+
+    static word pg_to_tty[32+2];
+    static struct pgrp_pid pgrp_pid_array[32+2];
+
+    unsigned i, ix;
+    struct pentry *pr;
+
+    word *pgrpInfo = sn->pgrpInfo;
+    word *ttyStruct = sn->ttyStruct;
+
+    putchar(HOME);
+
+    fputs("Process Groups\n\n", stdout);
+
+
+
+    memset(pg_to_tty, 0, sizeof(pg_to_tty));
+    memset(pgrp_pid_array, 0, sizeof(pgrp_pid_array));
+
+    for(i = 0; i < 38; ++i) {
+        unsigned pg = ttyStruct[i];
+        if (pg && pg < 32) pg_to_tty[pg] = i;
+    }
+
+
+    kern_kvm_setproc(ps, &errno);
+    i = 0;
+    while ((pr = kern_kvm_nextproc(ps, &errno)) != NULL) {
+        unsigned pgrp = pr->pgrp;
+        if (pgrp) {
+            pgrp_pid_array[i].pgrp = pgrp;
+            pgrp_pid_array[i].pid = ps->pid;
+            ++i;
+        }
+    }
+    qsort(pgrp_pid_array, i, sizeof(struct pgrp_pid), pgrp_pid_compare);
+
+
+
+    fputs("pgrp   tty processes\n", stdout);
+    for (i = 0, ix = 0; i < 32; ++i) {
+        unsigned pgrp = i + 2;
+        unsigned count = pgrpInfo[i];
+        unsigned tt = pg_to_tty[pgrp];
+
+        if (count || tt) {
+            printf("  %2u %5s", pgrp, devname(tt));
+            //printf(" %u\n", count);
+
+            // shouldn't have to skip over any...
+            while (pgrp_pid_array[ix].pgrp && pgrp_pid_array[ix].pgrp < pgrp) ++ix;
+            while (pgrp_pid_array[ix].pgrp == pgrp) {
+                printf(" %u", pgrp_pid_array[ix].pid);
+                ++ix;
+            }
+
+            putchar('\n');
+        }
+    }
+
+#if 0
+    for(i = 0; i < 32; ++i) {
+        unsigned pgrp = ttyStruct[i];
+        if (pgrp) printf("tty%02u %u\n", i, pgrp);
+    }
+#endif
+
+#if 0
     int i;
     fputs("\npgrp: ", stdout);
     for (i = 0; i < 15; i++)
@@ -479,36 +644,48 @@ void dumppgrp(struct snoop *sn) {
     fputs("\nttyStruct: ", stdout);
     for (i = 0; i < 32; i++)
         printf("[%d] ", sn->ttyStruct[i]);
+
+#endif
     putchar('\n');
     ReadKey();
 }
 
 void dumpfdtab(struct snoop *sm) {
     refTabPtr rtp = *(sm->pipeDat->refHand);
-    int i, x, y;
+    unsigned i, x, y;
+    unsigned n;
 
+    putchar(HOME);
+    fputs("Files\n\n", stdout);
+
+    fputs("   type         count\n", stdout);
     for (i = 0; i < (sm->pipeDat->refHandSize / sizeof(refTabStruct)); i++) {
         if (rtp[i].refnum == 0)
             continue;
-        printf("[%d,", y = rtp[i].refnum);
+        y = rtp[i].refnum;
         x = rtp[i].type;
+        n = printf("%2u ", i);
         switch (x) {
         case rtGSOS:
-            fputs("GSOS,", stdout);
+            n += printf("gs/os(%u)", y);
             break;
         case rtPIPE:
-            printf("PIPE(%d),", y);
+            n += printf("pipe(%u)", y);
             break;
         case rtTTY:
-            printf("tty%02d,", y - 1);
+            n += printf("dev(%u)", y-1);
             break;
         case rtSOCKET:
-            fputs("socket,", stdout);
+            n += printf("socket(%u)", y);
             break;
         default:
-            fputs("UNK,", stdout);
+            n += printf("unknown(%u)", y);
         }
-        printf("%d] ", rtp[i].count);
+        for ( ; n < 16; ++n) putchar(' ');
+        printf("%5u  ", rtp[i].count);
+        if (x == rtTTY) fputs(devname(y-1), stdout);
+
+        putchar('\n');
     }
     putchar('\n');
     ReadKey();
@@ -603,10 +780,10 @@ tryagain:
         goto redraw;
     }
     if (c == 'P') {
-        dumppgrp(sn);
+        dumppgrp(sn, ps);
         goto redraw;
     }
-    if (c != 'Q') {
+    if (c != 'Q' && c != 0x1b) {
         SysBeep();
         goto tryagain;
     }
