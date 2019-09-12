@@ -270,7 +270,7 @@ const char *dev_name(unsigned tt) {
         sprintf(buffer, "%ctyq%c", type[tt&0x01], conv[tt >> 1]);
         return buffer;
     }
-    sprintf(buffer, "tty%02u", tt);
+    sprintf(buffer, "dev%02u", tt);
     return buffer;
 }
 
@@ -541,13 +541,13 @@ void details(kvmt *ps) {
                     printf("  % 2u", i + 1);
                     switch(fd->refType) {
                     case rtGSOS:
-                        printf(" gs/os(%u)", fd->refNum);
+                        printf(" gs/os(%u) %s", fd->refNum, file_name(fd->refNum));
                         break;
                     case rtPIPE:
                         printf(" pipe(%u)", fd->refNum);
                         break;
-                    case rtTTY:
-                        printf(" dev(%u) %s", fd->refNum-1, dev_name(fd->refNum-1));
+                    case rtDEV:
+                        printf(" dev(%u) .%s", fd->refNum-1, dev_name(fd->refNum-1));
                         break;
                     case rtSOCKET:
                         printf(" socket(%u)", fd->refNum);
@@ -795,7 +795,7 @@ void dumpfdtab(struct snoop *sm) {
         case rtPIPE:
             n += printf("pipe(%u)", y);
             break;
-        case rtTTY:
+        case rtDEV:
             n += printf("dev(%u)", y-1);
             break;
         case rtSOCKET:
@@ -806,7 +806,7 @@ void dumpfdtab(struct snoop *sm) {
         }
         for ( ; n < 16; ++n) putchar(' ');
         printf("%5u  ", rtp[i].count);
-        if (x == rtTTY) { putchar('.'); fputs(dev_name(y-1), stdout); }
+        if (x == rtDEV) { putchar('.'); fputs(dev_name(y-1), stdout); }
         if (x == rtGSOS) fputs(file_name(y), stdout);
 
         putchar('\n');
