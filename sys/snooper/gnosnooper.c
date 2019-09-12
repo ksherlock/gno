@@ -4,6 +4,7 @@
 
 #pragma optimize - 1
 #pragma lint - 1
+#pragma debug 0x8000
 
 #define KERNEL
 #include <ctype.h>
@@ -16,6 +17,7 @@
 #include <memory.h>
 #include <misctool.h>
 #include <orca.h>
+#include <gsos.h>
 
 #include <gno/conf.h>
 #include <gno/kvm.h>
@@ -249,7 +251,7 @@ char *getstate(int st) {
 .ttyco and ptys are hard-coded.
 .null and .ttya/b are from the tty.config file
 */
-const char *devname(unsigned tt) {
+const char *dev_name(unsigned tt) {
     static char buffer[12];
     static char conv[] = "0123456789abcdef";
     static char type[] = "pt";
@@ -271,6 +273,144 @@ const char *devname(unsigned tt) {
     sprintf(buffer, "tty%02u", tt);
     return buffer;
 }
+
+
+/*
+ * GNO/ME's gs/os patches are still in effect so
+ * GetRefInfo won't find refNums (unless they belong to
+ * the null process)
+ *
+ * 0xd4 is gs/os temporary work area.  should be safe to use
+ * if gs/os isn't busy.
+ */
+#if 0
+/* clang-format off */
+const char *file_name(unsigned refNum) {
+    static char string[48];
+    unsigned i;
+    GSString255Ptr gstr = NULL;
+
+    string[0] = 0;
+
+    if (refNum == 0) return "";
+
+    /* e10064 = inc busy *
+    /* e10068 = dec busy */
+    asm {
+        brk 0xea
+        nop
+        nop
+        ldx #0
+        ldy #0
+        lda >0xe100be
+        bmi exit
+        ora #0x8000
+        sta >0xe100be
+
+
+        ldx refNum
+        phd
+        lda #0xbd00 /* gs/os dp */
+        tcd
+        sep #0x20
+        lda >0xe0c068
+        pha
+        lda >0xe0c08b
+        nop
+        lda >0xe0c08b
+        rep #0x20
+        txa
+        jsl 0x01fc4c /* find_fcr */
+        bcs fini
+        jsl 0x01fc38 /* deref */
+        stx 0xd4 /* temp work area */ 
+        sty 0xd4+2
+
+        ldy #2
+        lda [0xd4],y
+        tax
+        ldy #4
+        lda [0xd4],y
+        tay
+        jsl 0x01fc38 /* deref */
+
+fini:
+        sep #0x20
+        pla
+        sta >0xe0c068
+        rep #0x20
+
+        pld
+        stx gstr
+        sty gstr+2
+exit:
+    }
+
+    if (gstr) {
+        i = gstr->length;
+        if (i < 48) {
+            memcpy(string, gstr->text, i);
+            string[i] = 0;
+        } else {
+            string[0] = '.';
+            string[1] = '.';
+            string[2] = '.';
+            memcpy(string + 3, gstr + i - 44, 44);
+            string[47] = 0;
+        }
+        asm {
+            lda >0xe100be
+            asl a
+            lsr a
+            sta >0xe100be            
+        }        
+        return string;
+    }
+    return "";
+}
+/* clang-format on */
+#endif
+
+const char *file_name(unsigned refNum) {
+    unsigned i;
+    static ResultBuf255 path = { 255-1 };
+
+    static RefInfoRecGS dcb = {
+        5, 0, 0, &path, 0, 0
+    };
+
+    /* 009e12 is the original GS/OS stack dispatcher address */
+    extern pascal void call_gsos(void *, unsigned) inline(0, 0x009e12UL);
+
+    /* clang-format on */
+    asm {
+        lda >0xe100be
+        sta i;        
+    }
+    /* clang-format off */
+    if (i < 0 || refNum == 0) return "";
+
+    dcb.refNum = refNum;
+    call_gsos(&dcb, 0x2039);
+    if (_toolErr) return "";
+    i = path.bufString.length;
+    path.bufString.text[i] = 0;
+    if (i < 48) {
+        return path.bufString.text;
+    } else {
+        i = i - 48;
+        path.bufString.text[i+0] = '.';
+        path.bufString.text[i+1] = '.';
+        path.bufString.text[i+2] = '.';
+        return path.bufString.text + i;
+    }
+
+}
+
+
+
+
+
 void print_pr_header(void) {
     fputs(" PID    STATE   TTY pgrp userID    TIME COMMAND\n", stdout);
 }
@@ -289,7 +429,7 @@ void print_pr(const struct pentry *pr, const kvmt *ps) {
     else
         cmd += 8;
     printf("%4d %8s %5s   %02d   %04X %6lus %-20s\n", ps->pid, s,
-           devname(pr->ttyID), pr->pgrp, pr->userID, pr->ticks / 60, cmd);
+           dev_name(pr->ttyID), pr->pgrp, pr->userID, pr->ticks / 60, cmd);
 
     if (state == procSUSPENDED) {
         state = pr->stoppedState;
@@ -349,7 +489,7 @@ void details(kvmt *ps) {
             printf(" on sem: %c/%d", (pr->psem & 0x8000) ? 'k' : 'u', pr->psem & 0x7FFF);
         putchar('\n');
         fputs("           TTY: ", stdout);
-        fputs(devname(pr->ttyID), stdout);
+        fputs(dev_name(pr->ttyID), stdout);
         putchar('\n');
         fputs(" Process Group: ", stdout);
         if (pr->pgrp) printf("%u", pr->pgrp);
@@ -407,7 +547,7 @@ void details(kvmt *ps) {
                         printf(" pipe(%u)", fd->refNum);
                         break;
                     case rtTTY:
-                        printf(" dev(%u) %s", fd->refNum-1, devname(fd->refNum-1));
+                        printf(" dev(%u) %s", fd->refNum-1, dev_name(fd->refNum-1));
                         break;
                     case rtSOCKET:
                         printf(" socket(%u)", fd->refNum);
@@ -615,7 +755,7 @@ void dumppgrp(struct snoop *sn, kvmt *ps) {
         unsigned tt = pg_to_tty[pgrp];
 
         if (count || tt) {
-            printf("  %2u %5s", pgrp, devname(tt));
+            printf("  %2u %5s", pgrp, dev_name(tt));
             //printf(" %u\n", count);
 
             // shouldn't have to skip over any...
@@ -629,23 +769,6 @@ void dumppgrp(struct snoop *sn, kvmt *ps) {
         }
     }
 
-#if 0
-    for(i = 0; i < 32; ++i) {
-        unsigned pgrp = ttyStruct[i];
-        if (pgrp) printf("tty%02u %u\n", i, pgrp);
-    }
-#endif
-
-#if 0
-    int i;
-    fputs("\npgrp: ", stdout);
-    for (i = 0; i < 15; i++)
-        printf("[%d] ", sn->pgrpInfo[i]);
-    fputs("\nttyStruct: ", stdout);
-    for (i = 0; i < 32; i++)
-        printf("[%d] ", sn->ttyStruct[i]);
-
-#endif
     putchar('\n');
     ReadKey();
 }
@@ -683,7 +806,8 @@ void dumpfdtab(struct snoop *sm) {
         }
         for ( ; n < 16; ++n) putchar(' ');
         printf("%5u  ", rtp[i].count);
-        if (x == rtTTY) fputs(devname(y-1), stdout);
+        if (x == rtTTY) { putchar('.'); fputs(dev_name(y-1), stdout); }
+        if (x == rtGSOS) fputs(file_name(y), stdout);
 
         putchar('\n');
     }
