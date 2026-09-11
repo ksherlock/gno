@@ -1216,6 +1216,7 @@ mutex	key
 
 execute	START
 	using	vardata
+	using	global
 
 exebuf	equ	1
 pipesem	equ	exebuf+4
@@ -1533,6 +1534,8 @@ jobwait	anop
 	wait	@xa	   Get child completion status.
 	lda	waitstatus 
 	jsr	setstatus	   Set process's $status.
+	if2	term,eq,#T_AMP,restoresigh  ; already gone: pchild skipped tctpgrp
+	tctpgrp (gshtty,gshpid)
 	bra	restoresigh
 ;
 ; Child is active: wait for it to complete and get its status.
