@@ -486,6 +486,14 @@
  case off
  MEND
  MACRO
+&lab tctpgrp &a1
+&lab ph2 &a1(2)
+ ph2 &a1(1)
+ case on
+ jsl tctpgrp
+ case off
+ MEND
+ MACRO
 &lab tool &a1
 &lab ldx #&a1
  jsl $e10000

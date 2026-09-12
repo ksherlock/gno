@@ -151,6 +151,8 @@ nextchar2	jsr	cursoroff
 	cmp	#$FF00	Error?
 	bcc	findcmd
 	and	#$00FF
+	cmp	#14	EINTR: caught signal during read.
+	beq	cmdloop	 Retry; do not treat as fatal.
 	sta	ErrError
 	ErrorGS Err	  yes--print error code.
 	bra	reterr

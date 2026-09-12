@@ -1,0 +1,6 @@
+Sep 11 2026  [jb] Fast foreground jobs (e.g. ls) could exit before jobwait
+	   ran pchild, so the tty process group was never restored. The
+	   next GetCmdLine was a background read: SIGTTIN stopped the
+	   first login gsh, or a leftover SIGCHLD made Read return EINTR
+	   ($000E) and gsh quit. jobwait now tctpgrp's if the child is
+	   already gone (cmd.asm); getchar retries EINTR (stdio.asm).

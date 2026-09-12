@@ -300,12 +300,16 @@ getchar	START
 
 readloop	Read	inReadParm
 	bcc	okread
-	ldy	#-1	Return EOF if error code
-	cmp	#$4C	 is "EOF encountered".
-	beq	go_done2
+	cmp	#$4C	EOF encountered?
+	beq	iseof
+	and	#$00FF	; EINTR ($000E): leftover SIGCHLD, retry
+	cmp	#14
+	beq	readloop
 	ora	#$FF00	For all other errors,
 	tay		 hi-byte is $FF, low-byte is error.
-go_done2	jmp	done2
+	jmp	done2
+iseof	ldy	#-1
+	jmp	done2
 
 okread	stz	inindex
 	lda	insize
